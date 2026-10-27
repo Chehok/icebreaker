@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>랜덤 질문 뽑기 🎲</title>
+  <style>
+    :root {
+      --bg1: #6a11cb;
+      --bg2: #2575fc;
+      --card: rgba(255, 255, 255, 0.95);
+      --accent: #6a11cb;
+      --text: #2b2b3a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", -apple-system, sans-serif;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: var(--text);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 560px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #fff;
+      font-size: 2rem;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .subtitle {
+      color: rgba(255, 255, 255, 0.85);
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+    }
+
+    body {
+      transition: background 0.5s ease;
+    }
+
+    body.spicy-mode {
+      --bg1: #c31432;
+      --bg2: #f45c43;
+      --accent: #c31432;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+    }
+
+    .spices {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+
+    .spice-btn {
+      flex: 1;
+      max-width: 160px;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      border-radius: 16px;
+      padding: 14px 10px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      font-family: inherit;
+      backdrop-filter: blur(4px);
+    }
+
+    .spice-btn:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    .spice-btn.active {
+      background: #fff;
+      color: var(--accent);
+      border-color: #fff;
+      transform: scale(1.03);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .categories {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .chip {
+      background: rgba(255, 255, 255, 0.18);
+      color: #fff;
+      border: 1.5px solid rgba(255, 255, 255, 0.4);
+      border-radius: 50px;
+      padding: 9px 18px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      font-family: inherit;
+      backdrop-filter: blur(4px);
+    }
+
+    .chip:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .chip.active {
+      background: #fff;
+      color: var(--accent);
+      border-color: #fff;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 48px 32px;
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .badge {
+      display: none;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      color: #fff;
+      padding: 5px 14px;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .badge.show {
+      display: inline-block;
+    }
+
+    .question {
+      font-size: 1.5rem;
+      font-weight: 700;
+      line-height: 1.5;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .question.placeholder {
+      color: #9a9ab0;
+      font-weight: 500;
+      font-size: 1.15rem;
+    }
+
+    .question.pop {
+      animation: pop 0.4s ease;
+    }
+
+    @keyframes pop {
+      0% { opacity: 0; transform: scale(0.9) translateY(10px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .btn {
+      background: #fff;
+      color: var(--accent);
+      border: none;
+      border-radius: 50px;
+      padding: 18px 40px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      font-family: inherit;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
+    }
+
+    .btn:active {
+      transform: translateY(0) scale(0.97);
+    }
+
+    .counter {
+      margin-top: 18px;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎲 랜덤 질문 뽑기</h1>
+    <p class="subtitle">맛과 카테고리를 고르고 버튼을 누르면 질문 하나를 골라드려요!</p>
+
+    <div class="spices" id="spices"></div>
+    <div class="categories" id="categories"></div>
+
+    <div class="card">
+      <span class="badge" id="badge"></span>
+      <p class="question placeholder" id="question">아래 버튼을 눌러 질문을 뽑아보세요 👇</p>
+    </div>
+
+    <button class="btn" id="pickBtn">질문 뽑기 🎯</button>
+    <p class="counter" id="counter"></p>
+  </div>
+
+  <script>
+    const categories = {
+      imagine: { label: "🌈 상상 & 가정" },
+      favorite: { label: "🍔 취향 & 최애" },
+      daily: { label: "💬 나의 일상" },
+      faith: { label: "✝️ 신앙 이야기" },
+      love: { label: "💘 연애 & 썸" },
+      tmi: { label: "👥 자기소개 & TMI" },
+      balance: { label: "🔥 밸런스 게임" },
+      hobby: { label: "🎮 덕질 & 취미" },
+      deep: { label: "🥲 진지 토크" },
+      travel: { label: "🌏 여행 & 버킷리스트" },
+      food: { label: "🍽️ 먹부림 & 맛집" },
+      memory: { label: "🕰️ 어린 시절 & 추억" },
+      politics: { label: "🏛️ 정치 & 사회" },
+      invest: { label: "📈 투자 & 돈" }
+    };
+
+    const mildQuestions = [
+      { text: "무인도에 딱 3가지만 가져갈 수 있다면?", category: "imagine" },
+      { text: "타임머신이 생긴다면 과거와 미래 중 어디로 갈래?", category: "imagine" },
+      { text: "로또 1등에 당첨되면 가장 먼저 하고 싶은 일은?", category: "imagine" },
+      { text: "초능력 하나를 가질 수 있다면 어떤 능력?", category: "imagine" },
+      { text: "만약 동물로 다시 태어난다면 어떤 동물이 되고 싶어?", category: "imagine" },
+      { text: "하루 동안 다른 사람이 될 수 있다면 누가 되고 싶어?", category: "imagine" },
+      { text: "휴대폰 없이 하루를 버틸 수 있을까?", category: "imagine" },
+      { text: "만약 하루가 25시간이라면 그 1시간 뭐 할래?", category: "imagine" },
+      { text: "10년 뒤 나는 어떤 모습일 것 같아?", category: "imagine" },
+
+      { text: "인생 영화 딱 한 편만 꼽는다면?", category: "favorite" },
+      { text: "죽기 전에 꼭 먹어보고 싶은 음식은?", category: "favorite" },
+      { text: "최애 간식 or 야식은 뭐야?", category: "favorite" },
+      { text: "무한 리필 가능한 음식 딱 하나 고른다면?", category: "favorite" },
+      { text: "가장 좋아하는 계절과 그 이유는?", category: "favorite" },
+      { text: "노래방 18번(애창곡)은 뭐야?", category: "favorite" },
+      { text: "가장 가보고 싶은 콘서트나 공연은?", category: "favorite" },
+      { text: "가장 좋아하는 이모지 하나만 고른다면?", category: "favorite" },
+      { text: "지금 냉장고에 꼭 있어야 하는 음식은?", category: "favorite" },
+
+      { text: "가장 최근에 크게 웃었던 순간은 언제였어?", category: "daily" },
+      { text: "지금 당장 여행 갈 수 있다면 어디로?", category: "daily" },
+      { text: "어릴 때 장래희망이 뭐였어?", category: "daily" },
+      { text: "스트레스 받을 때 나만의 해소법이 있어?", category: "daily" },
+      { text: "지금까지 받은 선물 중 최고는 뭐였어?", category: "daily" },
+      { text: "친구들 사이에서 나의 별명 or 이미지는?", category: "daily" },
+      { text: "요즘 가장 빠져 있는 취미나 관심사는?", category: "daily" },
+      { text: "복권보다 로봇청소기? 소소하지만 삶의 질 높여준 물건은?", category: "daily" },
+      { text: "인생에서 가장 잘한 선택은 뭐라고 생각해?", category: "daily" },
+      { text: "비 오는 날 가장 하고 싶은 일은?", category: "daily" },
+      { text: "다시 배우고 싶은 것이 있다면?", category: "daily" },
+      { text: "오늘 하루를 색깔로 표현한다면 무슨 색?", category: "daily" },
+
+      { text: "요즘 가장 감사한 일 한 가지는 뭐야?", category: "faith" },
+      { text: "가장 좋아하는 성경 구절이나 마음에 남는 말씀은?", category: "faith" },
+      { text: "요즘 기도하고 있는 제목이 있다면?", category: "faith" },
+      { text: "하나님을 가장 가깝게 느꼈던 순간은 언제였어?", category: "faith" },
+      { text: "가장 좋아하는 찬양 한 곡을 꼽는다면?", category: "faith" },
+      { text: "성경 인물 중에 한 명과 하루를 보낼 수 있다면 누구?", category: "faith" },
+      { text: "신앙생활을 하면서 가장 크게 변한 점이 있다면?", category: "faith" },
+      { text: "요즘 내 신앙에 힘이 되어주는 사람이나 공동체는?", category: "faith" },
+      { text: "천국에 가면 하나님께 가장 먼저 여쭤보고 싶은 것은?", category: "faith" },
+      { text: "최근 예배나 말씀에서 마음에 콕 박힌 한 마디는?", category: "faith" },
+
+      { text: "내 이상형의 조건 딱 3가지만 꼽는다면?", category: "love" },
+      { text: "첫눈에 반한 경험이 있어?", category: "love" },
+      { text: "연애할 때 가장 중요하게 생각하는 건 뭐야?", category: "love" },
+      { text: "설레는 순간 top 1은 언제야?", category: "love" },
+      { text: "썸과 연애의 결정적인 차이는 뭐라고 생각해?", category: "love" },
+      { text: "받아보고 싶은 로맨틱한 이벤트가 있다면?", category: "love" },
+      { text: "연인에게 절대 양보 못 하는 것 하나는?", category: "love" },
+      { text: "가장 기억에 남는 고백(하거나 받은)은?", category: "love" },
+      { text: "이성에게 처음 호감을 느끼는 포인트는?", category: "love" },
+      { text: "완벽한 데이트 코스를 짠다면?", category: "love" },
+
+      { text: "사람들이 나에 대해 가장 많이 오해하는 점은?", category: "tmi" },
+      { text: "나만 아는 나의 의외의 모습이 있다면?", category: "tmi" },
+      { text: "내 MBTI는 뭐고, 잘 맞는 것 같아?", category: "tmi" },
+      { text: "나를 한 단어로 표현한다면?", category: "tmi" },
+      { text: "요즘 나의 최대 관심사는 뭐야?", category: "tmi" },
+      { text: "남들은 잘 모르는 나만의 특기가 있어?", category: "tmi" },
+      { text: "내 인생 최고의 자랑거리 하나는?", category: "tmi" },
+      { text: "스스로 생각하는 나의 최대 장점은?", category: "tmi" },
+      { text: "요즘 나의 소소한 목표가 있다면?", category: "tmi" },
+      { text: "나를 설명하는 해시태그 3개를 만든다면?", category: "tmi" },
+
+      { text: "짜장 vs 짬뽕, 하나만 평생 먹어야 한다면?", category: "balance" },
+      { text: "평생 여름 vs 평생 겨울?", category: "balance" },
+      { text: "돈 많은 백수 vs 바쁘지만 즐거운 직업?", category: "balance" },
+      { text: "과거로 돌아가기 vs 미래로 가보기?", category: "balance" },
+      { text: "말투는 그대로 목소리만 바뀌기 vs 목소리는 그대로 말투만 바뀌기?", category: "balance" },
+      { text: "산 vs 바다, 여행 간다면?", category: "balance" },
+      { text: "평생 치킨만 먹기 vs 평생 피자만 먹기?", category: "balance" },
+      { text: "인기 많은 삶 vs 돈 많은 삶?", category: "balance" },
+      { text: "아침형 인간 vs 저녁형 인간, 하나만 된다면?", category: "balance" },
+      { text: "모든 것을 아는 능력 vs 무엇이든 할 수 있는 체력?", category: "balance" },
+
+      { text: "요즘 가장 빠져 있는 최애(아이돌/캐릭터/작품)는?", category: "hobby" },
+      { text: "인생 드라마 or 애니 딱 하나 추천한다면?", category: "hobby" },
+      { text: "덕질하면서 가장 크게 지른 경험은?", category: "hobby" },
+      { text: "요즘 즐겨 하는 게임이나 앱이 있어?", category: "hobby" },
+      { text: "새로 도전해보고 싶은 취미가 있다면?", category: "hobby" },
+      { text: "인생 노래 플레이리스트에 꼭 있는 곡은?", category: "hobby" },
+      { text: "n회차 정주행할 만큼 좋아하는 콘텐츠는?", category: "hobby" },
+      { text: "취미에 한 달에 얼마 정도 쓰는 것 같아?", category: "hobby" },
+      { text: "최근에 새로 알게 된 '입덕 포인트'가 있어?", category: "hobby" },
+      { text: "함께 덕질하고 싶은 사람이 있다면?", category: "hobby" },
+
+      { text: "인생에서 가장 힘들었던 순간과 그걸 어떻게 이겨냈어?", category: "deep" },
+      { text: "요즘 가장 고민되는 게 있다면?", category: "deep" },
+      { text: "나에게 '행복'이란 무엇일까?", category: "deep" },
+      { text: "지금의 나에게 가장 필요한 한 마디는?", category: "deep" },
+      { text: "5년 전의 나에게 해주고 싶은 말이 있다면?", category: "deep" },
+      { text: "인생에서 가장 후회되는 선택이 있어?", category: "deep" },
+      { text: "나에게 가장 소중한 것 세 가지는?", category: "deep" },
+      { text: "요즘 내 마음을 가장 크게 채우고 있는 감정은?", category: "deep" },
+      { text: "어떤 사람으로 기억되고 싶어?", category: "deep" },
+      { text: "삶에서 절대 포기할 수 없는 가치는 뭐야?", category: "deep" },
+
+      { text: "죽기 전에 꼭 가보고 싶은 나라 한 곳은?", category: "travel" },
+      { text: "인생 최고의 여행지를 꼽는다면?", category: "travel" },
+      { text: "혼자 떠나는 여행 vs 함께 가는 여행?", category: "travel" },
+      { text: "버킷리스트에 꼭 있는 것 하나는?", category: "travel" },
+      { text: "당장 한 달 살기를 한다면 어디서?", category: "travel" },
+      { text: "여행 갈 때 절대 안 빼먹는 준비물은?", category: "travel" },
+      { text: "가장 인상 깊었던 여행의 순간은?", category: "travel" },
+      { text: "국내 여행지 중 강력 추천하는 곳은?", category: "travel" },
+      { text: "여행 스타일이 계획형이야, 즉흥형이야?", category: "travel" },
+      { text: "언젠가 꼭 도전해보고 싶은 액티비티가 있다면?", category: "travel" },
+
+      { text: "인생 최고의 음식 딱 하나만 꼽는다면?", category: "food" },
+      { text: "요즘 꽂혀 있는 음식이나 메뉴가 있어?", category: "food" },
+      { text: "혼자서도 자주 가는 나만의 맛집이 있다면?", category: "food" },
+      { text: "라면에 절대 빠지면 안 되는 것은?", category: "food" },
+      { text: "야식으로 가장 자주 시키는 메뉴는?", category: "food" },
+      { text: "호불호 갈리지만 내가 사랑하는 음식은?", category: "food" },
+      { text: "해외 음식 중 다시 먹고 싶은 것은?", category: "food" },
+      { text: "직접 만들 수 있는 요리 중 자신 있는 메뉴는?", category: "food" },
+      { text: "먹어보고 실망했던 유명 맛집이 있어?", category: "food" },
+      { text: "인생 디저트 or 간식을 꼽는다면?", category: "food" },
+
+      { text: "어릴 때 장래희망이 뭐였어?", category: "memory" },
+      { text: "학창시절 나의 별명은?", category: "memory" },
+      { text: "지금 생각하면 웃긴 어린 시절 흑역사가 있어?", category: "memory" },
+      { text: "어릴 때 가장 좋아했던 만화나 게임은?", category: "memory" },
+      { text: "학교 다닐 때 나는 어떤 스타일이었어?", category: "memory" },
+      { text: "가장 그리운 어린 시절의 순간은?", category: "memory" },
+      { text: "용돈을 받으면 주로 어디에 썼어?", category: "memory" },
+      { text: "어릴 때 가장 무서워했던 것은?", category: "memory" },
+      { text: "다시 돌아가고 싶은 나이가 있다면?", category: "memory" },
+      { text: "어린 시절 최고의 추억 여행이 있다면?", category: "memory" },
+
+      { text: "하루 동안 대통령이 된다면 가장 먼저 하고 싶은 일은?", category: "politics" },
+      { text: "딱 하나의 법을 새로 만들 수 있다면 어떤 법?", category: "politics" },
+      { text: "우리 동네에 꼭 생겼으면 하는 공공시설이 있다면?", category: "politics" },
+      { text: "만약 공휴일을 하나 더 만든다면 무슨 날로?", category: "politics" },
+      { text: "세금을 딱 한 분야에만 몰아 쓸 수 있다면 어디에?", category: "politics" },
+      { text: "우리 사회가 조금 더 나아졌으면 하는 부분이 있다면?", category: "politics" },
+      { text: "대통령에게 딱 한 가지 질문할 수 있다면 뭘 물어볼래?", category: "politics" },
+      { text: "만약 새로운 나라를 세운다면 국기나 국가 상징은 어떻게?", category: "politics" },
+      { text: "투표할 때 가장 중요하게 보는 것은 무엇이라고 생각해?", category: "politics" },
+      { text: "미래에 꼭 해결됐으면 하는 사회 문제 하나는?", category: "politics" },
+
+      { text: "만약 1,000만 원이 생긴다면 어디에 투자할 것 같아?", category: "invest" },
+      { text: "예금·주식·부동산·코인 중 가장 관심 가는 건?", category: "invest" },
+      { text: "돈 관리할 때 나만의 소소한 원칙이 있어?", category: "invest" },
+      { text: "재테크에 관심 갖게 된 계기가 있어?", category: "invest" },
+      { text: "'이건 사길 잘했다' 싶은 소비나 투자가 있다면?", category: "invest" },
+      { text: "은퇴 후를 위해 준비하고 있는 게 있어?", category: "invest" },
+      { text: "월급을 받으면 저축과 소비 비율을 어떻게 나눠?", category: "invest" },
+      { text: "요즘 눈여겨보는 산업이나 분야가 있다면?", category: "invest" },
+      { text: "경제 뉴스나 재테크 정보는 어디서 얻는 편이야?", category: "invest" },
+      { text: "돈을 모으는 이유, 나만의 목표가 있다면?", category: "invest" }
+    ];
+
+    const spicyQuestions = [
+      { text: "내일 세상이 끝난다면 오늘 밤 무엇을 하고 싶어?", category: "imagine" },
+      { text: "투명인간이 될 수 있다면 몰래 뭘 해볼래?", category: "imagine" },
+      { text: "딱 한 사람의 비밀을 알 수 있다면 누구의 무엇을?", category: "imagine" },
+      { text: "과거의 선택 하나를 되돌릴 수 있다면 무엇을 바꿀래?", category: "imagine" },
+      { text: "통장에 100억이 있어도 지금 하는 일을 계속할래?", category: "imagine" },
+      { text: "내 수명 10년을 팔아 100억을 받을 수 있다면 팔래?", category: "imagine" },
+      { text: "딱 한 사람의 마음을 조종할 수 있다면 누구에게 쓸래?", category: "imagine" },
+      { text: "지금의 나로 돌아올 수 없다면, 그래도 인생을 리셋할래?", category: "imagine" },
+
+      { text: "돈 때문에 포기했던 '진짜 갖고 싶은 것'이 있어?", category: "favorite" },
+      { text: "남들은 이해 못 하지만 내가 돈 안 아끼는 것은?", category: "favorite" },
+      { text: "솔직히 유행하지만 나는 별로인 것은?", category: "favorite" },
+      { text: "지금 인생에서 가장 과대평가됐다고 느끼는 건?", category: "favorite" },
+      { text: "돈이 무제한이라면 당장 지르고 싶은 사치품은?", category: "favorite" },
+      { text: "취향 때문에 누군가와 크게 부딪힌 적 있어?", category: "favorite" },
+      { text: "남들 다 좋아하는데 나만 싫은 것은?", category: "favorite" },
+      { text: "죽기 전에 딱 하나만 다시 경험한다면?", category: "favorite" },
+
+      { text: "최근에 가장 크게 후회한 소비는?", category: "daily" },
+      { text: "가족에게도 말 못 한 요즘 고민이 있다면?", category: "daily" },
+      { text: "지난 1년 중 다시 겪고 싶지 않은 날은?", category: "daily" },
+      { text: "요즘 남몰래 스트레스 받는 일이 있어?", category: "daily" },
+      { text: "최근에 누군가에게 서운했던 적 있어?", category: "daily" },
+      { text: "SNS에 차마 올리지 못한 진짜 요즘 근황은?", category: "daily" },
+      { text: "지금 인생에서 가장 바꾸고 싶은 습관은?", category: "daily" },
+      { text: "요즘 계속 미루고만 있는 '해야 하는 일'은?", category: "daily" },
+
+      { text: "신앙에 대해 가장 크게 의심했던 순간이 있었어?", category: "faith" },
+      { text: "기도했는데 응답받지 못했다고 느낀 적이 있어?", category: "faith" },
+      { text: "믿음과 현실 사이에서 갈등했던 경험이 있다면?", category: "faith" },
+      { text: "교회 생활에서 가장 상처받았던 순간은?", category: "faith" },
+      { text: "솔직히 아직도 이해되지 않는 성경 내용이 있어?", category: "faith" },
+      { text: "하나님께 서운했던 적이 있다면 언제였어?", category: "faith" },
+      { text: "내 신앙이 가장 크게 흔들렸던 계기는?", category: "faith" },
+      { text: "믿지 않는 사람에게 내 믿음을 어떻게 설명할래?", category: "faith" },
+
+      { text: "전 연인과 다시 만날 수 있다면 만날래?", category: "love" },
+      { text: "연애하면서 가장 크게 후회하는 일은?", category: "love" },
+      { text: "이별을 먼저 통보해봤어, 아니면 당해봤어?", category: "love" },
+      { text: "연인의 과거, 어디까지 알고 싶어?", category: "love" },
+      { text: "질투심이 폭발했던 순간이 있다면?", category: "love" },
+      { text: "짝사랑하다 포기한 경험이 있어?", category: "love" },
+      { text: "나에게 '이건 바람이다' 싶은 기준은?", category: "love" },
+      { text: "썸이 흐지부지된 진짜 이유, 뭐였던 것 같아?", category: "love" },
+
+      { text: "아무에게도 말 안 한 비밀이 있어? (말할 수 있는 선에서)", category: "tmi" },
+      { text: "가장 부끄러운 흑역사 하나를 공개한다면?", category: "tmi" },
+      { text: "남몰래 콤플렉스라고 느끼는 부분이 있어?", category: "tmi" },
+      { text: "거짓말했다가 들킨 경험이 있다면?", category: "tmi" },
+      { text: "주변에 은근히 질투 나는 사람이 있어?", category: "tmi" },
+      { text: "친구에게도 숨기고 싶은 나의 모습이 있어?", category: "tmi" },
+      { text: "인생에서 가장 창피했던 순간은?", category: "tmi" },
+      { text: "돈 관련해서 가장 대담했던 선택은?", category: "tmi" },
+
+      { text: "평생 연애 금지 vs 평생 친구 금지?", category: "balance" },
+      { text: "전 애인과 재회 vs 새로운 사람과 시작?", category: "balance" },
+      { text: "내 비밀 다 공개되기 vs 남의 비밀 다 알게 되기?", category: "balance" },
+      { text: "1년 뒤 죽고 100억 받기 vs 그냥 평범하게 오래 살기?", category: "balance" },
+      { text: "사랑하지만 가난한 사람 vs 사랑 안 하지만 부유한 사람?", category: "balance" },
+      { text: "평생 진실만 말하기 vs 평생 거짓말만 하기?", category: "balance" },
+      { text: "능력 없는데 인정받기 vs 능력 있는데 무시당하기?", category: "balance" },
+      { text: "가족 vs 연인, 하나만 택해야 한다면?", category: "balance" },
+
+      { text: "덕질에 쓴 돈, 솔직히 총 얼마쯤 될 것 같아?", category: "hobby" },
+      { text: "취미 때문에 사람들과 갈등한 적 있어?", category: "hobby" },
+      { text: "남들이 유치하다고 하는데 못 끊는 취미는?", category: "hobby" },
+      { text: "덕질하다 현타 온 적 있어?", category: "hobby" },
+      { text: "가장 후회되는 '지름'은?", category: "hobby" },
+      { text: "취미 때문에 밤새운 적 있어?", category: "hobby" },
+      { text: "남들에게 숨기고 싶은 은밀한 취향이 있어?", category: "hobby" },
+      { text: "'입덕 부정기'가 있었다면 언제였어?", category: "hobby" },
+
+      { text: "죽음에 대해 진지하게 생각해본 적 있어?", category: "deep" },
+      { text: "지금까지 가장 크게 상처받은 말은 뭐였어?", category: "deep" },
+      { text: "인간관계에서 누군가를 손절해본 경험이 있어?", category: "deep" },
+      { text: "스스로가 가장 미웠던 순간은 언제였어?", category: "deep" },
+      { text: "부모님에게 아직 하지 못한 진심이 있다면?", category: "deep" },
+      { text: "지금 가장 두려운 것은 뭐야?", category: "deep" },
+      { text: "돈, 명예, 사랑 중 하나만 택한다면?", category: "deep" },
+      { text: "내가 가장 외로웠던 시기는 언제였어?", category: "deep" },
+
+      { text: "여행지에서 저지른 가장 대담한 일이 있어?", category: "travel" },
+      { text: "함께 여행 갔다가 정 떨어진 사람 있어?", category: "travel" },
+      { text: "모든 걸 버리고 이민 간다면 어디로?", category: "travel" },
+      { text: "여행 중 가장 위험했던 순간은?", category: "travel" },
+      { text: "혼자 훌쩍 떠나버리고 싶었던 순간이 있어?", category: "travel" },
+      { text: "여행 경비, 한 번에 가장 많이 써본 액수는?", category: "travel" },
+      { text: "다시는 가고 싶지 않은 여행지가 있어?", category: "travel" },
+      { text: "여행지에서 예상 밖의 인연을 만난 적 있어?", category: "travel" },
+
+      { text: "혼자 다 먹어치운 '폭식' 경험이 있어?", category: "food" },
+      { text: "돈 아깝다고 느낀 최악의 맛집은?", category: "food" },
+      { text: "다이어트 중 몰래 먹은 것 실토한다면?", category: "food" },
+      { text: "음식 취향으로 크게 싸워본 적 있어?", category: "food" },
+      { text: "솔직히 과대평가됐다고 생각하는 음식은?", category: "food" },
+      { text: "인생에서 가장 많이 먹어본 한 끼는?", category: "food" },
+      { text: "먹다가 대형사고 친 경험이 있어?", category: "food" },
+      { text: "남들 앞에서 안 먹는 척했던 음식이 있어?", category: "food" },
+
+      { text: "학창시절 가장 큰 흑역사를 공개한다면?", category: "memory" },
+      { text: "지금 생각하면 이불킥하는 순간이 있어?", category: "memory" },
+      { text: "어릴 때 부모님 몰래 저지른 사고가 있어?", category: "memory" },
+      { text: "첫사랑, 지금은 어떻게 됐는지 알아?", category: "memory" },
+      { text: "학창시절 가장 후회되는 선택이 있다면?", category: "memory" },
+      { text: "다시는 만나고 싶지 않은 과거의 사람이 있어?", category: "memory" },
+      { text: "어릴 때 가장 크게 혼났던 사건은?", category: "memory" },
+      { text: "그때로 돌아가면 절대 안 할 것 같은 일은?", category: "memory" },
+
+      { text: "지지하는 정치 성향을 주변에 밝히는 편이야?", category: "politics" },
+      { text: "가족과 정치 얘기하다 싸워본 적 있어?", category: "politics" },
+      { text: "우리 사회에서 가장 바뀌어야 한다고 생각하는 제도는?", category: "politics" },
+      { text: "정치인에게 가장 실망했던 순간은?", category: "politics" },
+      { text: "세금이 제대로 쓰이고 있다고 생각해?", category: "politics" },
+      { text: "가장 공감되지 않는 사회 통념이 있다면?", category: "politics" },
+      { text: "우리나라의 가장 심각한 문제 하나를 꼽는다면?", category: "politics" },
+      { text: "정치 뉴스, 챙겨보는 편이야?", category: "politics" },
+
+      { text: "투자로 가장 크게 벌었거나 잃었던 경험이 있어?", category: "invest" },
+      { text: "지금 자산의 대부분은 어디에 들어가 있어?", category: "invest" },
+      { text: "'영끌'이나 빚투를 해본 적 있어? 어땠어?", category: "invest" },
+      { text: "솔직히 지금 통장 잔고, 만족스러운 편이야?", category: "invest" },
+      { text: "돈 때문에 사람과 틀어진 경험이 있어?", category: "invest" },
+      { text: "코인이나 주식 때문에 잠 못 이룬 밤이 있었어?", category: "invest" },
+      { text: "친구가 큰돈을 빌려달라면 얼마까지 빌려줄 수 있어?", category: "invest" },
+      { text: "지금 다시 돌아간다면 절대 안 할 투자는?", category: "invest" },
+      { text: "월 소득, 밝힐 수 있는 선에서 어느 정도야?", category: "invest" },
+      { text: "돈과 시간 중 지금 더 부족한 건 뭐야?", category: "invest" }
+    ];
+
+    const questions = [
+      ...mildQuestions.map((q) => ({ ...q, spice: "mild" })),
+      ...spicyQuestions.map((q) => ({ ...q, spice: "spicy" }))
+    ];
+
+    const spices = {
+      mild: { label: "😋 순한맛" },
+      spicy: { label: "🌶️ 매운맛" }
+    };
+
+    const questionEl = document.getElementById("question");
+    const badgeEl = document.getElementById("badge");
+    const btn = document.getElementById("pickBtn");
+    const counterEl = document.getElementById("counter");
+    const categoriesEl = document.getElementById("categories");
+    const spicesEl = document.getElementById("spices");
+
+    let currentSpice = "mild";
+    let currentCategory = "all";
+    let lastText = "";
+
+    Object.entries(spices).forEach(([key, { label }]) => {
+      const btnEl = document.createElement("button");
+      btnEl.className = "spice-btn" + (key === currentSpice ? " active" : "");
+      btnEl.dataset.spice = key;
+      btnEl.textContent = label;
+      btnEl.addEventListener("click", () => selectSpice(key));
+      spicesEl.appendChild(btnEl);
+    });
+
+    const chipDefs = [{ key: "all", label: "✨ 전체" }].concat(
+      Object.entries(categories).map(([key, { label }]) => ({ key, label }))
+    );
+
+    chipDefs.forEach(({ key, label }) => {
+      const chip = document.createElement("button");
+      chip.className = "chip" + (key === "all" ? " active" : "");
+      chip.textContent = label;
+      chip.dataset.key = key;
+      chip.addEventListener("click", () => selectCategory(key));
+      categoriesEl.appendChild(chip);
+    });
+
+    function getPool() {
+      return questions.filter(
+        (q) =>
+          q.spice === currentSpice &&
+          (currentCategory === "all" || q.category === currentCategory)
+      );
+    }
+
+    function updateCounter() {
+      const count = getPool().length;
+      const spiceName = spices[currentSpice].label;
+      const catName = currentCategory === "all" ? "전체" : categories[currentCategory].label;
+      counterEl.textContent = `${spiceName} · ${catName} · 질문 ${count}개`;
+    }
+
+    function selectSpice(key) {
+      currentSpice = key;
+      document.querySelectorAll(".spice-btn").forEach((b) => {
+        b.classList.toggle("active", b.dataset.spice === key);
+      });
+      document.body.classList.toggle("spicy-mode", key === "spicy");
+      updateCounter();
+    }
+
+    function selectCategory(key) {
+      currentCategory = key;
+      document.querySelectorAll(".chip").forEach((c) => {
+        c.classList.toggle("active", c.dataset.key === key);
+      });
+      updateCounter();
+    }
+
+    function pickQuestion() {
+      const pool = getPool();
+      let item;
+      do {
+        item = pool[Math.floor(Math.random() * pool.length)];
+      } while (item.text === lastText && pool.length > 1);
+      lastText = item.text;
+
+      badgeEl.textContent = `${spices[item.spice].label} · ${categories[item.category].label}`;
+      badgeEl.classList.add("show");
+
+      questionEl.classList.remove("placeholder", "pop");
+      void questionEl.offsetWidth;
+      questionEl.textContent = item.text;
+      questionEl.classList.add("pop");
+    }
+
+    btn.addEventListener("click", pickQuestion);
+    updateCounter();
+  </script>
+</body>
+</html>
