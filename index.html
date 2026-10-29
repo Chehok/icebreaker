@@ -12,9 +12,7 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Icebreaker" />
-  <meta name="description" content="모임 분위기를 풀어주는 대화 주제와 밸런스 게임 모음, Icebreaker" />
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <meta name="description" content="모임 분위기를 풀어주는 대화 주제, 밸런스 게임, 이 중 누가? 모음, Icebreaker" />
   <style>
     :root {
       --bg: #f4f5f9;
@@ -24,7 +22,7 @@
       --line-strong: #d3d6e2;
       --text: #171923;
       --text-2: #3f4354;
-      --muted: #6b7084;
+      --muted: #606579;
       --accent: #4f46e5;
       --accent-strong: #4338ca;
       --accent-soft: #eef0ff;
@@ -128,7 +126,7 @@
     }
 
     .modes { max-width: 440px; }
-    .mode-btn { white-space: nowrap; min-width: 0; }
+    .mode-btn { white-space: normal; min-width: 0; overflow-wrap: anywhere; }
     @media (max-width: 420px) {
       .mode-btn { padding: 10px 4px; font-size: 0.84rem; letter-spacing: -0.03em; }
     }
@@ -401,11 +399,11 @@
     }
 
     .versus.has-choice .option:not(.chosen) {
-      opacity: 0.5;
+      opacity: 1;
     }
 
     .versus.has-choice .option:not(.chosen):hover {
-      opacity: 0.85;
+      opacity: 1;
     }
 
     .option.chosen {
@@ -508,6 +506,13 @@
         transform: none;
       }
     }
+    .question, .option, .badge, .who-hint { max-width: 100%; overflow-wrap: anywhere; }
+    .option { min-width: 0; }
+    .btn { min-width: 0; max-width: 100%; }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+    }
   </style>
 </head>
 <body>
@@ -515,17 +520,20 @@
     <h1>🧊 Icebreaker</h1>
     <p class="subtitle">대화 주제, 밸런스 게임, 이 중 누가?로 어색한 분위기를 풀어보세요!<br />모드와 맛, 카테고리를 고르고 버튼을 눌러봐요.</p>
 
+    <p class="subtitle">답하기 곤란하면 언제든 건너뛰세요. 실명이나 타인의 비밀은 말하지 않아도 돼요.</p>
+
     <div class="modes" id="modes" role="group" aria-label="모드 선택"></div>
-    <div class="spices" id="spices"></div>
-    <div class="categories" id="categories"></div>
+    <div class="spices" id="spices" role="group" aria-label="맛 선택"></div>
+    <div class="categories" id="categories" role="group" aria-label="카테고리 선택"></div>
 
     <div class="card" id="card">
       <span class="badge" id="badge"></span>
       <p class="question placeholder" id="question"></p>
       <div class="versus" id="versus"></div>
-      <p class="who-hint" id="whoHint">👉 하나, 둘, 셋 하면 동시에 가리켜 주세요!</p>
+      <p class="who-hint" id="whoHint">👉 참여하고 싶은 사람끼리, 하나 둘 셋에 가리켜 주세요!</p>
     </div>
 
+    <p class="sr-only" id="announcement" role="status" aria-live="polite" aria-atomic="true"></p>
     <button class="btn" id="pickBtn"></button>
     <p class="counter" id="counter"></p>
   </div>
@@ -586,7 +594,7 @@
       { text: "지금까지 받은 선물 중 최고는 뭐였어?", category: "daily" },
       { text: "친구들 사이에서 나의 별명 or 이미지는?", category: "daily" },
       { text: "요즘 가장 빠져 있는 취미나 관심사는?", category: "daily" },
-      { text: "복권보다 로봇청소기? 소소하지만 삶의 질 높여준 물건은?", category: "daily" },
+      { text: "소소하지만 일상을 편하게 해준 물건은?", category: "daily" },
       { text: "인생에서 가장 잘한 선택은 뭐라고 생각해?", category: "daily" },
       { text: "비 오는 날 가장 하고 싶은 일은?", category: "daily" },
       { text: "다시 배우고 싶은 것이 있다면?", category: "daily" },
@@ -610,7 +618,7 @@
       { text: "썸과 연애의 결정적인 차이는 뭐라고 생각해?", category: "love" },
       { text: "받아보고 싶은 로맨틱한 이벤트가 있다면?", category: "love" },
       { text: "연인에게 절대 양보 못 하는 것 하나는?", category: "love" },
-      { text: "가장 기억에 남는 고백(하거나 받은)은?", category: "love" },
+      { text: "영화나 드라마에서 기억에 남는 고백 장면은?", category: "love" },
       { text: "이성에게 처음 호감을 느끼는 포인트는?", category: "love" },
       { text: "완벽한 데이트 코스를 짠다면?", category: "love" },
 
@@ -627,7 +635,7 @@
 
       { text: "요즘 가장 빠져 있는 최애(아이돌/캐릭터/작품)는?", category: "hobby" },
       { text: "인생 드라마 or 애니 딱 하나 추천한다면?", category: "hobby" },
-      { text: "덕질하면서 가장 크게 지른 경험은?", category: "hobby" },
+      { text: "취미 생활에 하나만 챙겨갈 수 있다면 어떤 물건?", category: "hobby" },
       { text: "요즘 즐겨 하는 게임이나 앱이 있어?", category: "hobby" },
       { text: "새로 도전해보고 싶은 취미가 있다면?", category: "hobby" },
       { text: "인생 노래 플레이리스트에 꼭 있는 곡은?", category: "hobby" },
@@ -636,12 +644,12 @@
       { text: "최근에 새로 알게 된 '입덕 포인트'가 있어?", category: "hobby" },
       { text: "함께 덕질하고 싶은 사람이 있다면?", category: "hobby" },
 
-      { text: "인생에서 가장 힘들었던 순간과 그걸 어떻게 이겨냈어?", category: "deep" },
-      { text: "요즘 가장 고민되는 게 있다면?", category: "deep" },
+      { text: "작지만 뿌듯했던 최근의 성취는?", category: "deep" },
+      { text: "요즘 배워보고 싶은 새로운 것은?", category: "deep" },
       { text: "나에게 '행복'이란 무엇일까?", category: "deep" },
       { text: "지금의 나에게 가장 필요한 한 마디는?", category: "deep" },
       { text: "5년 전의 나에게 해주고 싶은 말이 있다면?", category: "deep" },
-      { text: "지금 가장 두려운 것은 뭐야?", category: "deep" },
+      { text: "새로운 도전을 할 때 힘이 되는 말은?", category: "deep" },
       { text: "나에게 가장 소중한 것 세 가지는?", category: "deep" },
       { text: "요즘 내 마음을 가장 크게 채우고 있는 감정은?", category: "deep" },
       { text: "어떤 사람으로 기억되고 싶어?", category: "deep" },
@@ -658,7 +666,7 @@
       { text: "여행 스타일이 계획형이야, 즉흥형이야?", category: "travel" },
       { text: "언젠가 꼭 도전해보고 싶은 액티비티가 있다면?", category: "travel" },
 
-      { text: "인생에서 가장 많이 먹어본 한 끼는?", category: "food" },
+      { text: "한 끼에 가장 푸짐하게 먹었던 메뉴는?", category: "food" },
       { text: "요즘 꽂혀 있는 음식이나 메뉴가 있어?", category: "food" },
       { text: "혼자서도 자주 가는 나만의 맛집이 있다면?", category: "food" },
       { text: "라면에 절대 빠지면 안 되는 것은?", category: "food" },
@@ -671,7 +679,7 @@
 
       { text: "어릴 때 장래희망이 뭐였어?", category: "memory" },
       { text: "학창시절 나의 별명은?", category: "memory" },
-      { text: "지금 생각하면 웃긴 어린 시절 흑역사가 있어?", category: "memory" },
+      { text: "어릴 때 진짜라고 믿었던 엉뚱한 이야기는?", category: "memory" },
       { text: "어릴 때 가장 좋아했던 만화나 게임은?", category: "memory" },
       { text: "학교 다닐 때 나는 어떤 스타일이었어?", category: "memory" },
       { text: "가장 그리운 어린 시절의 순간은?", category: "memory" },
@@ -696,8 +704,8 @@
       { text: "돈 관리할 때 나만의 소소한 원칙이 있어?", category: "invest" },
       { text: "재테크에 관심 갖게 된 계기가 있어?", category: "invest" },
       { text: "'이건 사길 잘했다' 싶은 소비나 투자가 있다면?", category: "invest" },
-      { text: "은퇴 후를 위해 준비하고 있는 게 있어?", category: "invest" },
-      { text: "월급을 받으면 저축과 소비 비율을 어떻게 나눠?", category: "invest" },
+      { text: "나중에 여유가 생기면 해보고 싶은 일은?", category: "invest" },
+      { text: "가계부는 앱과 종이 중 어느 쪽이 편할 것 같아?", category: "invest" },
       { text: "요즘 눈여겨보는 산업이나 분야가 있다면?", category: "invest" },
       { text: "경제 뉴스나 재테크 정보는 어디서 얻는 편이야?", category: "invest" },
       { text: "돈을 모으는 이유, 나만의 목표가 있다면?", category: "invest" },
@@ -810,17 +818,17 @@
       { text: "칭찬받으면 쑥스러워하는 편이야, 즐기는 편이야?", category: "thanks" },
       { text: "힘들 때 큰 힘이 되어준 말 한마디는?", category: "thanks" },
       { text: "내가 남에게 자주 해주는 칭찬이 있다면?", category: "thanks" },
-      { text: "내가 힘들 때 곁에 남아준 사람은 누구야?", category: "thanks" }
+      { text: "오늘 모임에서 즐거웠던 순간 하나를 꼽는다면?", category: "thanks" }
     ];
 
     const spicyQuestions = [
       { text: "내일 세상이 끝난다면 오늘 밤 딱 한 사람에게 연락할 수 있어. 누구에게 무슨 말을 할래?", category: "imagine" },
-      { text: "투명인간이 된다면 이 자리 사람 중 누구의 하루를 몰래 따라다녀 보고 싶어?", category: "imagine" },
+      { text: "투명인간이 되어도 소리만은 숨길 수 없다면, 어떤 순간에 들킬 것 같아?", category: "imagine" },
       { text: "딱 한 사람의 비밀을 알 수 있다면 누구의 무엇을?", category: "imagine" },
       { text: "누군가에게 했던 말 한마디를 취소할 수 있다면, 누구에게 한 어떤 말이야?", category: "imagine" },
       { text: "통장에 100억이 생기면 회사(학교)에 그만둔다고 뭐라고 말할 거야? 실제 대사로!", category: "imagine" },
-      { text: "내 수명 10년을 팔아 100억을 받을 수 있다면 팔래?", category: "imagine" },
-      { text: "딱 한 사람의 마음을 조종할 수 있다면 누구에게 쓸래?", category: "imagine" },
+      { text: "100억을 받는 대신 평생 내 소비 내역이 공개된다면 받을래?", category: "imagine" },
+      { text: "내가 보낸 허세 섞인 메시지 하나를 지울 수 있다면 어떤 메시지?", category: "imagine" },
       { text: "지금의 나로 돌아올 수 없다면, 그래도 인생을 리셋할래?", category: "imagine" },
 
       { text: "돈 때문에 포기했던 '진짜 갖고 싶은 것'이 있어?", category: "favorite" },
@@ -833,7 +841,7 @@
       { text: "썸 상대의 취향(옷·음악·말투) 하나 때문에 마음이 확 식은 적 있어?", category: "favorite" },
 
       { text: "카톡 읽고 일부러 답 안 하다가 나중에 '못 봤어'라고 한 적 있어?", category: "daily" },
-      { text: "가족에게도 말 못 한 요즘 고민이 있다면?", category: "daily" },
+      { text: "바쁜 척하며 약속을 피했는데 사실 집에서 놀았던 적 있어?", category: "daily" },
       { text: "지난 1년 중 제일 민망했던 날, 무슨 일이 있었어?", category: "daily" },
       { text: "요즘 나를 은근히 스트레스 받게 하는 사람 유형은? (실명 금지!)", category: "daily" },
       { text: "최근에 누군가에게 서운했던 적 있어?", category: "daily" },
@@ -861,7 +869,7 @@
 
       { text: "아무에게도 말 안 한 비밀이 있어? (말할 수 있는 선에서)", category: "tmi" },
       { text: "가장 부끄러운 흑역사 하나를 공개한다면?", category: "tmi" },
-      { text: "남몰래 콤플렉스라고 느끼는 부분이 있어?", category: "tmi" },
+      { text: "아는 척했다가 추가 질문에 당황한 적 있어?", category: "tmi" },
       { text: "거짓말했다가 들킨 경험이 있다면?", category: "tmi" },
       { text: "주변에 은근히 질투 나는 사람이 있어?", category: "tmi" },
       { text: "친구에게도 숨기고 싶은 나의 모습이 있어?", category: "tmi" },
@@ -874,17 +882,17 @@
       { text: "덕질하다 현타 온 적 있어?", category: "hobby" },
       { text: "취미나 덕질 때문에 약속이나 할 일을 핑계 대고 빼먹은 적 있어?", category: "hobby" },
       { text: "연인이 내 최애나 취미를 대놓고 별로라고 하면, 솔직히 정 떨어질 것 같아?", category: "hobby" },
-      { text: "남들에게 숨기고 싶은 은밀한 취향이 있어?", category: "hobby" },
+      { text: "혼자 즐기다가 누가 들어오면 황급히 끄는 취미 영상이 있어?", category: "hobby" },
       { text: "최애와 연인 중 한쪽을 포기해야 한다면? 솔직하게!", category: "hobby" },
 
-      { text: "죽음에 대해 진지하게 생각해본 적 있어?", category: "deep" },
-      { text: "지금까지 가장 크게 상처받은 말은 뭐였어?", category: "deep" },
+      { text: "솔직한 조언을 구해놓고 듣기 좋은 말만 기다린 적 있어?", category: "deep" },
+      { text: "멋진 말을 하려다가 오히려 허세처럼 들렸던 적 있어?", category: "deep" },
       { text: "인간관계에서 누군가를 손절해본 경험이 있어?", category: "deep" },
-      { text: "스스로가 가장 미웠던 순간은 언제였어?", category: "deep" },
-      { text: "부모님에게 아직 하지 못한 진심이 있다면?", category: "deep" },
+      { text: "내 잘못인 걸 알면서도 끝까지 우겨본 적 있어?", category: "deep" },
+      { text: "가까운 사람에게 인정받고 싶어서 성과를 부풀려 말한 적 있어?", category: "deep" },
       { text: "인생에서 가장 후회되는 선택이 있어?", category: "deep" },
       { text: "솔직히 돈만 충분하면 사랑은 없어도 살 수 있을 것 같아?", category: "deep" },
-      { text: "내가 가장 외로웠던 시기는 언제였어?", category: "deep" },
+      { text: "혼자 있고 싶어서 약속을 거절한 뒤 SNS를 보고 부러워한 적 있어?", category: "deep" },
 
       { text: "여행지에서 저지른 가장 대담한 일이 있어?", category: "travel" },
       { text: "함께 여행 갔다가 정 떨어진 사람 있어?", category: "travel" },
@@ -893,11 +901,11 @@
       { text: "혼자 훌쩍 떠나버리고 싶었던 순간이 있어?", category: "travel" },
       { text: "여행 경비, 한 번에 가장 많이 써본 액수는?", category: "travel" },
       { text: "여행지에서 '현지인인 척'이나 '부자인 척' 허세 부려본 적 있어?", category: "travel" },
-      { text: "여행지에서 예상 밖의 인연을 만난 적 있어?", category: "travel" },
+      { text: "여행지에서 만난 사람에게 평소보다 멋있는 척한 적 있어?", category: "travel" },
 
       { text: "혼자 몰래 시켜 먹고 가족(룸메)한테 증거 인멸한 적 있어?", category: "food" },
       { text: "데이트나 소개팅에서 상대가 고른 식당이 별로였던 적 있어? 티 냈어?", category: "food" },
-      { text: "다이어트 중 몰래 먹은 것 실토한다면?", category: "food" },
+      { text: "남겨둔 간식을 몰래 먹고 모르는 척한 적 있어?", category: "food" },
       { text: "음식 취향으로 크게 싸워본 적 있어?", category: "food" },
       { text: "'이 사람이랑은 밥 같이 먹기 힘들다' 싶었던 식습관이 있어?", category: "food" },
       { text: "모임 메뉴 정할 때 속으로는 싫은데 '다 좋아요' 한 적 있어? 진짜 먹고 싶었던 건?", category: "food" },
@@ -908,8 +916,8 @@
       { text: "지금 생각하면 이불킥하는 순간이 있어?", category: "memory" },
       { text: "어릴 때 부모님 몰래 저지른 사고가 있어?", category: "memory" },
       { text: "첫사랑, 지금은 어떻게 됐는지 알아?", category: "memory" },
-      { text: "어릴 때 부모님 지갑이나 저금통에 몰래 손댄 적 있어? (공소시효 지났다 치고)", category: "memory" },
-      { text: "다시는 만나고 싶지 않은 과거의 사람이 있어?", category: "memory" },
+      { text: "어릴 때 용돈을 어디에 썼는지 다르게 말한 적 있어?", category: "memory" },
+      { text: "예전에 쓴 허세 가득한 자기소개를 지금 읽는다면 어떤 부분이 민망할까?", category: "memory" },
       { text: "어릴 때 친구들한테 멋있어 보이려고 부렸던 제일 웃긴 허세는?", category: "memory" },
       { text: "그때로 돌아가면 절대 안 할 것 같은 일은?", category: "memory" },
 
@@ -930,7 +938,7 @@
       { text: "코인이나 주식 때문에 잠 못 이룬 밤이 있었어?", category: "invest" },
       { text: "친구가 큰돈을 빌려달라면 얼마까지 빌려줄 수 있어?", category: "invest" },
       { text: "지금 다시 돌아간다면 절대 안 할 투자는?", category: "invest" },
-      { text: "월 소득, 밝힐 수 있는 선에서 어느 정도야?", category: "invest" },
+      { text: "돈을 아낀다고 말해놓고 몰래 충동구매한 적 있어?", category: "invest" },
       { text: "연인에게 나 몰래 빚이 있었다는 걸 알게 되면 어디까지 이해할 수 있어?", category: "invest" },
 
       { text: "지금 회사(학교) 몰래 이직(편입) 준비해본 적 있어? 혹시 지금도?", category: "work" },
@@ -939,7 +947,7 @@
       { text: "연봉을 2배 준다면 제일 불편한 사람이랑 1년 일할 수 있어?", category: "work" },
       { text: "퇴사(자퇴)하고 싶다고 제일 크게 느꼈던 순간은?", category: "work" },
       { text: "상사나 교수님한테 하고 싶었지만 못 한 말이 있다면?", category: "work" },
-      { text: "회사(학교)에서 들은 말 중 가장 상처였던 한마디는?", category: "work" },
+      { text: "회사(학교)에서 못 들은 척하고 넘어간 부탁이 있어?", category: "work" },
       { text: "지금 하는 일에서 솔직히 내가 제일 부족하다고 느끼는 부분은?", category: "work" },
 
       { text: "대화에 끼려고 안 본 작품을 본 척한 적 있어?", category: "content" },
@@ -955,7 +963,7 @@
       { text: "비 오는 날 우산 없는 썸 상대를 만나면 같이 쓰자고 말할 용기 있어?", category: "season" },
       { text: "가을만 되면 괜히 연애하고 싶어지는 편이야? 솔직하게!", category: "season" },
       { text: "너무 덥거나 추워서 씻기 귀찮아 하루 그냥 넘긴 적 있어? 솔직하게!", category: "season" },
-      { text: "눈 오는 크리스마스에 혼자라면 어떤 기분일 것 같아?", category: "season" },
+      { text: "크리스마스에 약속 있는 척해본 적 있어? 실제로는 뭘 했어?", category: "season" },
       { text: "비 오는 날 센치해져서 연락하고 싶었던 사람이 있어?", category: "season" },
       { text: "벚꽃이나 첫눈 시즌에 같이 보고 싶었던 사람, 지금은 어떻게 지내?", category: "season" },
       { text: "휴가나 연말 계획, 남들한테 실제보다 부풀려 말해본 적 있어?", category: "season" },
@@ -965,13 +973,13 @@
       { text: "가족·룸메이트와 같이 살면서 제일 참기 힘들었던 순간은?", category: "place" },
       { text: "동네에서 아는 사람을 마주쳐서 민망했던 적 있어?", category: "place" },
       { text: "연인이 '나중에 내 고향(시골)에 내려가서 살자'고 하면 따라갈 수 있어?", category: "place" },
-      { text: "동네 이웃이나 단골 가게 사장님한테 몰래 붙인 별명 있어?", category: "place" },
+      { text: "단골 가게에서 아는 척해주길 기대했다가 못 알아봐서 머쓱했던 적 있어?", category: "place" },
       { text: "이웃 때문에 스트레스 받았던 경험이 있어?", category: "place" },
       { text: "집 앞 편의점 갈 때, 아는 사람 만나면 절대 안 되는 내 차림새는?", category: "place" },
 
       { text: "솔직히 남의 반려동물이 별로 안 귀여웠는데 귀여운 척한 적 있어?", category: "pet" },
       { text: "반려동물 때문에 포기했던 게 있어?", category: "pet" },
-      { text: "반려동물이 아프다면 병원비로 얼마까지 쓸 수 있어?", category: "pet" },
+      { text: "반려동물에게 한 말을 누가 들으면 가장 민망할 것 같아?", category: "pet" },
       { text: "반려동물 사진·영상으로 단톡방 도배하다 눈치 받은 적 있어?", category: "pet" },
       { text: "연인이 내 반려동물을 싫어한다면 어떻게 할래?", category: "pet" },
       { text: "반려동물한테만 쓰는 혀 짧은 말투나 애칭, 여기서 재연해줄 수 있어?", category: "pet" },
@@ -996,7 +1004,7 @@
       { text: "받은 선물을 몰래 중고로 팔거나 다른 사람한테 선물한 적 있어?", category: "shop" },
       { text: "한 번에 가장 비싸게 지른 물건과 그 이유는?", category: "shop" },
 
-      { text: "시험 볼 때 컨닝하고 싶은 유혹을 느껴본 적 있어?", category: "school" },
+      { text: "시험 볼 때 커닝하고 싶은 유혹을 느껴본 적 있어?", category: "school" },
       { text: "학창시절에 짝사랑이나 썸이 있었어? 결말은 어땠어?", category: "school" },
       { text: "학교 다닐 때 가장 불편했던 친구 관계는?", category: "school" },
       { text: "선생님께 크게 혼났던 사건이 있어?", category: "school" },
@@ -1006,10 +1014,10 @@
       { text: "학창시절에 몰래 했던 일탈 중 지금 고백할 수 있는 건?", category: "school" },
 
       { text: "내 생각이 갑자기 모두에게 들린다면 가장 들키고 싶지 않은 생각은?", category: "silly" },
-      { text: "눈 떠보니 무인도! 같이 있고 싶은 사람 한 명과 절대 같이 있기 싫은 사람 한 명은?", category: "silly" },
+      { text: "무인도에서 가장 잘할 거라고 큰소리쳤다가 금방 들통날 내 허세는?", category: "silly" },
       { text: "내일 내 검색 기록이 전부 공개된다면 가장 걱정되는 건?", category: "silly" },
       { text: "좀비 사태에서 나 혼자 살아남기 vs 소중한 한 명과 함께 위험 감수하기, 어느 쪽이야?", category: "silly" },
-      { text: "평행우주의 내가 이 자리 누군가와 사귀고 있다면, 누구일 것 같아?", category: "silly" },
+      { text: "평행우주의 내가 허세 가득한 SNS 스타라면 어떤 게시물을 올릴 것 같아?", category: "silly" },
       { text: "하루 동안 아무 책임도 안 져도 된다면 가장 해보고 싶은 짓은?", category: "silly" },
       { text: "하루 동안 이 자리 누군가와 몸이 바뀐다면 누구랑 바꿔서 뭘 해볼래?", category: "silly" },
       { text: "내 카톡방 중 딱 하나가 광화문 전광판에 뜬다면, 절대 뜨면 안 되는 방은?", category: "silly" },
@@ -1019,8 +1027,8 @@
       { text: "이 자리 사람 중 첫인상은 어려웠는데 지금은 편해진 사람이 있다면? 이유는?", category: "thanks" },
       { text: "고마웠지만 은혜를 갚지 못해 마음에 걸리는 사람이 있어?", category: "thanks" },
       { text: "칭찬받고 싶어서 일부러 티 낸 적 있어? 뭘로?", category: "thanks" },
-      { text: "나 자신한테 가장 미안했던 순간은 언제야?", category: "thanks" },
-      { text: "이 자리에 있는 사람 중 닮고 싶은 점이 있는 사람과 그 이유는?", category: "thanks" },
+      { text: "겸손한 척했지만 사실 자랑하고 싶었던 순간은?", category: "thanks" },
+      { text: "누군가를 칭찬하면서 사실 나도 같은 칭찬을 듣고 싶었던 적 있어?", category: "thanks" },
       { text: "누군가에게 진심으로 사과하고 싶은 일이 있다면?", category: "thanks" }
     ];
 
@@ -1112,44 +1120,44 @@
 
       { a: "식당 계산할 때마다 화장실 가는 친구", b: "계산할 때마다 '다음엔 네가 사' 하는 친구", category: "food", spice: "spicy" },
       { a: "음식 사진 찍느라 매번 10분씩 못 먹게 하는 연인", b: "내가 추천한 맛집을 매번 별로라고 하는 연인", category: "food", spice: "spicy" },
-      { a: "아무리 먹어도 안 찌지만 맛을 못 느끼기", b: "맛은 다 느끼지만 하루 한 끼만 먹을 수 있기", category: "food", spice: "spicy" },
+      { a: "맛집 데이트 내내 내 먹방 영상이 실시간 방송되기", b: "맛집 데이트 내내 예전의 허세 가득한 맛집 후기가 낭독되기", category: "food", spice: "spicy" },
       { a: "연인이 내 앞에서 쩝쩝거리며 먹기", b: "연인이 내 음식을 매번 한 입씩 뺏어 먹기", category: "food", spice: "spicy" },
       { a: "더치페이를 칼같이 하는 연인", b: "항상 사주지만 매번 생색내는 연인", category: "food", spice: "spicy" },
       { a: "연인 부모님이 해주신 음식이 입에 안 맞아도 두 그릇 먹기", b: "솔직하게 입에 안 맞는다고 조금만 먹기", category: "food", spice: "spicy" },
-      { a: "음식에서 머리카락이 나왔지만 참고 먹기", b: "컴플레인해서 분위기가 싸해지기", category: "food", spice: "spicy" },
+      { a: "배달 주문을 잘못한 걸 알면서도 내 취향이라고 우기기", b: "주문을 잘못했다고 인정하고 친구들 앞에서 다시 주문하기", category: "food", spice: "spicy" },
       { a: "회식에서 상사가 싸 준 쌈 받아먹기", b: "회식에서 상사한테 쌈 싸 드리기", category: "food", spice: "spicy" },
 
       { a: "평생 연애 금지", b: "평생 친구 금지", category: "love", spice: "spicy" },
       { a: "전 애인과 재회하기", b: "새로운 사람과 시작하기", category: "love", spice: "spicy" },
       { a: "사랑하지만 가난한 사람과 살기", b: "사랑하진 않지만 부유한 사람과 살기", category: "love", spice: "spicy" },
-      { a: "가족을 선택하기", b: "연인을 선택하기", category: "love", spice: "spicy" },
+      { a: "가족과 미리 잡은 주말 약속 지키기", b: "오랜만에 시간이 난 연인과 주말 보내기", category: "love", spice: "spicy" },
       { a: "서로 휴대폰을 마음대로 볼 수 있는 연애", b: "서로 휴대폰은 절대 안 보지만 의심은 마음속에 남는 연애", category: "love", spice: "spicy" },
       { a: "연인이 이성 친구와 단둘이 술 마시는 걸 이해하기", b: "연인이 이성 친구와 연락을 끊게 하기", category: "love", spice: "spicy" },
       { a: "내가 좋아하는 사람을 평생 짝사랑하기", b: "나를 좋아하는 사람과 평생 연애하기", category: "love", spice: "spicy" },
       { a: "연인의 과거를 전부 알고 마음 불편하기", b: "아무것도 모르고 마음 편하기", category: "love", spice: "spicy" },
 
-      { a: "1년 뒤 죽는 대신 100억 받기", b: "그냥 평범하게 오래 살기", category: "work", spice: "spicy" },
+      { a: "내 실수인데 팀 전체의 실수라고 둘러대기", b: "내 실수라고 인정하고 팀 앞에서 수습 방법 발표하기", category: "work", spice: "spicy" },
       { a: "능력은 없는데 인정받기", b: "능력은 있는데 무시당하기", category: "work", spice: "spicy" },
       { a: "하기 싫은 일인데 연봉 2배", b: "좋아하는 일인데 연봉 반토막", category: "work", spice: "spicy" },
       { a: "동기보다 연봉 30% 더 받는데 모두가 알기", b: "동기보다 연봉 30% 덜 받는데 나만 알기", category: "work", spice: "spicy" },
       { a: "친구에게 100만 원 빌려주고 못 받기", b: "빌려주지 않아서 사이가 멀어지기", category: "work", spice: "spicy" },
       { a: "존경하는 상사 밑에서 월급 적게 받기", b: "싫은 상사 밑에서 월급 많이 받기", category: "work", spice: "spicy" },
-      { a: "내 월급이 모두에게 공개되기", b: "다른 사람들 월급을 전부 알게 되기", category: "work", spice: "spicy" },
+      { a: "내 월급이 동료들에게 공개되기", b: "내 업무 메신저의 혼잣말이 동료들에게 공개되기", category: "work", spice: "spicy" },
       { a: "평생 부자지만 친구가 한 명도 없기", b: "평생 가난하지만 진짜 친구가 다섯 명 있기", category: "work", spice: "spicy" },
 
       { a: "평생 진실만 말하기", b: "평생 거짓말만 하기", category: "power", spice: "spicy" },
       { a: "연인의 속마음을 딱 한 번 들을 수 있기", b: "연인의 휴대폰을 딱 한 번 볼 수 있기", category: "power", spice: "spicy" },
       { a: "내 속마음이 모두에게 들리기", b: "남의 속마음이 항상 들리기", category: "power", spice: "spicy" },
-      { a: "가장 아픈 기억 하나를 지우기(그때 배운 것도 같이 사라짐)", b: "그 기억을 그대로 안고 살기", category: "power", spice: "spicy" },
-      { a: "내가 죽는 날짜를 정확히 알기", b: "내가 죽는 이유를 정확히 알기", category: "power", spice: "spicy" },
-      { a: "영원히 늙지 않지만 소중한 사람들은 늙어가기", b: "평범하게 늙으며 소중한 사람들과 함께하기", category: "power", spice: "spicy" },
+      { a: "내 흑역사를 나만 잊고 친구들은 기억하기", b: "친구들은 내 흑역사를 잊고 나만 기억하기", category: "power", spice: "spicy" },
+      { a: "속마음을 읽는 능력이 있는데 거짓말할 때마다 귀가 빛나기", b: "투명인간이 될 수 있는데 웃음소리는 평소보다 커지기", category: "power", spice: "spicy" },
+      { a: "시간을 되돌릴 때마다 친구들에게 내 검색 기록 하나가 공개되기", b: "순간이동할 때마다 도착지에서 내 옛날 닉네임이 크게 울리기", category: "power", spice: "spicy" },
       { a: "100명이 나를 우러러보는 삶", b: "단 한 명이 나를 진심으로 사랑해주는 삶", category: "power", spice: "spicy" },
       { a: "세상 모든 거짓말을 알아채기", b: "내 거짓말은 절대 안 들키기", category: "power", spice: "spicy" },
 
-      { a: "내 비밀이 전부 공개되기", b: "남의 비밀을 전부 알게 되기", category: "life", spice: "spicy" },
+      { a: "내 비밀이 전부 공개되기", b: "내가 했던 선의의 거짓말이 전부 공개되기", category: "life", spice: "spicy" },
       { a: "한 달 동안 내 하루가 가족 단톡방에 실시간 공유되기", b: "한 달 동안 내 하루가 회사 단톡방에 실시간 공유되기", category: "life", spice: "spicy" },
       { a: "매일 밤 친구를 데려오는 룸메이트", b: "매일 내 음식을 몰래 먹는 룸메이트", category: "life", spice: "spicy" },
-      { a: "무인도에서 제일 친한 친구와 1년 지내기", b: "무인도에서 혼자 6개월 지내고 10억 받기", category: "life", spice: "spicy" },
+      { a: "무인도에서 제일 친한 친구와 6개월 지내고 둘이 10억 나누기", b: "무인도에서 혼자 6개월 지내고 10억 받기", category: "life", spice: "spicy" },
       { a: "엘리베이터에 싫어하는 사람과 30분 갇히기", b: "화장실이 급한데 꽉 막힌 도로에서 30분 버티기", category: "life", spice: "spicy" },
       { a: "지구 멸망 하루 전, 짝사랑에게 고백하기", b: "지구 멸망 하루 전, 전 애인에게 마지막 연락하기", category: "life", spice: "spicy" },
       { a: "휴대폰 속 사진과 연락처가 전부 사라지기", b: "내 SNS 계정과 게시물이 전부 공개되기", category: "life", spice: "spicy" },
@@ -1162,7 +1170,7 @@
       { a: "전 직원 앞에서 애교 공연하기", b: "한 달 동안 매일 아침 큰 소리로 노래 한 소절 부르며 출근하기", category: "weird", spice: "spicy" },
       { a: "평생 친구들이 내 흑역사 별명으로만 부르기", b: "평생 회사 메신저 프사가 내 어릴 적 사진으로 고정되기", category: "weird", spice: "spicy" },
       { a: "공포 영화 보다가 썸 상대 앞에서 비명 지르기", b: "놀이기구 타고 내려와 썸 상대 앞에서 멀미하기", category: "weird", spice: "spicy" },
-      { a: "한 달 동안 하루 한 끼를 곤충 요리로 먹기", b: "한 달 동안 매일 아침 얼음물에 입수하기", category: "weird", spice: "spicy" },
+      { a: "썸 상대 앞에서 한 달간 말끝마다 노래 한 소절 붙이기", b: "썸 상대 앞에서 한 달간 인사할 때마다 아이돌 포즈 취하기", category: "weird", spice: "spicy" },
 
       { a: "삼겹살은 바삭하게 구워 먹기", b: "삼겹살은 촉촉하게 구워 먹기", category: "food", spice: "mild" },
       { a: "붕어빵은 머리부터", b: "붕어빵은 꼬리부터", category: "food", spice: "mild" },
@@ -1188,17 +1196,17 @@
       { a: "내 인생을 딱 한 번 리셋하기", b: "지금 인생 그대로 10억 받기", category: "power", spice: "spicy" },
       { a: "모든 사람의 호감도 숫자가 보이기", b: "나에 대한 진짜 평가가 들리기", category: "power", spice: "spicy" },
       { a: "10년 젊어지기", b: "10억 받기", category: "power", spice: "spicy" },
-      { a: "알람 5개 맞추고 일어나기", b: "알람 1개로 단번에 일어나기", category: "life", spice: "mild" },
+      { a: "잔잔한 음악 알람으로 일어나기", b: "신나는 음악 알람으로 일어나기", category: "life", spice: "mild" },
       { a: "비 오는 날 집에서 부침개", b: "눈 오는 날 밖에서 눈사람 만들기", category: "life", spice: "mild" },
       { a: "방은 늘 깔끔하게 정리", b: "방은 어질러도 내가 다 아는 위치", category: "life", spice: "mild" },
       { a: "중요한 발표 내내 바지 지퍼가 열려 있기", b: "발표 화면에 개인 카톡 알림이 계속 뜨기", category: "life", spice: "spicy" },
-      { a: "친구 결혼식 축가 부르다 음이탈", b: "친구 결혼식 사회 보다 신랑·신부 이름 틀리기", category: "life", spice: "spicy" },
+      { a: "친구 결혼식 축가 부르다 음이탈", b: "친구 결혼식 사회를 보다가 신랑·신부 이름 틀리기", category: "life", spice: "spicy" },
       { a: "모르는 사람과 엘리베이터에서 방귀 소리 내기", b: "회의실에서 딸꾹질이 멈추지 않기", category: "life", spice: "spicy" },
       { a: "평생 반말로만 말하기", b: "평생 존댓말로만 말하기(친구, 가족 포함)", category: "weird", spice: "mild" },
       { a: "민트초코 떡볶이", b: "파인애플 김치찌개", category: "weird", spice: "mild" },
-      { a: "손가락이 하나 더 생기기", b: "발가락이 하나 줄어들기", category: "weird", spice: "mild" },
+      { a: "손짓할 때마다 작은 반짝이가 나타나기", b: "발걸음마다 작은 구름이 나타나기", category: "weird", spice: "mild" },
       { a: "샤워하며 부른 노래가 녹음돼 친구 단톡방에 올라가기", b: "잠꼬대 영상이 가족 단톡방에 올라가기", category: "weird", spice: "spicy" },
-      { a: "1년 동안 머리를 못 감기", b: "1년 동안 양치를 하루 한 번만 하기", category: "weird", spice: "spicy" },
+      { a: "소개팅에서 내 옛날 허세 닉네임으로 자기소개하기", b: "소개팅에서 내 옛날 감성 글 한 편 낭독하기", category: "weird", spice: "spicy" },
       { a: "소개팅에서 이에 고춧가루 낀 채로 웃기", b: "소개팅에서 상대 이름 잘못 부르기", category: "weird", spice: "spicy" },
       { a: "계획을 분 단위로 짜는 여행", b: "발길 닿는 대로 즉흥 여행", category: "travel", spice: "mild" },
       { a: "평생 해외여행 금지", b: "평생 국내여행 금지", category: "travel", spice: "mild" },
@@ -1212,8 +1220,8 @@
       { a: "기념품을 잔뜩 사 오기", b: "기념품 대신 경험에 돈 쓰기", category: "travel", spice: "mild" },
       { a: "여행 가서 연인의 잠버릇에 정 떨어지기", b: "연인이 내 잠버릇에 정 떨어지기", category: "travel", spice: "spicy" },
       { a: "10시간 비행 내내 옆자리에 전 애인", b: "10시간 비행 내내 옆자리에 직장 상사", category: "travel", spice: "spicy" },
-      { a: "여행 중 나만 빠진 단톡방이 있었다는 걸 알게 되기", b: "내가 몰래 만든 '나 빼고' 단톡방이 들키기", category: "travel", spice: "spicy" },
-      { a: "여행 경비는 내가 다 내고 일정은 친구가 정하기", b: "일정은 내가 다 짜고 경비는 n분의 1", category: "travel", spice: "spicy" },
+      { a: "여행 중 나만 빠진 일정 의논 단톡방이 있었다는 걸 알게 되기", b: "여행 중 친구 한 명을 빼고 만든 일정 의논 단톡방이 들키기", category: "travel", spice: "spicy" },
+      { a: "여행 경비는 내가 다 내고 일정도 내가 정하기", b: "여행 경비는 친구가 다 내고 일정도 친구가 정하기", category: "travel", spice: "spicy" },
       { a: "친구 커플 여행에 혼자 솔로로 끼기", b: "전 애인도 오는 동창 여행에 가기", category: "travel", spice: "spicy" },
       { a: "내가 짠 여행 일정이 다 망해서 눈치 보기", b: "친구가 짠 일정이 별로인데 꾹 참고 따르기", category: "travel", spice: "spicy" },
       { a: "여행 중 친구와 대판 싸우기", b: "여행 내내 친구와 어색하게 지내기", category: "travel", spice: "spicy" },
@@ -1247,8 +1255,8 @@
       { a: "짝꿍은 웃긴 친구", b: "짝꿍은 공부 잘하는 친구", category: "school", spice: "mild" },
       { a: "졸업 앨범 사진 다시 찍기", b: "졸업 앨범 그대로 간직하기", category: "school", spice: "mild" },
       { a: "수업 중 선생님을 '엄마'라고 부르기", b: "발표 중에 목소리가 삑사리 나기", category: "school", spice: "spicy" },
-      { a: "졸업 앨범이 회사 단톡방에 공유되기", b: "중학생 때 싸이 감성 글이 공개되기", category: "school", spice: "spicy" },
-      { a: "컨닝해서 1등 하고 평생 비밀 지키기", b: "정직하게 시험 보고 꼴등 하기", category: "school", spice: "spicy" },
+      { a: "졸업 앨범이 회사 단톡방에 공유되기", b: "중학생 때 쓴 싸이월드 감성 글이 공개되기", category: "school", spice: "spicy" },
+      { a: "시험 전 큰소리쳤다가 모르는 문제 앞에서 조용해지기", b: "공부 안 했다고 해놓고 빽빽한 요약 노트 들키기", category: "school", spice: "spicy" },
       { a: "다시 고3으로 돌아가기", b: "군대나 신입 첫해로 돌아가기", category: "school", spice: "spicy" },
       { a: "학창 시절 짝사랑이 지금 내 상사", b: "학창 시절 앙숙이 지금 내 상사", category: "school", spice: "spicy" },
       { a: "전교생 앞에서 장기자랑", b: "전교생 앞에서 반성문 낭독", category: "school", spice: "spicy" },
@@ -1271,7 +1279,7 @@
       { a: "내 알고리즘 추천 영상이 회의 화면에 뜨기", b: "내 플레이리스트가 회사 스피커로 재생되기", category: "tech", spice: "spicy" },
       { a: "단톡방에서 나만 빼고 다 아는 소식 뒤늦게 듣기", b: "내 소식이 나보다 먼저 단톡방에 퍼지기", category: "tech", spice: "spicy" },
       { a: "내 비밀 부계정이 지인들한테 들키기", b: "지인의 비밀 부계정을 우연히 발견하기", category: "tech", spice: "spicy" },
-      { a: "카톡 읽씹당하기", b: "카톡 안읽씹당하기", category: "tech", spice: "spicy" }
+      { a: "답장 기다리는 사람에게 읽씹당하기", b: "답장 기다리는 사람에게 안읽씹당하기", category: "tech", spice: "spicy" }
     ];
 
     /* ===== 🎯 이 중 누가? 모드 데이터 ===== */
@@ -1297,9 +1305,9 @@
       { text: "이 중에 새벽까지 유튜브 보다가 잠들 것 같은 사람은?", category: "habit", spice: "mild" },
       { text: "이 중에 손님 오기 직전에 물건을 전부 옷장에 쑤셔 넣을 것 같은 사람은?", category: "habit", spice: "spicy" },
       { text: "이 중에 빨래를 며칠째 의자에 쌓아 둘 것 같은 사람은?", category: "habit", spice: "spicy" },
-      { text: "이 중에 몰래 지른 택배를 가족(룸메) 몰래 받을 것 같은 사람은?", category: "habit", spice: "spicy" },
+      { text: "이 중에 충동구매한 택배를 가족(룸메) 몰래 받을 것 같은 사람은?", category: "habit", spice: "spicy" },
       { text: "이 중에 '나 지금 출발했어'라고 하고 아직 집일 것 같은 사람은?", category: "habit", spice: "spicy" },
-      { text: "이 중에 휴대폰 잠금 패턴이 제일 복잡할 것 같은 사람은?", category: "habit", spice: "spicy" },
+      { text: "이 중에 알림을 못 본 척하다가 온라인 상태로 들킬 것 같은 사람은?", category: "habit", spice: "spicy" },
       { text: "이 중에 읽씹을 제일 많이 할 것 같은 사람은?", category: "habit", spice: "spicy" },
       { text: "이 중에 '내일부터 진짜 한다'를 1년째 말하고 있을 것 같은 사람은?", category: "habit", spice: "spicy" },
       { text: "이 중에 샤워하면서 콘서트를 열 것 같은 사람은?", category: "habit", spice: "spicy" },
@@ -1316,7 +1324,7 @@
       { text: "이 중에 회의 중에 몰래 딴짓하다 걸릴 것 같은 사람은?", category: "work", spice: "spicy" },
       { text: "이 중에 '몸이 안 좋아서요' 하고 연차 내고 놀러 갈 것 같은 사람은?", category: "work", spice: "spicy" },
       { text: "이 중에 '확인했습니다' 하고 사실 안 읽었을 것 같은 사람은?", category: "work", spice: "spicy" },
-      { text: "이 중에 몰래 이직 준비하고 있을 것 같은 사람은?", category: "work", spice: "spicy" },
+      { text: "이 중에 퇴사 상상만 하다가 실수로 사직서 초안을 공유할 것 같은 사람은?", category: "work", spice: "spicy" },
       { text: "이 중에 회사(학교) 익명 게시판에 몰래 글 올려 봤을 것 같은 사람은?", category: "work", spice: "spicy" },
       { text: "이 중에 퇴근 시간 1분 전부터 가방 쌀 것 같은 사람은?", category: "work", spice: "spicy" },
       { text: "이 중에 단톡방에 잘못 보낸 메시지로 레전드 찍을 것 같은 사람은?", category: "work", spice: "spicy" },
@@ -1326,7 +1334,7 @@
       { text: "이 중에 연애편지를 제일 감동적으로 쓸 것 같은 사람은?", category: "love", spice: "mild" },
       { text: "이 중에 데이트 코스를 엑셀로 짤 것 같은 사람은?", category: "love", spice: "mild" },
       { text: "이 중에 애인한테 제일 다정할 것 같은 사람은?", category: "love", spice: "mild" },
-      { text: "이 중에 제일 먼저 결혼할 것 같은 사람은?", category: "love", spice: "mild" },
+      { text: "이 중에 로맨틱 코미디의 주인공 역할이 잘 어울릴 것 같은 사람은?", category: "love", spice: "mild" },
       { text: "이 중에 첫눈에 반하는 걸 믿을 것 같은 사람은?", category: "love", spice: "mild" },
       { text: "이 중에 연애 상담을 제일 잘해 줄 것 같은 사람은?", category: "love", spice: "mild" },
       { text: "이 중에 커플템을 제일 좋아할 것 같은 사람은?", category: "love", spice: "mild" },
@@ -1356,7 +1364,7 @@
       { text: "이 중에 '나 집에 갈게' 하고 2시간 더 있을 것 같은 사람은?", category: "party", spice: "spicy" },
       { text: "이 중에 흥 오르면 춤까지 출 것 같은 사람은?", category: "party", spice: "spicy" },
       { text: "이 중에 모임에서 흑역사 제일 많이 만들 것 같은 사람은?", category: "party", spice: "spicy" },
-      { text: "이 중에 진실게임에서 제일 위험한 대답을 할 것 같은 사람은?", category: "party", spice: "spicy" },
+      { text: "이 중에 진실게임에서 허세를 부리다가 추가 질문에 당황할 것 같은 사람은?", category: "party", spice: "spicy" },
       { text: "이 중에 좀비 사태에서 제일 오래 살아남을 것 같은 사람은?", category: "future", spice: "mild" },
       { text: "이 중에 무인도에서 제일 잘 버틸 것 같은 사람은?", category: "future", spice: "mild" },
       { text: "이 중에 10년 뒤에 유명해져 있을 것 같은 사람은?", category: "future", spice: "mild" },
@@ -1385,11 +1393,11 @@
       { text: "이 중에 식물한테 말 걸 것 같은 사람은?", category: "silly", spice: "mild" },
       { text: "이 중에 인형 뽑기에 제일 진심일 것 같은 사람은?", category: "silly", spice: "mild" },
       { text: "이 중에 웃음 참기 게임에서 제일 먼저 터질 것 같은 사람은?", category: "silly", spice: "mild" },
-      { text: "이 중에 모르는 사람한테 아는 척 인사할 것 같은 사람은?", category: "silly", spice: "spicy" },
-      { text: "이 중에 잠꼬대로 제일 웃긴 말 할 것 같은 사람은?", category: "silly", spice: "spicy" },
+      { text: "이 중에 모르는 사람에게 친구인 줄 알고 비밀 얘기를 시작할 것 같은 사람은?", category: "silly", spice: "spicy" },
+      { text: "이 중에 잠꼬대로 허세 가득한 수상 소감을 말할 것 같은 사람은?", category: "silly", spice: "spicy" },
       { text: "이 중에 '나 원래 이런 사람 아닌데'를 제일 자주 할 것 같은 사람은?", category: "silly", spice: "spicy" },
       { text: "이 중에 거울 보면서 혼자 연기 연습할 것 같은 사람은?", category: "silly", spice: "spicy" },
-      { text: "이 중에 셀카 100장 찍고 1장 건질 것 같은 사람은?", category: "silly", spice: "spicy" },
+      { text: "이 중에 셀카 고르다가 약속에 늦고 차가 막혔다고 할 것 같은 사람은?", category: "silly", spice: "spicy" },
       { text: "이 중에 넘어지고 나서 아무 일 없던 척 제일 뻔뻔하게 할 것 같은 사람은?", category: "silly", spice: "spicy" },
       { text: "이 중에 진지한 순간에 웃음 터져서 혼날 것 같은 사람은?", category: "silly", spice: "spicy" },
       { text: "이 중에 흑역사 사진을 제일 많이 갖고 있을 것 같은 사람은?", category: "silly", spice: "spicy" }
@@ -1430,6 +1438,7 @@
 
     const STORAGE_KEY = "icebreaker:mode";
 
+    const announcementEl = document.getElementById("announcement");
     const cardEl = document.getElementById("card");
     const questionEl = document.getElementById("question");
     const versusEl = document.getElementById("versus");
@@ -1448,7 +1457,7 @@
 
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved && modes[saved]) currentMode = saved;
+      if (Object.hasOwn(modes, saved)) currentMode = saved;
     } catch (e) {
       /* localStorage 사용 불가 시 무시 */
     }
@@ -1474,6 +1483,7 @@
       btnEl.dataset.spice = key;
       btnEl.type = "button";
       btnEl.textContent = label;
+      btnEl.setAttribute("aria-pressed", key === currentSpice ? "true" : "false");
       btnEl.addEventListener("click", () => selectSpice(key));
       spicesEl.appendChild(btnEl);
     });
@@ -1488,6 +1498,7 @@
         chip.className = "chip" + (key === currentCategory ? " active" : "");
         chip.type = "button";
         chip.textContent = label;
+        chip.setAttribute("aria-pressed", key === currentCategory ? "true" : "false");
         chip.dataset.key = key;
         chip.addEventListener("click", () => selectCategory(key));
         categoriesEl.appendChild(chip);
@@ -1518,11 +1529,12 @@
       questionEl.classList.remove("pop");
       questionEl.classList.add("placeholder");
       questionEl.textContent = cur().placeholder;
+      announcementEl.textContent = "";
       whoHintEl.classList.remove("show");
     }
 
     function selectMode(key) {
-      if (!modes[key]) return;
+      if (!Object.hasOwn(modes, key)) return;
       currentMode = key;
       currentCategory = "all";
       lastKey = "";
@@ -1544,19 +1556,27 @@
     }
 
     function selectSpice(key) {
+      if (!Object.hasOwn(spices, key)) return;
       currentSpice = key;
       document.querySelectorAll(".spice-btn").forEach((b) => {
-        b.classList.toggle("active", b.dataset.spice === key);
+        const on = b.dataset.spice === key;
+        b.classList.toggle("active", on);
+        b.setAttribute("aria-pressed", String(on));
       });
       document.body.classList.toggle("spicy-mode", key === "spicy");
+      showPlaceholder();
       updateCounter();
     }
 
     function selectCategory(key) {
+      if (key !== "all" && !Object.hasOwn(cur().categories, key)) return;
       currentCategory = key;
       document.querySelectorAll(".chip").forEach((c) => {
-        c.classList.toggle("active", c.dataset.key === key);
+        const on = c.dataset.key === key;
+        c.classList.toggle("active", on);
+        c.setAttribute("aria-pressed", String(on));
       });
+      showPlaceholder();
       updateCounter();
     }
 
@@ -1615,11 +1635,15 @@
 
     function pickQuestion() {
       const pool = getPool();
-      if (!pool.length) return;
-      let item;
-      do {
-        item = pool[Math.floor(Math.random() * pool.length)];
-      } while (itemKey(item) === lastKey && pool.length > 1);
+      if (!pool.length) {
+        showPlaceholder();
+        questionEl.textContent = "이 조건에 맞는 질문이 없어요. 다른 맛이나 카테고리를 골라주세요.";
+        announcementEl.textContent = questionEl.textContent;
+        return;
+      }
+      const alternatives = pool.filter((candidate) => itemKey(candidate) !== lastKey);
+      const candidates = alternatives.length ? alternatives : pool;
+      const item = candidates[Math.floor(Math.random() * candidates.length)];
       lastKey = itemKey(item);
 
       badgeEl.textContent = `${spices[item.spice].label} · ${cur().categories[item.category].label}`;
@@ -1627,12 +1651,17 @@
 
       if (currentMode === "balance") showBalance(item);
       else showTopic(item);
+      announcementEl.textContent = `${badgeEl.textContent}. ${currentMode === "balance" ? `A: ${item.a}. B: ${item.b}` : item.text}`;
     }
 
     btn.addEventListener("click", pickQuestion);
     selectMode(currentMode);
 
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+    if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+      navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).catch(() => {
+        /* 오프라인 첫 방문·등록 제한 환경에서도 질문 뽑기는 계속 동작합니다. */
+      });
+    }
 
   </script>
 </body>
