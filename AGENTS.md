@@ -23,7 +23,7 @@
 | 파일 | 설명 |
 |---|---|
 | `index.html` | 앱 전체 (HTML + CSS + JS + 질문 데이터). **단일 파일**, 빌드 없음, 의존성 없음 |
-| `sw.js` | 앱 셸 오프라인 캐시, 버전 `icebreaker-v4` |
+| `sw.js` | 앱 셸 오프라인 캐시, 버전 `icebreaker-v5`, 글꼴 캐시 `icebreaker-fonts-v1` |
 | `manifest.webmanifest` | 상대 경로 시작 URL·범위·설치 아이콘 |
 | `icons/` | PWA 및 Apple 터치 아이콘 |
 | `README.md` | 사람용 간단 소개 |
@@ -215,10 +215,10 @@ const mildQuestions = [
 ### PWA 캐시 유지보수
 
 - 캐시 대상: `./`, `./index.html`, manifest, icons. 앱 진입은 네트워크 우선, 실패 시 동일한 index 캐시를 사용합니다.
-- 캐시 파일을 수정하면 `sw.js` 캐시 이름도 반드시 증가시키세요(현재 검토 패치는 `icebreaker-v4`).
-- 업데이트 설치 시 HTTP 캐시를 새로 검증하며, 이전 Icebreaker 버전 캐시와 기존 외부 글꼴 캐시만 정리합니다.
+- 캐시 파일을 수정하면 `sw.js` 캐시 이름도 반드시 증가시키세요(현재 `icebreaker-v5`).
+- 업데이트 설치 시 HTTP 캐시를 새로 검증하며, 이전 Icebreaker 버전 캐시만 정리하고 글꼴 캐시는 유지합니다.
 - `file://`에서는 질문 뽑기만 동작합니다. 서비스 워커는 HTTPS 또는 localhost에서 확인합니다.
-- 외부 CDN 의존성은 없고 로컬에 설치된 Pretendard가 있으면 우선 사용하며, 없으면 시스템 한글 글꼴을 사용합니다.
+- Pretendard는 jsDelivr CDN(`pretendard@v1.3.9` 다이내믹 서브셋)에서 불러오고 서비스 워커가 캐시 우선으로 저장합니다. 불러오지 못하면 시스템 한글 글꼴을 사용합니다.
 
 ### 배포 흐름
 

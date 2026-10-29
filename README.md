@@ -26,7 +26,7 @@ cd icebreaker
 start index.html
 ```
 
-PWA 설치·오프라인은 GitHub Pages 또는 로컬 HTTP 서버에서 확인하세요. `file://`로 열면 질문 뽑기는 동작하지만 서비스 워커는 등록하지 않습니다. 시스템 글꼴을 사용하므로 외부 CDN 연결이 필요하지 않습니다.
+PWA 설치·오프라인은 GitHub Pages 또는 로컬 HTTP 서버에서 확인하세요. `file://`로 열면 질문 뽑기는 동작하지만 서비스 워커는 등록하지 않습니다. Pretendard 글꼴은 jsDelivr CDN에서 받아 서비스 워커의 글꼴 캐시(`icebreaker-fonts-v1`)에 저장하며, 받지 못하면 시스템 글꼴로 표시됩니다.
 
 ## 질문 추가하기 (요약)
 
@@ -42,6 +42,6 @@ PWA 설치·오프라인은 GitHub Pages 또는 로컬 HTTP 서버에서 확인�
 ## 배포
 
 GitHub Pages가 `main` 브랜치 루트를 그대로 서비스합니다.
-앱이나 캐시 파일을 수정하면 `sw.js`의 캐시 이름도 올려 주세요(이 검토 패치: `icebreaker-v4`). 새 페이지는 온라인 방문 시 네트워크에서 우선 읽고, 통신 실패 시 캐시를 사용합니다.
+앱이나 캐시 파일을 수정하면 `sw.js`의 캐시 이름도 올려 주세요(현재 `icebreaker-v5`). 새 페이지는 온라인 방문 시 네트워크에서 우선 읽고, 통신 실패 시 캐시를 사용합니다.
 
 `index.html` 수정 → `main`에 커밋 & 푸시 → 보통 1~2분 안에 자동 반영됩니다. (자세한 내용은 [AGENTS.md](./AGENTS.md))
