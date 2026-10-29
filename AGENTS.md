@@ -74,7 +74,11 @@ const balanceCategories = {
   work:  { label: "💼 직장 & 돈" },
   power: { label: "🦸 초능력 & 상상" },
   life:  { label: "🌀 일상 & 극한 상황" },
-  weird: { label: "🤪 엽기 & 괴식" }
+  weird: { label: "🤪 엽기 & 괴식" },
+  travel:  { label: "✈️ 여행 & 휴가" },
+  friends: { label: "🤝 친구 & 인간관계" },
+  school:  { label: "🏫 학교 & 추억" },
+  tech:    { label: "📱 테크 & SNS" }
 };
 
 const balanceItems = [
@@ -85,7 +89,7 @@ const balanceItems = [
 
 - 항목 객체 모양: `{ a: string, b: string, category: string, spice: "mild" | "spicy" }`
 - 밸런스 게임은 **한 배열**에 순한맛/매운맛이 섞여 있고, `spice` 필드로 구분합니다.
-- 주의: 대화 주제 모드와 밸런스 게임 모드의 카테고리 키는 **서로 별개**입니다. (`food`, `love`, `work`가 양쪽에 있지만 다른 객체)
+- 주의: 대화 주제 모드와 밸런스 게임 모드의 카테고리 키는 **서로 별개**입니다. (`food`, `love`, `work`, `travel`, `school`이 양쪽에 있지만 다른 객체)
 
 #### 공통 설정
 
@@ -106,12 +110,12 @@ const STORAGE_KEY = "icebreaker:mode";
 - 화면의 카테고리 칩은 `categories` / `balanceCategories` 객체에서 자동 생성됩니다. (`✨ 전체` 칩은 코드에서 따로 추가)
 - 뽑기 풀 = 현재 모드의 `items` 중 `spice`가 선택한 맛과 같고, 카테고리가 `전체`이거나 선택한 카테고리와 같은 것. 직전과 같은 질문은 연속으로 나오지 않습니다.
 
-### 현재 수량 (2026-10-28 기준, `index.html`에서 직접 집계)
+### 현재 수량 (2026-10-29 기준, `index.html`에서 직접 집계)
 
 | 모드 | 카테고리 | 질문 수 | 내역 |
 |---|---|---|---|
 | 💬 대화 주제 | 23 | **416** | 순한맛 230 + 매운맛 186 |
-| ⚖️ 밸런스 게임 | 6 | **108** | 순한맛 60 + 매운맛 48 (카테고리당 18개) |
+| ⚖️ 밸런스 게임 | 10 | **216** | 순한맛 118 + 매운맛 98 (기존 6개 카테고리는 24개씩, 새 4개 카테고리는 18개씩) |
 
 질문을 추가/삭제하면 이 표와 `README.md`의 숫자도 함께 갱신해 주세요.
 
