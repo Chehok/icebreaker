@@ -1,7 +1,7 @@
 {
   "name": "Icebreaker",
   "short_name": "Icebreaker",
-  "description": "모임 분위기를 풀어주는 대화 주제와 밸런스 게임 모음",
+  "description": "모임 분위기를 풀어주는 대화 주제, 밸런스 게임, 이 중 누가? 모음",
   "lang": "ko",
   "start_url": "./",
   "scope": "./",

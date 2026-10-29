@@ -10,6 +10,9 @@
 - **💬 대화 주제 모드**: 랜덤 대화 질문 뽑기
 - **⚖️ 밸런스 게임 모드**: A/B 중 하나를 고르는 양자택일 질문 뽑기
 
+- **🎯 이 중 누가? 모드**: 질문에 어울리는 사람을 함께 가리키기(참여는 선택)
+- **📱 PWA**: 설치 및 최초 온라인 캐시 이후 오프라인 사용
+
 - 라이브 주소: https://chehok.github.io/icebreaker/
 - 저장소: https://github.com/Chehok/icebreaker (공개 저장소)
 
@@ -20,6 +23,9 @@
 | 파일 | 설명 |
 |---|---|
 | `index.html` | 앱 전체 (HTML + CSS + JS + 질문 데이터). **단일 파일**, 빌드 없음, 의존성 없음 |
+| `sw.js` | 앱 셸 오프라인 캐시, 버전 `icebreaker-v4` |
+| `manifest.webmanifest` | 상대 경로 시작 URL·범위·설치 아이콘 |
+| `icons/` | PWA 및 Apple 터치 아이콘 |
 | `README.md` | 사람용 간단 소개 |
 | `AGENTS.md` | 이 문서 (상세 인수인계) |
 | `CLAUDE.md` | `@AGENTS.md` 한 줄 (Claude Code가 이 문서를 읽도록 연결) |
@@ -28,7 +34,7 @@
 
 - 탭 제목: `<title>Icebreaker</title>`
 - 파비콘: 🧊 이모지를 담은 SVG data URI (`<link rel="icon" href="data:image/svg+xml,...🧊...">`) — 별도 이미지 파일 없음
-- 마지막 사용 모드 저장: `localStorage` 키 **`icebreaker:mode`** (값: `"topic"` 또는 `"balance"`)
+- 마지막 사용 모드 저장: `localStorage` 키 **`icebreaker:mode`** (값: `"topic"`, `"balance"`, `"who"`)
   - `localStorage`를 쓸 수 없는 환경에서는 조용히 무시하고 기본값 `topic`으로 시작합니다.
 
 ### 데이터 구조 (`index.html`의 `<script>` 안)
@@ -91,6 +97,13 @@ const balanceItems = [
 - 밸런스 게임은 **한 배열**에 순한맛/매운맛이 섞여 있고, `spice` 필드로 구분합니다.
 - 주의: 대화 주제 모드와 밸런스 게임 모드의 카테고리 키는 **서로 별개**입니다. (`food`, `love`, `work`, `travel`, `school`이 양쪽에 있지만 다른 객체)
 
+#### 🎯 이 중 누가? 모드
+
+- 카테고리 객체: `whoCategories`, 질문 배열: `whoItems`
+- 항목: `{ text: string, category: string, spice: "mild" | "spicy" }`
+- 카테고리: `habit`, `work`, `love`, `party`, `future`, `silly`
+- 각 카테고리는 순한맛 10개 + 매운맛 8개입니다. 카테고리 키는 모드별로 독립적입니다.
+
 #### 공통 설정
 
 ```js
@@ -101,13 +114,14 @@ const spices = {
 
 const modes = {
   topic:   { label: "💬 대화 주제",   categories, items: questions, ... },
-  balance: { label: "⚖️ 밸런스 게임", categories: balanceCategories, items: balanceItems, ... }
+  balance: { label: "⚖️ 밸런스 게임", categories: balanceCategories, items: balanceItems, ... },
+  who:     { label: "🎯 이 중 누가?", categories: whoCategories, items: whoItems, ... }
 };
 
 const STORAGE_KEY = "icebreaker:mode";
 ```
 
-- 화면의 카테고리 칩은 `categories` / `balanceCategories` 객체에서 자동 생성됩니다. (`✨ 전체` 칩은 코드에서 따로 추가)
+- 화면의 카테고리 칩은 `categories` / `balanceCategories` / `whoCategories` 객체에서 자동 생성됩니다. (`✨ 전체` 칩은 코드에서 따로 추가)
 - 뽑기 풀 = 현재 모드의 `items` 중 `spice`가 선택한 맛과 같고, 카테고리가 `전체`이거나 선택한 카테고리와 같은 것. 직전과 같은 질문은 연속으로 나오지 않습니다.
 
 ### 현재 수량 (2026-10-29 기준, `index.html`에서 직접 집계)
@@ -116,6 +130,10 @@ const STORAGE_KEY = "icebreaker:mode";
 |---|---|---|---|
 | 💬 대화 주제 | 23 | **416** | 순한맛 230 + 매운맛 186 |
 | ⚖️ 밸런스 게임 | 10 | **216** | 순한맛 118 + 매운맛 98 (기존 6개 카테고리는 24개씩, 새 4개 카테고리는 18개씩) |
+
+| 🎯 이 중 누가? | 6 | **108** | 순한맛 60 + 매운맛 48 (각 카테고리 10 + 8) |
+
+합계 **740개**입니다. 문구만 수정하는 검토에서는 모드·카테고리·맛별 수량을 유지하세요. 순한맛은 첫 만남에도 안전하게, 매운맛은 가벼운 민망함·솔직함 위주로 작성합니다. 성적 내용, 비하, 실명, 트라우마·건강 고백 압박은 피하고 신앙·정치 의견은 존중하세요. 답변과 지목 참여는 언제든 건너뛸 수 있습니다.
 
 질문을 추가/삭제하면 이 표와 `README.md`의 숫자도 함께 갱신해 주세요.
 
@@ -170,7 +188,7 @@ const mildQuestions = [
 빌드가 없으므로 `index.html`을 브라우저로 직접 열어서 확인합니다.
 
 - [ ] 브라우저 개발자 도구(F12) 콘솔에 오류가 없다
-- [ ] 💬 대화 주제 / ⚖️ 밸런스 게임 모드 전환이 된다
+- [ ] 💬 대화 주제 / ⚖️ 밸런스 게임 / 🎯 이 중 누가? 모드 전환이 된다
 - [ ] 😋 순한맛 / 🌶️ 매운맛 전환이 된다
 - [ ] `✨ 전체`와 각 카테고리(특히 새로 추가/수정한 카테고리)에서 뽑기가 된다
 - [ ] 하단 카운터의 질문 수가 예상대로 늘었다/줄었다
@@ -180,11 +198,27 @@ const mildQuestions = [
 - [ ] 모바일 폭(개발자 도구의 기기 모드)에서도 레이아웃이 괜찮다
 - [ ] 탭 제목 `Icebreaker`와 🧊 파비콘이 그대로다
 
+- [ ] 잘못된 저장 모드(`toString`, `__proto__`, 삭제된 모드)와 저장소 사용 불가 환경에서도 시작된다
+- [ ] 맛·카테고리 변경 시 이전 질문이 사라지고 선택 상태가 스크린 리더에 전달된다
+- [ ] 질문과 A/B 내용이 라이브 영역에 전달되고 키보드 포커스가 보인다
+- [ ] 빠른 연속 뽑기, 질문 0개·1개·동일 문구만 있는 풀에서도 멈추지 않는다
+- [ ] HTTPS/localhost에서 최초 캐시 후 오프라인으로 세 모드를 사용한다
+- [ ] 기존 버전에서 업데이트 후 `./`, `./index.html`, 쿼리 URL에서 최신 질문이 보인다
+- [ ] 캐시 정리 시 다른 앱 캐시를 삭제하지 않는다
+
 ## 5. 배포 (GitHub Pages)
 
 - GitHub Pages가 **`main` 브랜치 루트(`/`)** 를 그대로 서비스합니다. 빌드 단계 없음.
 - 라이브: https://chehok.github.io/icebreaker/
 - 사용자 PC 작업 폴더: `C:\git\icebreaker` (Windows, PowerShell)
+
+### PWA 캐시 유지보수
+
+- 캐시 대상: `./`, `./index.html`, manifest, icons. 앱 진입은 네트워크 우선, 실패 시 동일한 index 캐시를 사용합니다.
+- 캐시 파일을 수정하면 `sw.js` 캐시 이름도 반드시 증가시키세요(현재 검토 패치는 `icebreaker-v4`).
+- 업데이트 설치 시 HTTP 캐시를 새로 검증하며, 이전 Icebreaker 버전 캐시와 기존 외부 글꼴 캐시만 정리합니다.
+- `file://`에서는 질문 뽑기만 동작합니다. 서비스 워커는 HTTPS 또는 localhost에서 확인합니다.
+- 외부 CDN 의존성은 없고 로컬에 설치된 Pretendard가 있으면 우선 사용하며, 없으면 시스템 한글 글꼴을 사용합니다.
 
 ### 배포 흐름
 
