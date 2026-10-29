@@ -6,14 +6,35 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>🧊</text></svg>">
   <title>Icebreaker</title>
   <meta name="description" content="모임 분위기를 풀어주는 대화 주제와 밸런스 게임 모음, Icebreaker" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
   <style>
     :root {
-      --bg1: #6a11cb;
-      --bg2: #2575fc;
-      --card: rgba(255, 255, 255, 0.95);
-      --accent: #6a11cb;
-      --text: #2b2b3a;
-      --soft: #f1e9fd;
+      --bg: #f4f5f9;
+      --surface: #ffffff;
+      --surface-2: #f7f8fb;
+      --line: #e4e6ee;
+      --line-strong: #d3d6e2;
+      --text: #171923;
+      --text-2: #3f4354;
+      --muted: #6b7084;
+      --accent: #4f46e5;
+      --accent-strong: #4338ca;
+      --accent-soft: #eef0ff;
+      --accent-ink: #3730a3;
+      --accent-glow: rgba(79, 70, 229, 0.16);
+      --radius: 22px;
+      --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
+      --shadow-md: 0 1px 2px rgba(16, 24, 40, 0.04), 0 10px 30px -10px rgba(16, 24, 40, 0.14);
+      --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+
+    body.spicy-mode {
+      --accent: #d6303b;
+      --accent-strong: #b9242e;
+      --accent-soft: #fff0ef;
+      --accent-ink: #a8201f;
+      --accent-glow: rgba(214, 48, 59, 0.15);
     }
 
     * {
@@ -24,137 +45,190 @@
 
     body {
       min-height: 100vh;
-      font-family: "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", -apple-system, sans-serif;
-      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+        "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+      background-color: var(--bg);
+      background-image: radial-gradient(1000px 520px at 50% -160px, var(--accent-glow), transparent 72%);
+      background-repeat: no-repeat;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 24px;
+      padding: 48px 24px;
       color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      word-break: keep-all;
+      transition: background-color 0.4s ease;
     }
 
     .container {
       width: 100%;
-      max-width: 560px;
+      max-width: 600px;
       text-align: center;
     }
 
     h1 {
-      color: #fff;
+      color: var(--text);
       font-size: 2rem;
-      margin-bottom: 8px;
-      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 10px;
     }
 
     .subtitle {
-      color: rgba(255, 255, 255, 0.85);
-      margin-bottom: 24px;
+      color: var(--muted);
+      margin-bottom: 28px;
       font-size: 0.95rem;
+      line-height: 1.65;
+      letter-spacing: -0.01em;
     }
 
-    body {
-      transition: background 0.5s ease;
+    /* ---------- mode switch (segmented control) ---------- */
+    .modes {
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+      margin: 0 auto 14px;
+      max-width: 380px;
+      background: #e9ebf2;
+      border: 1px solid var(--line);
+      border-radius: 14px;
     }
 
-    body.spicy-mode {
-      --bg1: #c31432;
-      --bg2: #f45c43;
-      --accent: #c31432;
-      --soft: #fde9e6;
-      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+    .mode-btn {
+      flex: 1;
+      background: transparent;
+      color: var(--muted);
+      border: none;
+      border-radius: 10px;
+      padding: 11px 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
     }
 
+    .mode-btn:hover {
+      color: var(--text);
+    }
+
+    .mode-btn.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08), 0 2px 8px rgba(16, 24, 40, 0.06);
+    }
+
+    /* ---------- spice toggle ---------- */
     .spices {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       justify-content: center;
-      margin-bottom: 18px;
+      margin-bottom: 22px;
     }
 
     .spice-btn {
       flex: 1;
-      max-width: 160px;
-      background: rgba(255, 255, 255, 0.15);
-      color: #fff;
-      border: 2px solid rgba(255, 255, 255, 0.5);
-      border-radius: 16px;
-      padding: 14px 10px;
-      font-size: 1.05rem;
+      max-width: 150px;
+      background: var(--surface);
+      color: var(--text-2);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 10px 12px;
+      font-size: 0.92rem;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.18s ease;
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
       font-family: inherit;
-      backdrop-filter: blur(4px);
+      box-shadow: var(--shadow-sm);
     }
 
     .spice-btn:hover {
-      background: rgba(255, 255, 255, 0.28);
+      border-color: var(--line-strong);
+      color: var(--text);
     }
 
     .spice-btn.active {
-      background: #fff;
-      color: var(--accent);
-      border-color: #fff;
-      transform: scale(1.03);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      background: var(--accent-soft);
+      color: var(--accent-ink);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
     }
 
+    /* ---------- category chips ---------- */
     .categories {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
       justify-content: center;
-      margin-bottom: 24px;
+      margin-bottom: 28px;
     }
 
     .chip {
-      background: rgba(255, 255, 255, 0.18);
-      color: #fff;
-      border: 1.5px solid rgba(255, 255, 255, 0.4);
-      border-radius: 50px;
-      padding: 9px 18px;
-      font-size: 0.9rem;
+      background: var(--surface);
+      color: var(--text-2);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 13px;
+      font-size: 0.85rem;
       font-weight: 600;
+      letter-spacing: -0.01em;
       cursor: pointer;
-      transition: all 0.18s ease;
+      transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
       font-family: inherit;
-      backdrop-filter: blur(4px);
     }
 
     .chip:hover {
-      background: rgba(255, 255, 255, 0.3);
+      border-color: var(--line-strong);
+      background: var(--surface-2);
+      color: var(--text);
     }
 
     .chip.active {
-      background: #fff;
-      color: var(--accent);
-      border-color: #fff;
+      background: var(--text);
+      color: #fff;
+      border-color: var(--text);
     }
 
+    /* ---------- question card ---------- */
     .card {
-      background: var(--card);
-      border-radius: 24px;
-      padding: 48px 32px;
-      min-height: 220px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 52px 36px;
+      min-height: 240px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 14px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
-      margin-bottom: 28px;
+      gap: 16px;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 24px;
       position: relative;
       overflow: hidden;
     }
 
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--accent);
+      transition: background 0.3s ease;
+    }
+
     .badge {
       display: none;
-      background: linear-gradient(135deg, var(--bg1), var(--bg2));
-      color: #fff;
-      padding: 5px 14px;
-      border-radius: 50px;
-      font-size: 0.8rem;
+      background: var(--accent-soft);
+      color: var(--accent-ink);
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 0.78rem;
       font-weight: 700;
+      letter-spacing: -0.01em;
     }
 
     .badge.show {
@@ -165,102 +239,75 @@
       font-size: 1.5rem;
       font-weight: 700;
       line-height: 1.5;
+      letter-spacing: -0.025em;
+      color: var(--text);
+      max-width: 30ch;
       transition: opacity 0.25s ease, transform 0.25s ease;
     }
 
     .question.placeholder {
-      color: #9a9ab0;
+      color: var(--muted);
       font-weight: 500;
-      font-size: 1.15rem;
+      font-size: 1.05rem;
+      letter-spacing: -0.01em;
     }
 
     .question.pop {
-      animation: pop 0.4s ease;
+      animation: pop 0.38s var(--ease);
     }
 
     @keyframes pop {
-      0% { opacity: 0; transform: scale(0.9) translateY(10px); }
-      100% { opacity: 1; transform: scale(1) translateY(0); }
+      0% { opacity: 0; transform: translateY(8px); }
+      100% { opacity: 1; transform: translateY(0); }
     }
 
+    /* ---------- primary button ---------- */
     .btn {
-      background: #fff;
-      color: var(--accent);
+      background: var(--accent);
+      color: #fff;
       border: none;
-      border-radius: 50px;
-      padding: 18px 40px;
-      font-size: 1.15rem;
+      border-radius: 14px;
+      min-width: 220px;
+      padding: 16px 36px;
+      font-size: 1.05rem;
       font-weight: 700;
+      letter-spacing: -0.01em;
       cursor: pointer;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.1), 0 8px 20px -6px var(--accent);
+      transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
       font-family: inherit;
     }
 
     .btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
+      background: var(--accent-strong);
+      transform: translateY(-1px);
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.1), 0 12px 26px -8px var(--accent);
     }
 
     .btn:active {
-      transform: translateY(0) scale(0.97);
+      transform: translateY(0) scale(0.98);
     }
 
     .counter {
-      margin-top: 18px;
-      color: rgba(255, 255, 255, 0.8);
-      font-size: 0.85rem;
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-variant-numeric: tabular-nums;
     }
 
-    /* ---------- mode switch (segmented toggle) ---------- */
-    .modes {
-      display: flex;
-      gap: 4px;
-      padding: 5px;
-      margin: 0 auto 20px;
-      max-width: 400px;
-      background: rgba(0, 0, 0, 0.24);
-      border-radius: 50px;
-      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .mode-btn {
-      flex: 1;
-      background: transparent;
-      color: rgba(255, 255, 255, 0.8);
-      border: none;
-      border-radius: 50px;
-      padding: 12px 8px;
-      font-size: 1rem;
-      font-weight: 800;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .mode-btn:hover {
-      color: #fff;
-      background: rgba(255, 255, 255, 0.12);
-    }
-
-    .mode-btn.active {
-      background: #fff;
-      color: var(--accent);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    }
-
+    /* ---------- focus ---------- */
     .mode-btn:focus-visible,
     .spice-btn:focus-visible,
     .chip:focus-visible,
     .option:focus-visible,
     .btn:focus-visible {
-      outline: 3px solid #ffe066;
-      outline-offset: 2px;
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
     }
 
     /* ---------- balance game card ---------- */
     .card.balance {
-      padding: 36px 24px;
+      padding: 40px 28px 32px;
     }
 
     .versus {
@@ -276,7 +323,7 @@
     }
 
     .versus.pop {
-      animation: pop 0.4s ease;
+      animation: pop 0.38s var(--ease);
     }
 
     .option {
@@ -285,66 +332,84 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      min-height: 110px;
-      padding: 18px 16px;
-      background: var(--soft);
+      gap: 10px;
+      min-height: 112px;
+      padding: 20px 18px;
+      background: var(--surface-2);
       color: var(--text);
-      border: 3px solid transparent;
-      border-radius: 20px;
+      border: 1.5px solid var(--line);
+      border-radius: 18px;
       font-family: inherit;
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       font-weight: 700;
       line-height: 1.45;
+      letter-spacing: -0.02em;
       word-break: keep-all;
       cursor: pointer;
-      transition: transform 0.15s ease, background 0.2s ease, color 0.2s ease,
-        opacity 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 0.18s var(--ease), background 0.2s ease, color 0.2s ease,
+        border-color 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
     }
 
     .option:hover {
       transform: translateY(-2px);
       border-color: var(--accent);
+      background: var(--accent-soft);
+      box-shadow: var(--shadow-md);
     }
 
     .option .opt-tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      background: var(--surface);
+      border: 1px solid var(--line);
       font-size: 0.75rem;
       font-weight: 800;
-      letter-spacing: 0.08em;
-      color: var(--accent);
-      opacity: 0.85;
+      color: var(--accent-ink);
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
     }
 
     .versus.has-choice .option:not(.chosen) {
-      opacity: 0.55;
+      opacity: 0.5;
+    }
+
+    .versus.has-choice .option:not(.chosen):hover {
+      opacity: 0.85;
     }
 
     .option.chosen {
-      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      background: var(--accent);
       color: #fff;
-      border-color: #fff;
-      transform: scale(1.03);
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.1), 0 12px 28px -10px var(--accent);
     }
 
     .option.chosen .opt-tag {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.35);
       color: #fff;
     }
 
     .vs {
       align-self: center;
       flex: none;
-      width: 44px;
-      height: 44px;
+      width: 40px;
+      height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
       border-radius: 50%;
-      background: #fff;
-      color: var(--accent);
-      border: 3px solid var(--accent);
-      font-weight: 900;
-      font-size: 0.95rem;
+      background: var(--surface);
+      color: var(--muted);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-md);
+      font-weight: 800;
+      font-size: 0.75rem;
+      letter-spacing: 0.04em;
       z-index: 1;
     }
 
@@ -356,32 +421,63 @@
       }
       .vs {
         align-self: center;
-        margin: 0 -10px;
+        margin: 0 -12px;
       }
       .option {
-        min-height: 150px;
+        min-height: 160px;
       }
     }
 
     @media (max-width: 420px) {
       body {
-        padding: 18px 14px;
+        padding: 28px 16px;
+        align-items: flex-start;
       }
       h1 {
-        font-size: 1.7rem;
+        font-size: 1.65rem;
+      }
+      .subtitle {
+        font-size: 0.88rem;
+        margin-bottom: 22px;
       }
       .chip {
-        padding: 8px 14px;
-        font-size: 0.85rem;
+        padding: 6px 11px;
+        font-size: 0.8rem;
       }
       .card {
-        padding: 36px 20px;
+        padding: 40px 22px;
+        min-height: 210px;
       }
       .card.balance {
-        padding: 28px 14px;
+        padding: 32px 16px 18px;
       }
       .question {
-        font-size: 1.3rem;
+        font-size: 1.28rem;
+      }
+      .option {
+        min-height: 96px;
+        font-size: 1.04rem;
+      }
+      .vs {
+        margin: -16px 0;
+      }
+      .btn {
+        width: 100%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .btn:hover,
+      .option:hover,
+      .option.chosen {
+        transform: none;
       }
     }
   </style>
