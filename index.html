@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>🧊</text></svg>">
   <title>Icebreaker</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#f4f5f9" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Icebreaker" />
   <meta name="description" content="모임 분위기를 풀어주는 대화 주제와 밸런스 게임 모음, Icebreaker" />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
@@ -119,6 +126,27 @@
       color: var(--text);
       box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08), 0 2px 8px rgba(16, 24, 40, 0.06);
     }
+
+    .modes { max-width: 440px; }
+    .mode-btn { white-space: nowrap; min-width: 0; }
+    @media (max-width: 420px) {
+      .mode-btn { padding: 10px 4px; font-size: 0.84rem; letter-spacing: -0.03em; }
+    }
+
+    /* ---------- who mode hint ---------- */
+    .who-hint {
+      display: none;
+      margin: 0;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: #eef0ff;
+      color: #4f46e5;
+      font-size: 0.88rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .who-hint.show { display: inline-block; }
+    body.spicy-mode .who-hint { background: #fff0f0; color: #dc2626; }
 
     /* ---------- spice toggle ---------- */
     .spices {
@@ -485,7 +513,7 @@
 <body>
   <div class="container">
     <h1>🧊 Icebreaker</h1>
-    <p class="subtitle">대화 주제와 밸런스 게임으로 어색한 분위기를 풀어보세요!<br />모드와 맛, 카테고리를 고르고 버튼을 눌러봐요.</p>
+    <p class="subtitle">대화 주제, 밸런스 게임, 이 중 누가?로 어색한 분위기를 풀어보세요!<br />모드와 맛, 카테고리를 고르고 버튼을 눌러봐요.</p>
 
     <div class="modes" id="modes" role="group" aria-label="모드 선택"></div>
     <div class="spices" id="spices"></div>
@@ -495,6 +523,7 @@
       <span class="badge" id="badge"></span>
       <p class="question placeholder" id="question"></p>
       <div class="versus" id="versus"></div>
+      <p class="who-hint" id="whoHint">👉 하나, 둘, 셋 하면 동시에 가리켜 주세요!</p>
     </div>
 
     <button class="btn" id="pickBtn"></button>
@@ -1245,6 +1274,127 @@
       { a: "카톡 읽씹당하기", b: "카톡 안읽씹당하기", category: "tech", spice: "spicy" }
     ];
 
+    /* ===== 🎯 이 중 누가? 모드 데이터 ===== */
+    const whoCategories = {
+      habit: { label: "😴 생활 습관" },
+      work: { label: "💼 직장 & 학교" },
+      love: { label: "💘 연애" },
+      party: { label: "🍻 놀기 & 모임" },
+      future: { label: "🦸 상상 & 미래" },
+      silly: { label: "🤪 엉뚱 & 웃긴 상황" }
+    };
+
+    const whoItems = [
+      { text: "이 중에 제일 늦게 일어날 것 같은 사람은?", category: "habit", spice: "mild" },
+      { text: "이 중에 알람을 제일 많이 맞춰 둘 것 같은 사람은?", category: "habit", spice: "mild" },
+      { text: "이 중에 방 정리를 제일 잘할 것 같은 사람은?", category: "habit", spice: "mild" },
+      { text: "이 중에 주말에 집에서 한 발짝도 안 나갈 것 같은 사람은?", category: "habit", spice: "mild" },
+      { text: "이 중에 배달 앱을 제일 자주 켤 것 같은 사람은?", category: "habit", spice: "mild" },
+      { text: "이 중에 아침 루틴이 제일 완벽할 것 같은 사람은?", category: "habit", spice: "mild" },
+      { text: "이 중에 휴대폰 배터리가 늘 간당간당할 것 같은 사람은?", category: "habit", spice: "mild" },
+      { text: "이 중에 약속 시간에 제일 먼저 도착할 것 같은 사람은?", category: "habit", spice: "mild" },
+      { text: "이 중에 물건을 제일 자주 잃어버릴 것 같은 사람은?", category: "habit", spice: "mild" },
+      { text: "이 중에 새벽까지 유튜브 보다가 잠들 것 같은 사람은?", category: "habit", spice: "mild" },
+      { text: "이 중에 '5분만 더'를 제일 많이 외칠 것 같은 사람은?", category: "habit", spice: "spicy" },
+      { text: "이 중에 빨래를 며칠째 의자에 쌓아 둘 것 같은 사람은?", category: "habit", spice: "spicy" },
+      { text: "이 중에 장바구니에 담아 놓고 몇 달째 고민할 것 같은 사람은?", category: "habit", spice: "spicy" },
+      { text: "이 중에 '나 지금 출발했어'라고 하고 아직 집일 것 같은 사람은?", category: "habit", spice: "spicy" },
+      { text: "이 중에 냉장고에 뭐가 있는지 전혀 모를 것 같은 사람은?", category: "habit", spice: "spicy" },
+      { text: "이 중에 읽씹을 제일 많이 할 것 같은 사람은?", category: "habit", spice: "spicy" },
+      { text: "이 중에 다이어리를 사 놓고 3일 만에 그만둘 것 같은 사람은?", category: "habit", spice: "spicy" },
+      { text: "이 중에 샤워하면서 콘서트를 열 것 같은 사람은?", category: "habit", spice: "spicy" },
+      { text: "이 중에 회의 때 제일 먼저 아이디어를 낼 것 같은 사람은?", category: "work", spice: "mild" },
+      { text: "이 중에 시험 기간에 갑자기 방 청소를 시작할 것 같은 사람은?", category: "work", spice: "mild" },
+      { text: "이 중에 팀플에서 조장을 맡을 것 같은 사람은?", category: "work", spice: "mild" },
+      { text: "이 중에 점심 메뉴를 제일 잘 고를 것 같은 사람은?", category: "work", spice: "mild" },
+      { text: "이 중에 단톡방 공지를 제일 꼼꼼히 챙길 것 같은 사람은?", category: "work", spice: "mild" },
+      { text: "이 중에 탕비실 간식을 제일 먼저 발견할 것 같은 사람은?", category: "work", spice: "mild" },
+      { text: "이 중에 발표를 제일 떨지 않고 할 것 같은 사람은?", category: "work", spice: "mild" },
+      { text: "이 중에 나중에 사장님이 될 것 같은 사람은?", category: "work", spice: "mild" },
+      { text: "이 중에 동료 생일을 제일 잘 챙길 것 같은 사람은?", category: "work", spice: "mild" },
+      { text: "이 중에 필기를 제일 예쁘게 할 것 같은 사람은?", category: "work", spice: "mild" },
+      { text: "이 중에 회의 중에 몰래 딴짓하다 걸릴 것 같은 사람은?", category: "work", spice: "spicy" },
+      { text: "이 중에 마감 5분 전에 제출 버튼 누를 것 같은 사람은?", category: "work", spice: "spicy" },
+      { text: "이 중에 '확인했습니다' 하고 사실 안 읽었을 것 같은 사람은?", category: "work", spice: "spicy" },
+      { text: "이 중에 월요일 아침에 영혼 없이 출근할 것 같은 사람은?", category: "work", spice: "spicy" },
+      { text: "이 중에 수업 시간에 졸다가 이름 불릴 것 같은 사람은?", category: "work", spice: "spicy" },
+      { text: "이 중에 퇴근 시간 1분 전부터 가방 쌀 것 같은 사람은?", category: "work", spice: "spicy" },
+      { text: "이 중에 단톡방에 잘못 보낸 메시지로 레전드 찍을 것 같은 사람은?", category: "work", spice: "spicy" },
+      { text: "이 중에 화상 회의에서 음소거 안 하고 혼잣말할 것 같은 사람은?", category: "work", spice: "spicy" },
+      { text: "이 중에 기념일을 제일 잘 챙길 것 같은 사람은?", category: "love", spice: "mild" },
+      { text: "이 중에 깜짝 이벤트를 제일 잘할 것 같은 사람은?", category: "love", spice: "mild" },
+      { text: "이 중에 연애편지를 제일 감동적으로 쓸 것 같은 사람은?", category: "love", spice: "mild" },
+      { text: "이 중에 데이트 코스를 엑셀로 짤 것 같은 사람은?", category: "love", spice: "mild" },
+      { text: "이 중에 애인한테 제일 다정할 것 같은 사람은?", category: "love", spice: "mild" },
+      { text: "이 중에 제일 먼저 결혼할 것 같은 사람은?", category: "love", spice: "mild" },
+      { text: "이 중에 첫눈에 반하는 걸 믿을 것 같은 사람은?", category: "love", spice: "mild" },
+      { text: "이 중에 연애 상담을 제일 잘해 줄 것 같은 사람은?", category: "love", spice: "mild" },
+      { text: "이 중에 커플템을 제일 좋아할 것 같은 사람은?", category: "love", spice: "mild" },
+      { text: "이 중에 고백을 제일 로맨틱하게 할 것 같은 사람은?", category: "love", spice: "mild" },
+      { text: "이 중에 연애하면 제일 애교 많아질 것 같은 사람은?", category: "love", spice: "spicy" },
+      { text: "이 중에 썸 타면서 티 제일 많이 날 것 같은 사람은?", category: "love", spice: "spicy" },
+      { text: "이 중에 새벽에 감성 폭발해서 장문 카톡 보낼 것 같은 사람은?", category: "love", spice: "spicy" },
+      { text: "이 중에 애인 사진으로 프사 도배할 것 같은 사람은?", category: "love", spice: "spicy" },
+      { text: "이 중에 질투를 몰래 제일 많이 할 것 같은 사람은?", category: "love", spice: "spicy" },
+      { text: "이 중에 연락 답장 기다리며 1분마다 폰 볼 것 같은 사람은?", category: "love", spice: "spicy" },
+      { text: "이 중에 연애하면 친구들 약속 제일 먼저 미룰 것 같은 사람은?", category: "love", spice: "spicy" },
+      { text: "이 중에 드라마 보다가 연애 세포가 깨어날 것 같은 사람은?", category: "love", spice: "spicy" },
+      { text: "이 중에 모임 약속을 제일 먼저 잡을 것 같은 사람은?", category: "party", spice: "mild" },
+      { text: "이 중에 노래방에서 마이크를 제일 오래 잡을 것 같은 사람은?", category: "party", spice: "mild" },
+      { text: "이 중에 맛집 리스트를 제일 많이 갖고 있을 것 같은 사람은?", category: "party", spice: "mild" },
+      { text: "이 중에 단체 사진을 제일 잘 찍어 줄 것 같은 사람은?", category: "party", spice: "mild" },
+      { text: "이 중에 여행 계획을 제일 꼼꼼하게 짤 것 같은 사람은?", category: "party", spice: "mild" },
+      { text: "이 중에 게임에서 제일 승부욕 불태울 것 같은 사람은?", category: "party", spice: "mild" },
+      { text: "이 중에 분위기 메이커가 될 것 같은 사람은?", category: "party", spice: "mild" },
+      { text: "이 중에 모임 끝나고 제일 먼저 집에 갈 것 같은 사람은?", category: "party", spice: "mild" },
+      { text: "이 중에 정산을 제일 빨리 해 줄 것 같은 사람은?", category: "party", spice: "mild" },
+      { text: "이 중에 처음 보는 사람과 제일 빨리 친해질 것 같은 사람은?", category: "party", spice: "mild" },
+      { text: "이 중에 술 취하면 제일 말 많아질 것 같은 사람은?", category: "party", spice: "spicy" },
+      { text: "이 중에 '딱 한 잔만'이 제일 안 지켜질 것 같은 사람은?", category: "party", spice: "spicy" },
+      { text: "이 중에 노래방에서 갑자기 발라드로 분위기 잡을 것 같은 사람은?", category: "party", spice: "spicy" },
+      { text: "이 중에 다음 날 단톡방에 '어제 나 괜찮았어?' 물어볼 것 같은 사람은?", category: "party", spice: "spicy" },
+      { text: "이 중에 '나 집에 갈게' 하고 2시간 더 있을 것 같은 사람은?", category: "party", spice: "spicy" },
+      { text: "이 중에 흥 오르면 춤까지 출 것 같은 사람은?", category: "party", spice: "spicy" },
+      { text: "이 중에 모임에서 흑역사 제일 많이 만들 것 같은 사람은?", category: "party", spice: "spicy" },
+      { text: "이 중에 술자리 게임에서 제일 많이 걸릴 것 같은 사람은?", category: "party", spice: "spicy" },
+      { text: "이 중에 좀비 사태에서 제일 오래 살아남을 것 같은 사람은?", category: "future", spice: "mild" },
+      { text: "이 중에 무인도에서 제일 잘 버틸 것 같은 사람은?", category: "future", spice: "mild" },
+      { text: "이 중에 10년 뒤에 유명해져 있을 것 같은 사람은?", category: "future", spice: "mild" },
+      { text: "이 중에 우주여행을 제일 먼저 갈 것 같은 사람은?", category: "future", spice: "mild" },
+      { text: "이 중에 시골에서 텃밭 가꾸며 살 것 같은 사람은?", category: "future", spice: "mild" },
+      { text: "이 중에 초능력이 생기면 제일 잘 쓸 것 같은 사람은?", category: "future", spice: "mild" },
+      { text: "이 중에 책을 써서 작가가 될 것 같은 사람은?", category: "future", spice: "mild" },
+      { text: "이 중에 세계 일주를 제일 먼저 할 것 같은 사람은?", category: "future", spice: "mild" },
+      { text: "이 중에 나중에 유튜버로 대박 날 것 같은 사람은?", category: "future", spice: "mild" },
+      { text: "이 중에 타임머신 타면 과거로 갈 것 같은 사람은?", category: "future", spice: "mild" },
+      { text: "이 중에 좀비 사태에서 제일 먼저 소리 질러서 들킬 것 같은 사람은?", category: "future", spice: "spicy" },
+      { text: "이 중에 투명 인간이 되면 장난만 치고 다닐 것 같은 사람은?", category: "future", spice: "spicy" },
+      { text: "이 중에 무인도에서 제일 먼저 구조 요청 편지 쓸 것 같은 사람은?", category: "future", spice: "spicy" },
+      { text: "이 중에 외계인을 만나면 제일 먼저 셀카 찍을 것 같은 사람은?", category: "future", spice: "spicy" },
+      { text: "이 중에 공포 영화 속 주인공이면 제일 먼저 문 열어 볼 것 같은 사람은?", category: "future", spice: "spicy" },
+      { text: "이 중에 하루 동안 투명 인간이 되면 냉장고부터 털 것 같은 사람은?", category: "future", spice: "spicy" },
+      { text: "이 중에 리얼리티 예능 나가면 악마의 편집 당할 것 같은 사람은?", category: "future", spice: "spicy" },
+      { text: "이 중에 탈출 게임에서 힌트 제일 먼저 쓰자고 할 것 같은 사람은?", category: "future", spice: "spicy" },
+      { text: "이 중에 길을 제일 자주 잃을 것 같은 사람은?", category: "silly", spice: "mild" },
+      { text: "이 중에 영화 보다가 제일 먼저 울 것 같은 사람은?", category: "silly", spice: "mild" },
+      { text: "이 중에 동물들이 제일 잘 따를 것 같은 사람은?", category: "silly", spice: "mild" },
+      { text: "이 중에 자판기 앞에서 제일 오래 고민할 것 같은 사람은?", category: "silly", spice: "mild" },
+      { text: "이 중에 아재 개그를 제일 많이 할 것 같은 사람은?", category: "silly", spice: "mild" },
+      { text: "이 중에 놀이공원에서 제일 크게 소리 지를 것 같은 사람은?", category: "silly", spice: "mild" },
+      { text: "이 중에 엘리베이터에서 혼자 노래 부를 것 같은 사람은?", category: "silly", spice: "mild" },
+      { text: "이 중에 식물한테 말 걸 것 같은 사람은?", category: "silly", spice: "mild" },
+      { text: "이 중에 인형 뽑기에 제일 진심일 것 같은 사람은?", category: "silly", spice: "mild" },
+      { text: "이 중에 웃음 참기 게임에서 제일 먼저 터질 것 같은 사람은?", category: "silly", spice: "mild" },
+      { text: "이 중에 모르는 사람한테 아는 척 인사할 것 같은 사람은?", category: "silly", spice: "spicy" },
+      { text: "이 중에 잠꼬대로 제일 웃긴 말 할 것 같은 사람은?", category: "silly", spice: "spicy" },
+      { text: "이 중에 '나 원래 이런 사람 아닌데'를 제일 자주 할 것 같은 사람은?", category: "silly", spice: "spicy" },
+      { text: "이 중에 거울 보면서 혼자 연기 연습할 것 같은 사람은?", category: "silly", spice: "spicy" },
+      { text: "이 중에 문 '당기시오'를 계속 밀 것 같은 사람은?", category: "silly", spice: "spicy" },
+      { text: "이 중에 단체 사진에서 꼭 눈 감고 나올 것 같은 사람은?", category: "silly", spice: "spicy" },
+      { text: "이 중에 진지한 순간에 웃음 터져서 혼날 것 같은 사람은?", category: "silly", spice: "spicy" },
+      { text: "이 중에 흑역사 사진을 제일 많이 갖고 있을 것 같은 사람은?", category: "silly", spice: "spicy" }
+    ];
+
     /* ===== 공통 설정 ===== */
     const spices = {
       mild: { label: "😋 순한맛" },
@@ -1261,12 +1411,20 @@
         unit: "질문"
       },
       balance: {
-        label: "⚖️ 밸런스 게임",
+        label: "⚖️ 밸런스",
         categories: balanceCategories,
         items: balanceItems,
         placeholder: "아래 버튼을 눌러 밸런스 게임을 뽑아보세요 👇",
         btnLabel: "밸런스 뽑기 ⚖️",
         unit: "밸런스"
+      },
+      who: {
+        label: "🎯 이 중 누가?",
+        categories: whoCategories,
+        items: whoItems,
+        placeholder: "아래 버튼을 눌러 '이 중 누가?' 질문을 뽑아보세요 👇",
+        btnLabel: "누구일까 뽑기 🎯",
+        unit: "질문"
       }
     };
 
@@ -1281,6 +1439,7 @@
     const categoriesEl = document.getElementById("categories");
     const spicesEl = document.getElementById("spices");
     const modesEl = document.getElementById("modes");
+    const whoHintEl = document.getElementById("whoHint");
 
     let currentMode = "topic";
     let currentSpice = "mild";
@@ -1359,6 +1518,7 @@
       questionEl.classList.remove("pop");
       questionEl.classList.add("placeholder");
       questionEl.textContent = cur().placeholder;
+      whoHintEl.classList.remove("show");
     }
 
     function selectMode(key) {
@@ -1408,6 +1568,7 @@
       void questionEl.offsetWidth;
       questionEl.textContent = item.text;
       questionEl.classList.add("pop");
+      if (currentMode === "who") whoHintEl.classList.add("show");
     }
 
     function chooseOption(btnEl) {
@@ -1470,6 +1631,8 @@
 
     btn.addEventListener("click", pickQuestion);
     selectMode(currentMode);
+
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
 
   </script>
 </body>
