@@ -1,4 +1,4 @@
-const CACHE = 'icebreaker-v2';
+const CACHE = 'icebreaker-v3';
 const FONT_CACHE = 'icebreaker-fonts-v1';
 const PRECACHE = [
   './',
