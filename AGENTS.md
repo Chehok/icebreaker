@@ -55,20 +55,25 @@ const mildQuestions = [   // 😋 순한맛
   // ...
 ];
 
-const spicyQuestions = [  // 🌶️ 매운맛
+const mediumQuestions = [  // 🌶️ 중간맛 (예전 매운맛)
+  // ...
+];
+
+const hotQuestions = [  // 🔥 매운맛
   { text: "내일 세상이 끝난다면 오늘 밤 무엇을 하고 싶어?", category: "imagine" },
   // ...
 ];
 
-// 두 배열을 합치면서 spice 필드를 자동으로 붙임 (직접 수정할 필요 없음)
+// 세 배열(mild/medium/hot)을 합치면서 spice 필드를 자동으로 붙임 (직접 수정할 필요 없음)
 const questions = [
   ...mildQuestions.map((q) => ({ ...q, spice: "mild" })),
-  ...spicyQuestions.map((q) => ({ ...q, spice: "spicy" }))
+  ...mediumQuestions.map((q) => ({ ...q, spice: "medium" })),
+  ...hotQuestions.map((q) => ({ ...q, spice: "hot" }))
 ];
 ```
 
 - 질문 객체 모양: `{ text: string, category: string }`
-- 순한맛/매운맛은 **어느 배열에 넣느냐**로 결정됩니다. (`spice` 필드를 직접 쓰지 않음)
+- 순한맛/중간맛/매운맛은 **어느 배열에 넣느냐**로 결정됩니다. (`spice` 필드를 직접 쓰지 않음)
 - 카테고리 키 23개: `imagine`, `favorite`, `daily`, `faith`, `love`, `tmi`, `hobby`, `deep`, `travel`, `food`, `memory`, `politics`, `invest`, `work`, `content`, `season`, `place`, `pet`, `habit`, `shop`, `school`, `silly`, `thanks`
 
 #### ⚖️ 밸런스 게임 모드
@@ -93,23 +98,24 @@ const balanceItems = [
 ];
 ```
 
-- 항목 객체 모양: `{ a: string, b: string, category: string, spice: "mild" | "spicy" }`
-- 밸런스 게임은 **한 배열**에 순한맛/매운맛이 섞여 있고, `spice` 필드로 구분합니다.
+- 항목 객체 모양: `{ a: string, b: string, category: string, spice: "mild" | "medium" | "hot" }`
+- 밸런스 게임은 **한 배열**에 순한맛/중간맛/매운맛이 섞여 있고, `spice` 필드로 구분합니다.
 - 주의: 대화 주제 모드와 밸런스 게임 모드의 카테고리 키는 **서로 별개**입니다. (`food`, `love`, `work`, `travel`, `school`이 양쪽에 있지만 다른 객체)
 
 #### 🎯 이 중 누가? 모드
 
 - 카테고리 객체: `whoCategories`, 질문 배열: `whoItems`
-- 항목: `{ text: string, category: string, spice: "mild" | "spicy" }`
+- 항목: `{ text: string, category: string, spice: "mild" | "medium" | "hot" }`
 - 카테고리: `habit`, `work`, `love`, `party`, `future`, `silly`
-- 각 카테고리는 순한맛 10개 + 매운맛 8개입니다. 카테고리 키는 모드별로 독립적입니다.
+- 각 카테고리는 순한맛 10개 + 중간맛 8개 + 매운맛 5~12개입니다. 카테고리 키는 모드별로 독립적입니다.
 
 #### 공통 설정
 
 ```js
 const spices = {
   mild:  { label: "😋 순한맛" },
-  spicy: { label: "🌶️ 매운맛" }
+  medium: { label: "🌶️ 중간맛" },
+  hot:    { label: "🔥 매운맛" }
 };
 
 const modes = {
@@ -119,6 +125,7 @@ const modes = {
 };
 
 const STORAGE_KEY = "icebreaker:mode";
+const SPICE_KEY = "icebreaker:spice"; // 예전 값 "spicy"는 "medium"으로 자동 이전
 ```
 
 - 화면의 카테고리 칩은 `categories` / `balanceCategories` / `whoCategories` 객체에서 자동 생성됩니다. (`✨ 전체` 칩은 코드에서 따로 추가)
@@ -128,12 +135,12 @@ const STORAGE_KEY = "icebreaker:mode";
 
 | 모드 | 카테고리 | 질문 수 | 내역 |
 |---|---|---|---|
-| 💬 대화 주제 | 23 | **416** | 순한맛 230 + 매운맛 186 |
-| ⚖️ 밸런스 게임 | 10 | **216** | 순한맛 118 + 매운맛 98 (기존 6개 카테고리는 24개씩, 새 4개 카테고리는 18개씩) |
+| 💬 대화 주제 | 23 | **525** | 순한맛 230 + 중간맛 186 + 매운맛 109 |
+| ⚖️ 밸런스 게임 | 10 | **278** | 순한맛 118 + 중간맛 98 + 매운맛 62 (순한/중간 기준: 기존 6개 카테고리는 24개씩, 새 4개 카테고리는 18개씩) |
 
-| 🎯 이 중 누가? | 6 | **108** | 순한맛 60 + 매운맛 48 (각 카테고리 10 + 8) |
+| 🎯 이 중 누가? | 6 | **148** | 순한맛 60 + 중간맛 48 + 매운맛 40 |
 
-합계 **740개**입니다. 문구만 수정하는 검토에서는 모드·카테고리·맛별 수량을 유지하세요. 순한맛은 첫 만남에도 안전하게, 매운맛은 가벼운 민망함·솔직함 위주로 작성합니다. 성적 내용, 비하, 실명, 트라우마·건강 고백 압박은 피하고 신앙·정치 의견은 존중하세요. 답변과 지목 참여는 언제든 건너뛸 수 있습니다.
+합계 **951개**입니다. 문구만 수정하는 검토에서는 모드·카테고리·맛별 수량을 유지하세요. 순한맛은 첫 만남에도 안전하게, 중간맛은 가벼운 민망함·솔직함, 🔥 매운맛은 성인 친구끼리의 과감한 질문(연애사·전 애인·질투·돈·비밀·흑역사, 가벼운 19금 뉘앙스)까지 허용합니다. 노골적인 성적 묘사, 비하, 실명, 트라우마·건강 고백 압박은 피하고 신앙·정치 의견은 존중하세요. 답변과 지목 참여는 언제든 건너뛸 수 있습니다.
 
 질문을 추가/삭제하면 이 표와 `README.md`의 숫자도 함께 갱신해 주세요.
 
@@ -142,7 +149,7 @@ const STORAGE_KEY = "icebreaker:mode";
 ### 대화 주제 질문 추가
 
 1. `index.html`을 UTF-8로 엽니다. (VS Code 권장. 메모장 등으로 인코딩이 바뀌지 않게 주의)
-2. 순한맛이면 `mildQuestions`, 매운맛이면 `spicyQuestions` 배열을 찾습니다.
+2. 순한맛이면 `mildQuestions`, 중간맛이면 `mediumQuestions`, 매운맛이면 `hotQuestions` 배열을 찾습니다.
 3. 같은 카테고리 질문들이 모여 있는 위치에 한 줄을 추가합니다.
 4. `category` 값은 반드시 `categories`에 **이미 있는 키**여야 합니다. 없는 키를 쓰면 뽑을 때 오류가 납니다.
 5. 배열의 **마지막 항목 뒤에는 쉼표가 없어야** 합니다. 중간에 추가할 때는 앞뒤 쉼표를 확인하세요.
@@ -162,7 +169,7 @@ const mildQuestions = [
 
 1. `balanceItems` 배열을 찾습니다.
 2. 같은 카테고리·같은 맛 항목들이 모인 곳에 한 줄을 추가합니다.
-3. `a`, `b`, `category`, `spice` 네 필드를 **모두** 채웁니다. `spice`는 `"mild"` 또는 `"spicy"`만 허용됩니다.
+3. `a`, `b`, `category`, `spice` 네 필드를 **모두** 채웁니다. `spice`는 `"mild"`(순한맛), `"medium"`(중간맛), `"hot"`(매운맛)만 허용됩니다.
 
 예시:
 
@@ -176,7 +183,7 @@ const mildQuestions = [
    ```js
    music: { label: "🎵 음악 & 노래" }
    ```
-2. 그 키를 쓰는 질문을 **순한맛과 매운맛 양쪽에 최소 1개 이상씩** 넣어 주세요. 한쪽이 비어 있으면 해당 맛에서 그 카테고리를 고를 때 아무것도 뽑히지 않습니다.
+2. 그 키를 쓰는 질문을 **세 맛 모두에 최소 1개 이상씩** 넣어 주세요. 한쪽이 비어 있으면 해당 맛에서 그 카테고리를 고를 때 아무것도 뽑히지 않습니다.
 
 ### 질문 수정·삭제
 
@@ -189,7 +196,7 @@ const mildQuestions = [
 
 - [ ] 브라우저 개발자 도구(F12) 콘솔에 오류가 없다
 - [ ] 💬 대화 주제 / ⚖️ 밸런스 게임 / 🎯 이 중 누가? 모드 전환이 된다
-- [ ] 😋 순한맛 / 🌶️ 매운맛 전환이 된다
+- [ ] 😋 순한맛 / 🌶️ 중간맛 / 🔥 매운맛 전환이 된다
 - [ ] `✨ 전체`와 각 카테고리(특히 새로 추가/수정한 카테고리)에서 뽑기가 된다
 - [ ] 하단 카운터의 질문 수가 예상대로 늘었다/줄었다
 - [ ] 밸런스 게임에서 A/B 선택이 정상 표시된다
