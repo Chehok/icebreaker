@@ -44,8 +44,8 @@ PWA 설치·오프라인은 GitHub Pages 또는 로컬 HTTP 서버에서 확인�
 ## 배포
 
 GitHub Pages가 `main` 브랜치 루트를 그대로 서비스합니다.
-앱이나 캐시 파일을 수정하면 `sw.js`의 캐시 이름도 올려 주세요(현재 `icebreaker-v12`). 새 페이지는 온라인 방문 시 네트워크에서 우선 읽고, 통신 실패 시 캐시를 사용합니다.
+앱이나 캐시 파일을 수정하면 `sw.js`의 캐시 이름도 올려 주세요(현재 `icebreaker-v13`). 새 페이지는 온라인 방문 시 네트워크에서 우선 읽고, 통신 실패 시 캐시를 사용합니다.
 
 `index.html` 수정 → `main`에 커밋 & 푸시 → 보통 1~2분 안에 자동 반영됩니다. (자세한 내용은 [AGENTS.md](./AGENTS.md))
 
-- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v12, 통계 요청은 캐시하지 않음.
+- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v13, 통계 요청은 캐시하지 않음.
