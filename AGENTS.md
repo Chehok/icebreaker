@@ -23,7 +23,7 @@
 | 파일 | 설명 |
 |---|---|
 | `index.html` | 앱 전체 (HTML + CSS + JS + 질문 데이터). **단일 파일**, 빌드 없음, 의존성 없음 |
-| `sw.js` | 앱 셸 오프라인 캐시, 버전 `icebreaker-v12`, 글꼴 캐시 `icebreaker-fonts-v1` |
+| `sw.js` | 앱 셸 오프라인 캐시, 버전 `icebreaker-v13`, 글꼴 캐시 `icebreaker-fonts-v1` |
 | `manifest.webmanifest` | 상대 경로 시작 URL·범위·설치 아이콘 |
 | `icons/` | PWA 및 Apple 터치 아이콘 |
 | `README.md` | 사람용 간단 소개 |
@@ -60,7 +60,7 @@ const mediumQuestions = [  // 🌶️ 매운맛 (예전 매운맛)
 ];
 
 const hotQuestions = [  // 🔥 핵매운맛
-  { text: "내일 세상이 끝난다면 오늘 밤 무엇을 하고 싶어?", category: "imagine" },
+  { text: "오늘 여기서 서로의 호감을 딱 한 번 확인할 수 있다면 누구의 마음을 알고 싶어?", category: "imagine" },
   // ...
 ];
 
@@ -133,7 +133,7 @@ const SPICE_KEY = "icebreaker:spice"; // 예전 값 "spicy"는 "medium"으로 �
 - 뽑기 풀 = 현재 모드의 `items` 중 `spice`가 선택한 맛과 같고, 카테고리가 `전체`이거나 선택한 카테고리와 같은 것. 직전과 같은 질문은 연속으로 나오지 않습니다.
 - 풀(모드·맛·카테고리, 전체는 독립)마다 Fisher-Yates 셔플 백으로 한 바퀴 동안 중복 없이 뽑고 회차 경계의 연속 중복도 피하며(2개 이상), `icebreaker:bags`에 남은 풀 내부 인덱스·마지막 인덱스·크기를 저장·검증하고 상태 줄에 회차 진행도를 표시합니다.
 
-### 현재 수량 (2026-11-03 기준, `index.html`에서 직접 집계)
+### 현재 수량 (2026-11-04 기준, `index.html`에서 직접 집계)
 
 | 모드 | 카테고리 | 질문 수 | 내역 |
 |---|---|---|---|
@@ -225,7 +225,7 @@ const mildQuestions = [
 ### PWA 캐시 유지보수
 
 - 캐시 대상: `./`, `./index.html`, manifest, icons. 앱 진입은 네트워크 우선, 실패 시 동일한 index 캐시를 사용합니다.
-- 캐시 파일을 수정하면 `sw.js` 캐시 이름도 반드시 증가시키세요(현재 `icebreaker-v12`).
+- 캐시 파일을 수정하면 `sw.js` 캐시 이름도 반드시 증가시키세요(현재 `icebreaker-v13`).
 - 업데이트 설치 시 HTTP 캐시를 새로 검증하며, 이전 Icebreaker 버전 캐시만 정리하고 글꼴 캐시는 유지합니다.
 - `file://`에서는 질문 뽑기만 동작합니다. 서비스 워커는 HTTPS 또는 localhost에서 확인합니다.
 - Pretendard는 jsDelivr CDN(`pretendard@v1.3.9` 다이내믹 서브셋)에서 불러오고 서비스 워커가 캐시 우선으로 저장합니다. 불러오지 못하면 시스템 한글 글꼴을 사용합니다.
@@ -268,4 +268,4 @@ git push origin main
 - ❌ **검토 요청 시 바로 푸시 금지**: 문서 변경 등에 대해 검토를 요청받았다면 `main`에 바로 푸시하지 말고 브랜치 + PR로 올려 확인을 받으세요.
 - ❌ 파일 인코딩을 UTF-8 이외로 바꾸지 마세요. (한글 깨짐)
 
-- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v12, 통계 요청은 캐시하지 않음.
+- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v13, 통계 요청은 캐시하지 않음.
