@@ -23,7 +23,7 @@
 | 파일 | 설명 |
 |---|---|
 | `index.html` | 앱 전체 (HTML + CSS + JS + 질문 데이터). **단일 파일**, 빌드 없음, 의존성 없음 |
-| `sw.js` | 앱 셸 오프라인 캐시, 버전 `icebreaker-v13`, 글꼴 캐시 `icebreaker-fonts-v1` |
+| `sw.js` | 앱 셸 오프라인 캐시, 버전 `icebreaker-v14`, 글꼴 캐시 `icebreaker-fonts-v1` |
 | `manifest.webmanifest` | 상대 경로 시작 URL·범위·설치 아이콘 |
 | `icons/` | PWA 및 Apple 터치 아이콘 |
 | `README.md` | 사람용 간단 소개 |
@@ -89,7 +89,11 @@ const balanceCategories = {
   travel:  { label: "✈️ 여행 & 휴가" },
   friends: { label: "🤝 친구 & 인간관계" },
   school:  { label: "🏫 학교 & 추억" },
-  tech:    { label: "📱 테크 & SNS" }
+  tech:    { label: "📱 테크 & SNS" },
+  home:    { label: "🏠 집 & 생활" },
+  media:   { label: "🎬 영화 & 음악" },
+  body:    { label: "💪 운동 & 외모" },
+  family:  { label: "👪 가족 & 결혼" }
 };
 
 const balanceItems = [
@@ -106,8 +110,8 @@ const balanceItems = [
 
 - 카테고리 객체: `whoCategories`, 질문 배열: `whoItems`
 - 항목: `{ text: string, category: string, spice: "mild" | "medium" | "hot" }`
-- 카테고리: `habit`, `work`, `love`, `party`, `future`, `silly`
-- 카테고리별 수량(순한맛/매운맛/핵매운맛): habit 17/13/9, work 17/13/10, love 17/13/17, party 17/13/11, future 16/13/9, silly 16/13/9입니다. 카테고리 키는 모드별로 독립적입니다.
+- 카테고리: `habit`, `work`, `love`, `party`, `future`, `silly`, `food`(🍜 먹는 것 & 취향), `phone`(📱 폰 & SNS), `money`(💸 돈 & 소비), `trip`(✈️ 여행 & 이동)
+- 카테고리별 수량(순한맛/매운맛/핵매운맛): habit 17/13/9, work 17/13/10, love 17/13/17, party 17/13/11, future 16/13/9, silly 16/13/9, food·phone·money·trip 각 16/13/9입니다. 카테고리 키는 모드별로 독립적입니다.
 
 #### 공통 설정
 
@@ -138,10 +142,10 @@ const SPICE_KEY = "icebreaker:spice"; // 예전 값 "spicy"는 "medium"으로 �
 | 모드 | 카테고리 | 질문 수 | 내역 |
 |---|---|---|---|
 | 💬 대화 주제 | 23 | **525** | 순한맛 230 + 매운맛 186 + 핵매운맛 109 |
-| ⚖️ 밸런스게임 | 10 | **398** | 순한맛 168 + 매운맛 138 + 핵매운맛 92 (카테고리별 순한맛/매운맛/핵매운맛: food 18/15/9, love 18/15/18, work 18/15/9, power 18/15/7, life 18/15/9, weird 18/15/7, travel 15/12/7, friends 15/12/11, school 15/12/6, tech 15/12/9) |
-| 🎯 이 중 누가? | 6 | **243** | 순한맛 100 + 매운맛 78 + 핵매운맛 65 |
+| ⚖️ 밸런스게임 | 14 | **546** | 순한맛 232 + 매운맛 190 + 핵매운맛 124 (카테고리별 순한맛/매운맛/핵매운맛: food 18/15/9, love 18/15/18, work 18/15/9, power 18/15/7, life 18/15/9, weird 18/15/7, travel 15/12/7, friends 15/12/11, school 15/12/6, tech 15/12/9, home·media·body·family 각 16/13/8) |
+| 🎯 이 중 누가? | 10 | **395** | 순한맛 164 + 매운맛 130 + 핵매운맛 101 |
 
-합계 **1166개**입니다. 문구만 수정하는 검토에서는 모드·카테고리·맛별 수량을 유지하세요. 순한맛은 첫 만남에도 안전하게, 매운맛은 가벼운 민망함·솔직함, 🔥 핵매운맛은 성인 친구끼리의 과감한 질문(연애사·전 애인·질투·돈·비밀·흑역사, 가벼운 19금 뉘앙스)까지 허용합니다. 노골적인 성적 묘사, 비하, 실명, 트라우마·건강 고백 압박은 피하고 신앙·정치 의견은 존중하세요. 답변과 지목 참여는 언제든 건너뛸 수 있습니다.
+합계 **1466개**입니다. 문구만 수정하는 검토에서는 모드·카테고리·맛별 수량을 유지하세요. 순한맛은 첫 만남에도 안전하게, 매운맛은 가벼운 민망함·솔직함, 🔥 핵매운맛은 성인 친구끼리의 과감한 질문(연애사·전 애인·질투·돈·비밀·흑역사, 가벼운 19금 뉘앙스)까지 허용합니다. 노골적인 성적 묘사, 비하, 실명, 트라우마·건강 고백 압박은 피하고 신앙·정치 의견은 존중하세요. 답변과 지목 참여는 언제든 건너뛸 수 있습니다.
 
 질문을 추가/삭제하면 이 표와 `README.md`의 숫자도 함께 갱신해 주세요.
 
@@ -225,7 +229,7 @@ const mildQuestions = [
 ### PWA 캐시 유지보수
 
 - 캐시 대상: `./`, `./index.html`, manifest, icons. 앱 진입은 네트워크 우선, 실패 시 동일한 index 캐시를 사용합니다.
-- 캐시 파일을 수정하면 `sw.js` 캐시 이름도 반드시 증가시키세요(현재 `icebreaker-v13`).
+- 캐시 파일을 수정하면 `sw.js` 캐시 이름도 반드시 증가시키세요(현재 `icebreaker-v14`).
 - 업데이트 설치 시 HTTP 캐시를 새로 검증하며, 이전 Icebreaker 버전 캐시만 정리하고 글꼴 캐시는 유지합니다.
 - `file://`에서는 질문 뽑기만 동작합니다. 서비스 워커는 HTTPS 또는 localhost에서 확인합니다.
 - Pretendard는 jsDelivr CDN(`pretendard@v1.3.9` 다이내믹 서브셋)에서 불러오고 서비스 워커가 캐시 우선으로 저장합니다. 불러오지 못하면 시스템 한글 글꼴을 사용합니다.
@@ -268,4 +272,4 @@ git push origin main
 - ❌ **검토 요청 시 바로 푸시 금지**: 문서 변경 등에 대해 검토를 요청받았다면 `main`에 바로 푸시하지 말고 브랜치 + PR로 올려 확인을 받으세요.
 - ❌ 파일 인코딩을 UTF-8 이외로 바꾸지 마세요. (한글 깨짐)
 
-- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v13, 통계 요청은 캐시하지 않음.
+- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v14, 통계 요청은 캐시하지 않음.
