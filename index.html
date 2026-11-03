@@ -88,6 +88,19 @@
       font-weight: 800;
       letter-spacing: -0.03em;
       margin-bottom: 10px;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    h1.shake {
+      animation: title-shake 0.3s ease;
+    }
+
+    @keyframes title-shake {
+      25%, 75% { transform: translateX(-3px); }
+      50% { transform: translateX(3px); }
     }
 
     .subtitle {
@@ -1679,9 +1692,13 @@
     const spicesEl = document.getElementById("spices");
     const modesEl = document.getElementById("modes");
     const whoHintEl = document.getElementById("whoHint");
+    const titleEl = document.querySelector("h1");
 
     let currentMode = "topic";
     let currentSpice = "mild";
+    let hotUnlocked = false;
+    let titleTaps = 0;
+    let lastTitleTap = 0;
     let currentCategory = "all";
     let lastKey = "";
 
@@ -1689,9 +1706,10 @@
       const saved = localStorage.getItem(STORAGE_KEY);
       if (Object.hasOwn(modes, saved)) currentMode = saved;
       let savedSpice = localStorage.getItem(SPICE_KEY);
-      if (savedSpice === "spicy") {
-        /* 예전 '매운맛(spicy)'은 지금의 중간맛으로 이전 */
+      if (savedSpice === "spicy" || savedSpice === "hot" || savedSpice === "매운맛") {
+        /* 예전 맛과 잠긴 매운맛은 중간맛으로 이전 */
         savedSpice = "medium";
+        currentSpice = savedSpice;
         localStorage.setItem(SPICE_KEY, savedSpice);
       }
       if (Object.hasOwn(spices, savedSpice)) currentSpice = savedSpice;
@@ -1718,12 +1736,29 @@
       const btnEl = document.createElement("button");
       btnEl.className = "spice-btn" + (key === currentSpice ? " active" : "");
       btnEl.dataset.spice = key;
+      btnEl.hidden = key === "hot";
       btnEl.type = "button";
       btnEl.textContent = label;
       btnEl.setAttribute("aria-pressed", key === currentSpice ? "true" : "false");
       btnEl.addEventListener("click", () => selectSpice(key));
       spicesEl.appendChild(btnEl);
     });
+
+    /* 제목을 1.5초 간격 이내로 다섯 번 누르면 매운맛 잠금 전환 */
+    titleEl.addEventListener("click", () => {
+      const now = performance.now();
+      titleTaps = now - lastTitleTap <= 1500 ? titleTaps + 1 : 1;
+      lastTitleTap = now;
+      if (titleTaps < 5) return;
+      titleTaps = 0;
+      hotUnlocked = !hotUnlocked;
+      spicesEl.querySelector('[data-spice="hot"]').hidden = !hotUnlocked;
+      if (!hotUnlocked && currentSpice === "hot") selectSpice("medium");
+      titleEl.classList.remove("shake");
+      void titleEl.offsetWidth;
+      titleEl.classList.add("shake");
+    });
+    titleEl.addEventListener("animationend", () => titleEl.classList.remove("shake"));
 
     function renderChips() {
       categoriesEl.innerHTML = "";
@@ -1793,7 +1828,7 @@
     }
 
     function selectSpice(key) {
-      if (!Object.hasOwn(spices, key)) return;
+      if (!Object.hasOwn(spices, key) || (key === "hot" && !hotUnlocked)) return;
       currentSpice = key;
       try {
         localStorage.setItem(SPICE_KEY, key);

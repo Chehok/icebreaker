@@ -23,7 +23,7 @@
 | 파일 | 설명 |
 |---|---|
 | `index.html` | 앱 전체 (HTML + CSS + JS + 질문 데이터). **단일 파일**, 빌드 없음, 의존성 없음 |
-| `sw.js` | 앱 셸 오프라인 캐시, 버전 `icebreaker-v5`, 글꼴 캐시 `icebreaker-fonts-v1` |
+| `sw.js` | 앱 셸 오프라인 캐시, 버전 `icebreaker-v8`, 글꼴 캐시 `icebreaker-fonts-v1` |
 | `manifest.webmanifest` | 상대 경로 시작 URL·범위·설치 아이콘 |
 | `icons/` | PWA 및 Apple 터치 아이콘 |
 | `README.md` | 사람용 간단 소개 |
@@ -128,6 +128,7 @@ const STORAGE_KEY = "icebreaker:mode";
 const SPICE_KEY = "icebreaker:spice"; // 예전 값 "spicy"는 "medium"으로 자동 이전
 ```
 
+- 세 모드 모두 매운맛 버튼은 기본 `hidden`이며, 제목을 매번 1.5초 이내 간격으로 5번 클릭/탭하면 잠금이 전환됩니다(제목 흔들림 피드백). 잠금 해제는 메모리에만 유지합니다. 다시 잠글 때 매운맛 선택 중이면 `selectSpice("medium")`으로 저장·질문 초기화하고, 로드 시 저장된 `hot`/`매운맛`도 `medium`으로 이전합니다. iPhone Safari를 위해 제목의 터치·선택 방지 CSS와 단일 `click` 리스너를 유지하세요.
 - 화면의 카테고리 칩은 `categories` / `balanceCategories` / `whoCategories` 객체에서 자동 생성됩니다. (`✨ 전체` 칩은 코드에서 따로 추가)
 - 뽑기 풀 = 현재 모드의 `items` 중 `spice`가 선택한 맛과 같고, 카테고리가 `전체`이거나 선택한 카테고리와 같은 것. 직전과 같은 질문은 연속으로 나오지 않습니다.
 
@@ -196,7 +197,9 @@ const mildQuestions = [
 
 - [ ] 브라우저 개발자 도구(F12) 콘솔에 오류가 없다
 - [ ] 💬 대화 주제 / ⚖️ 밸런스 게임 / 🎯 이 중 누가? 모드 전환이 된다
-- [ ] 😋 순한맛 / 🌶️ 중간맛 / 🔥 매운맛 전환이 된다
+- [ ] 처음에는 순한맛·중간맛만 표시되고, 제목 5회 빠른 클릭/탭으로 매운맛을 표시한 뒤 세 모드에서 세 맛 전환이 된다
+- [ ] 제목 4회 → 1.5초 초과 대기 → 1회로는 잠금이 바뀌지 않고, 이후 4회를 빠르게 누르면 바뀐다
+- [ ] 매운맛 질문을 뽑은 뒤 제목 5회로 재잠그면 버튼·질문·A/B 선택이 사라지고 중간맛이 저장되며, 새로고침해도 잠금 상태다
 - [ ] `✨ 전체`와 각 카테고리(특히 새로 추가/수정한 카테고리)에서 뽑기가 된다
 - [ ] 하단 카운터의 질문 수가 예상대로 늘었다/줄었다
 - [ ] 밸런스 게임에서 A/B 선택이 정상 표시된다
@@ -222,7 +225,7 @@ const mildQuestions = [
 ### PWA 캐시 유지보수
 
 - 캐시 대상: `./`, `./index.html`, manifest, icons. 앱 진입은 네트워크 우선, 실패 시 동일한 index 캐시를 사용합니다.
-- 캐시 파일을 수정하면 `sw.js` 캐시 이름도 반드시 증가시키세요(현재 `icebreaker-v5`).
+- 캐시 파일을 수정하면 `sw.js` 캐시 이름도 반드시 증가시키세요(현재 `icebreaker-v8`).
 - 업데이트 설치 시 HTTP 캐시를 새로 검증하며, 이전 Icebreaker 버전 캐시만 정리하고 글꼴 캐시는 유지합니다.
 - `file://`에서는 질문 뽑기만 동작합니다. 서비스 워커는 HTTPS 또는 localhost에서 확인합니다.
 - Pretendard는 jsDelivr CDN(`pretendard@v1.3.9` 다이내믹 서브셋)에서 불러오고 서비스 워커가 캐시 우선으로 저장합니다. 불러오지 못하면 시스템 한글 글꼴을 사용합니다.
@@ -265,4 +268,4 @@ git push origin main
 - ❌ **검토 요청 시 바로 푸시 금지**: 문서 변경 등에 대해 검토를 요청받았다면 `main`에 바로 푸시하지 말고 브랜치 + PR로 올려 확인을 받으세요.
 - ❌ 파일 인코딩을 UTF-8 이외로 바꾸지 마세요. (한글 깨짐)
 
-- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v7, 통계 요청은 캐시하지 않음.
+- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v8, 통계 요청은 캐시하지 않음.
