@@ -1694,6 +1694,9 @@
 
     const STORAGE_KEY = "icebreaker:mode";
     const SPICE_KEY = "icebreaker:spice";
+    const BAGS_KEY = "icebreaker:bags";
+    // 풀별 남은 인덱스(b), 마지막 인덱스(l), 전체 크기(n)만 저장합니다.
+    const drawBags = Object.create(null);
 
     const announcementEl = document.getElementById("announcement");
     const cardEl = document.getElementById("card");
@@ -1714,7 +1717,6 @@
     let titleTaps = 0;
     let lastTitleTap = 0;
     let currentCategory = "all";
-    let lastKey = "";
 
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -1732,7 +1734,27 @@
     }
 
     const cur = () => modes[currentMode];
-    const itemKey = (item) => (item.text !== undefined ? item.text : item.a + "||" + item.b);
+
+    try {
+      const saved = JSON.parse(localStorage.getItem(BAGS_KEY));
+      if (saved && typeof saved === "object" && !Array.isArray(saved)) {
+        Object.entries(saved).forEach(([key, state]) => {
+          const [mode, spice, category, extra] = key.split(":");
+          if (extra !== undefined || !Object.hasOwn(modes, mode) || !Object.hasOwn(spices, spice) ||
+              (category !== "all" && !Object.hasOwn(modes[mode].categories, category))) return;
+          const size = getPool(mode, spice, category).length;
+          const validIndex = (index) => Number.isInteger(index) && index >= 0 && index < size;
+          if (state && state.n === size && Array.isArray(state.b) && state.b.length <= size &&
+              state.b.every(validIndex) && new Set(state.b).size === state.b.length &&
+              (state.l === null ? state.b.length === 0 || state.b.length === size :
+                validIndex(state.l) && !state.b.includes(state.l))) {
+            drawBags[key] = { b: state.b, l: state.l, n: size };
+          }
+        });
+      }
+    } catch (e) {
+      /* 저장소 사용 불가·잘못된 JSON은 새 뽑기로 시작 */
+    }
 
     /* 모드 토글 */
     Object.entries(modes).forEach(([key, { label }]) => {
@@ -1791,19 +1813,29 @@
       });
     }
 
-    function getPool() {
-      return cur().items.filter(
+    function getPool(mode = currentMode, spice = currentSpice, category = currentCategory) {
+      return modes[mode].items.filter(
         (q) =>
-          q.spice === currentSpice &&
-          (currentCategory === "all" || q.category === currentCategory)
+          q.spice === spice &&
+          (category === "all" || q.category === category)
       );
+    }
+
+    function getBag(size) {
+      const key = `${currentMode}:${currentSpice}:${currentCategory}`;
+      if (!drawBags[key] || drawBags[key].n !== size) {
+        drawBags[key] = { b: [], l: null, n: size };
+      }
+      return drawBags[key];
     }
 
     function updateCounter() {
       const count = getPool().length;
+      const state = getBag(count);
+      const drawn = state.l === null ? 0 : count - state.b.length;
       const spiceName = spices[currentSpice].label;
       const catName = currentCategory === "all" ? "전체" : cur().categories[currentCategory].label;
-      counterEl.textContent = `${spiceName} · ${catName} · ${cur().unit} ${count}개`;
+      counterEl.textContent = `${spiceName} · ${catName} · ${cur().unit} ${count}개 · ${drawn}/${count}`;
     }
 
     function showPlaceholder() {
@@ -1823,7 +1855,6 @@
       if (!Object.hasOwn(modes, key)) return;
       currentMode = key;
       currentCategory = "all";
-      lastKey = "";
       try {
         localStorage.setItem(STORAGE_KEY, key);
       } catch (e) {
@@ -1933,10 +1964,27 @@
         announcementEl.textContent = questionEl.textContent;
         return;
       }
-      const alternatives = pool.filter((candidate) => itemKey(candidate) !== lastKey);
-      const candidates = alternatives.length ? alternatives : pool;
-      const item = candidates[Math.floor(Math.random() * candidates.length)];
-      lastKey = itemKey(item);
+      const state = getBag(pool.length);
+      if (!state.b.length) {
+        state.b = pool.map((_, index) => index);
+        for (let i = state.b.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [state.b[i], state.b[j]] = [state.b[j], state.b[i]];
+        }
+        const end = state.b.length - 1;
+        if (end > 0 && state.b[end] === state.l) {
+          const j = Math.floor(Math.random() * end);
+          [state.b[end], state.b[j]] = [state.b[j], state.b[end]];
+        }
+      }
+      state.l = state.b.pop();
+      const item = pool[state.l];
+      try {
+        localStorage.setItem(BAGS_KEY, JSON.stringify(drawBags));
+      } catch (e) {
+        /* 저장 실패 시 메모리에서 계속 뽑기 */
+      }
+      updateCounter();
 
       badgeEl.textContent = `${spices[item.spice].label} · ${cur().categories[item.category].label}`;
       badgeEl.classList.add("show");
