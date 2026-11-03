@@ -208,6 +208,19 @@
       box-shadow: 0 0 0 3px var(--accent-glow);
     }
 
+    .spice-btn[data-spice="medium"].active {
+      background: linear-gradient(135deg, #d32f2f, #b71c1c);
+      color: #fff;
+      border-color: #b71c1c;
+    }
+
+    .spice-btn[data-spice="hot"].active {
+      background: linear-gradient(135deg, #7f0000, #2a0000);
+      color: #fff;
+      border-color: #2a0000;
+      box-shadow: 0 0 0 3px rgba(127, 0, 0, 0.2), 0 0 12px rgba(127, 0, 0, 0.24);
+    }
+
     /* ---------- category chips ---------- */
     .categories {
       display: flex;
@@ -1647,8 +1660,8 @@
     /* ===== 공통 설정 ===== */
     const spices = {
       mild: { label: "😋 순한맛" },
-      medium: { label: "🌶️ 중간맛" },
-      hot: { label: "🔥 매운맛" }
+      medium: { label: "🌶️ 매운맛" },
+      hot: { label: "🔥 핵매운맛" }
     };
 
     const modes = {
@@ -1707,7 +1720,7 @@
       if (Object.hasOwn(modes, saved)) currentMode = saved;
       let savedSpice = localStorage.getItem(SPICE_KEY);
       if (savedSpice === "spicy" || savedSpice === "hot" || savedSpice === "매운맛") {
-        /* 예전 맛과 잠긴 매운맛은 중간맛으로 이전 */
+        /* 예전 맛과 잠긴 핵매운맛은 매운맛으로 이전 */
         savedSpice = "medium";
         currentSpice = savedSpice;
         localStorage.setItem(SPICE_KEY, savedSpice);
@@ -1744,7 +1757,7 @@
       spicesEl.appendChild(btnEl);
     });
 
-    /* 제목을 1.5초 간격 이내로 다섯 번 누르면 매운맛 잠금 전환 */
+    /* 제목을 1.5초 간격 이내로 다섯 번 누르면 핵매운맛 잠금 전환 */
     titleEl.addEventListener("click", () => {
       const now = performance.now();
       titleTaps = now - lastTitleTap <= 1500 ? titleTaps + 1 : 1;
