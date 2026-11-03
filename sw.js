@@ -1,4 +1,4 @@
-const CACHE = 'icebreaker-v13';
+const CACHE = 'icebreaker-v14';
 const FONT_CACHE = 'icebreaker-fonts-v1';
 const FONT_ORIGIN = 'https://cdn.jsdelivr.net';
 const PRECACHE = [
