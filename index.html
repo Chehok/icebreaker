@@ -14,7 +14,7 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Icebreaker" />
-  <meta name="description" content="모임 분위기를 풀어주는 대화 주제, 밸런스 게임, 이 중 누가? 모음, Icebreaker" />
+  <meta name="description" content="모임 분위기를 풀어주는 대화 주제, 밸런스게임, 이 중 누가? 모음, Icebreaker" />
   <style>
     :root {
       --bg: #f4f5f9;
@@ -149,9 +149,14 @@
     }
 
     .modes { max-width: 440px; }
-    .mode-btn { white-space: normal; min-width: 0; overflow-wrap: anywhere; }
+    .mode-btn { white-space: nowrap; min-width: 0; }
     @media (max-width: 420px) {
       .mode-btn { padding: 10px 4px; font-size: 0.84rem; letter-spacing: -0.03em; }
+    }
+
+    @media (max-width: 360px) {
+      .modes { gap: 2px; padding: 3px; }
+      .mode-btn { padding: 10px 2px; font-size: 0.78rem; }
     }
 
     /* ---------- who mode hint ---------- */
@@ -558,7 +563,7 @@
 <body>
   <div class="container">
     <h1>🧊 Icebreaker</h1>
-    <p class="subtitle">대화 주제, 밸런스 게임, 이 중 누가?로 어색한 분위기를 풀어보세요!<br />모드와 맛, 카테고리를 고르고 버튼을 눌러봐요.</p>
+    <p class="subtitle">대화 주제, 밸런스게임, 이 중 누가?로 어색한 분위기를 풀어보세요!<br />모드와 맛, 카테고리를 고르고 버튼을 눌러봐요.</p>
 
     <p class="subtitle">답하기 곤란하면 언제든 건너뛰세요. 실명이나 타인의 비밀은 말하지 않아도 돼요.</p>
 
@@ -1190,7 +1195,7 @@
       ...hotQuestions.map((q) => ({ ...q, spice: "hot" }))
     ];
 
-    /* ===== ⚖️ 밸런스 게임 모드 데이터 ({a, b, category, spice}) ===== */
+    /* ===== ⚖️ 밸런스게임 모드 데이터 ({a, b, category, spice}) ===== */
     const balanceCategories = {
       food: { label: "🍜 음식" },
       love: { label: "💘 연애" },
@@ -1494,7 +1499,128 @@
       { a: "연인과의 카톡 전부 스크린샷 유출", b: "내 메모장 전부 유출", category: "tech", spice: "hot" },
       { a: "사장님이 내 연애 상담사", b: "내 전 애인이 회사 인사팀장", category: "work", spice: "hot" },
       { a: "데이트 중 말할 때마다 속마음이 자막으로 뜨기", b: "데이트 중 웃을 때마다 콧물 나오기", category: "weird", spice: "hot" },
-      { a: "연인과 여행 중 숙소 방음이 하나도 안 되기", b: "연인과 여행 중 숙소를 친구들과 같이 쓰기", category: "travel", spice: "hot" }
+      { a: "연인과 여행 중 숙소 방음이 하나도 안 되기", b: "연인과 여행 중 숙소를 친구들과 같이 쓰기", category: "travel", spice: "hot" },
+
+      { a: "갓 구운 빵의 바삭한 끝부분", b: "촉촉하고 부드러운 가운데 부분", category: "food", spice: "mild" },
+      { a: "도시락 반찬을 한 칸씩 따로 담기", b: "한 그릇에 전부 비벼 먹기", category: "food", spice: "mild" },
+      { a: "새 메뉴가 나오면 바로 도전하기", b: "단골 메뉴를 꾸준히 주문하기", category: "food", spice: "mild" },
+      { a: "국물 요리에 밥을 처음부터 말기", b: "밥을 따로 떠서 국물과 먹기", category: "food", spice: "mild" },
+      { a: "요리할 때 계량컵 꼭 쓰기", b: "눈대중으로 간 맞추기", category: "food", spice: "mild" },
+      { a: "내 요리만 남은 포틀럭 파티", b: "내 요리인 줄 모르고 혹평하는 친구", category: "food", spice: "medium" },
+      { a: "식당에서 단골인 척했는데 사장님이 못 알아보기", b: "요리를 아는 척했는데 재료부터 틀리기", category: "food", spice: "medium" },
+      { a: "친구가 내 추천 메뉴를 먹고 옆 테이블 음식만 부러워하기", b: "내가 친구 메뉴를 계속 부러워하는 걸 들키기", category: "food", spice: "medium" },
+      { a: "음식점 리뷰에 내 얼굴만 우스꽝스럽게 찍히기", b: "음식점 벽에 내 먹다 만 표정이 단골 사진으로 걸리기", category: "food", spice: "medium" },
+      { a: "전 애인에게 배운 요리로 현 연인에게 칭찬받기", b: "현 연인의 인생 요리가 전 애인 레시피인 걸 알기", category: "food", spice: "hot" },
+      { a: "고급 식당 데이트 비용을 내 생활비에서 무리해서 내기", b: "오늘은 돈 없다고 털어놓고 예약 취소하기", category: "food", spice: "hot" },
+      { a: "썸 상대와의 저녁에 절친을 초대했다가 둘이 눈 맞기", b: "절친의 소개팅 저녁에 갔다가 내가 상대에게 끌리기", category: "food", spice: "hot" },
+      { a: "비 오는 날 우산 하나 같이 쓰기", b: "맑은 날 자전거 나란히 타기", category: "love", spice: "mild" },
+      { a: "서로 좋아하는 책 바꿔 읽기", b: "서로 좋아하는 영화 한 편씩 같이 보기", category: "love", spice: "mild" },
+      { a: "함께 도자기 만들기", b: "함께 빵 굽기", category: "love", spice: "mild" },
+      { a: "응원 메시지를 아침에 받기", b: "하루 끝에 수고했다는 말 듣기", category: "love", spice: "mild" },
+      { a: "같이 퍼즐 완성하기", b: "같이 화분 키우기", category: "love", spice: "mild" },
+      { a: "썸 상대가 내 농담에 예의상 웃는 걸 알기", b: "내가 예의상 웃는 걸 썸 상대가 알아채기", category: "love", spice: "medium" },
+      { a: "소개팅에서 서로 자기 자랑만 하기", b: "소개팅에서 서로 질문만 하고 답을 피하기", category: "love", spice: "medium" },
+      { a: "연인이 내 패션을 매번 고쳐주기", b: "연인이 내 사진 각도를 매번 지적하기", category: "love", spice: "medium" },
+      { a: "둘만 아는 애칭을 친구들이 따라 부르기", b: "둘만 아는 말투를 친구들이 흉내 내기", category: "love", spice: "medium" },
+      { a: "연인이 나와 결혼을 망설이는 이유가 돈이기", b: "내가 연인과 결혼을 망설이는 이유가 설렘 부족이기", category: "love", spice: "hot" },
+      { a: "헤어진 뒤 돌려받을 비싼 선물 직접 요구하기", b: "미련 있다는 오해를 피하려고 선물 포기하기", category: "love", spice: "hot" },
+      { a: "키스 취향을 솔직히 말해 잠깐 어색해지기", b: "안 맞는 걸 알면서 계속 상대에게 맞춰주기", category: "love", spice: "hot" },
+      { a: "일할 때 큰 모니터 하나", b: "작은 모니터 두 개", category: "work", spice: "mild" },
+      { a: "하루 업무를 체크리스트로 관리하기", b: "달력에 시간별로 배치하기", category: "work", spice: "mild" },
+      { a: "새 기술을 배우는 교육비 지원", b: "좋아하는 책을 사는 도서비 지원", category: "work", spice: "mild" },
+      { a: "일주일에 하루 회의 몰아서 하기", b: "매일 짧게 회의하기", category: "work", spice: "mild" },
+      { a: "첫 월급으로 나에게 선물하기", b: "고마운 사람에게 식사 대접하기", category: "work", spice: "mild" },
+      { a: "업무 칭찬인 줄 알고 좋아했는데 다른 사람 이야기", b: "내 칭찬인데 남 이야기인 줄 알고 맞장구치기", category: "work", spice: "medium" },
+      { a: "후배에게 배운 걸 상사에게 설명하다 막히기", b: "상사에게 배운 걸 후배가 더 쉽게 설명하기", category: "work", spice: "medium" },
+      { a: "퇴근 인사를 너무 크게 해서 모두 시계 보기", b: "출근 인사를 너무 작게 해서 세 번 반복하기", category: "work", spice: "medium" },
+      { a: "아는 척한 엑셀 기능을 즉석에서 시연하기", b: "영어 잘하는 척한 뒤 외국 손님 안내 맡기", category: "work", spice: "medium" },
+      { a: "연인에게 숨긴 개인 저축을 결혼 전에 밝히기", b: "결혼이 무산될까 봐 결혼 자체를 미루기", category: "work", spice: "hot" },
+      { a: "절친과 동업하면서 지분 70% 요구하기", b: "똑같이 일하고 절친에게 지분 70% 주기", category: "work", spice: "hot" },
+      { a: "전 애인에게 받은 고가 선물을 팔아 현 연인 선물 사기", b: "현 연인에게 선물 살 돈이 부족한 이유까지 솔직히 말하기", category: "work", spice: "hot" },
+      { a: "그림 속 풍경에 하루 들어가기", b: "노래 속 장면에 하루 들어가기", category: "power", spice: "mild" },
+      { a: "필요한 물건을 종이접기로 만들기", b: "필요한 물건을 그림으로 그려 꺼내기", category: "power", spice: "mild" },
+      { a: "별자리를 원하는 모양으로 바꾸기", b: "구름을 원하는 모양으로 바꾸기", category: "power", spice: "mild" },
+      { a: "어디서든 작은 무지개 만들기", b: "어디서든 은은한 꽃향기 만들기", category: "power", spice: "mild" },
+      { a: "물건의 사용법을 만지면 알기", b: "식물에게 필요한 것을 만지면 알기", category: "power", spice: "mild" },
+      { a: "허세 부릴 때마다 키가 1cm 줄기", b: "아는 척할 때마다 말풍선에 물음표 뜨기", category: "power", spice: "medium" },
+      { a: "칭찬받으면 머리 위에 점수판 뜨기", b: "삐치면 머리 위에 먹구름 뜨기", category: "power", spice: "medium" },
+      { a: "핑계 댈 때마다 진짜 이유가 영수증으로 나오기", b: "과장할 때마다 실제 수치가 자막으로 나오기", category: "power", spice: "medium" },
+      { a: "남과 비교할 때마다 상대에게 알림 가기", b: "잘난 척할 때마다 과거 실수 장면이 떠오르기", category: "power", spice: "medium" },
+      { a: "마음이 식은 정확한 날짜를 알 수 있기", b: "사귀게 된 진짜 이유를 한 번 물을 수 있기", category: "power", spice: "hot" },
+      { a: "내가 누구에게 질투하는지 머리 위에 표시되기", b: "내가 누구에게 성적으로 끌리는지 머리 위에 표시되기", category: "power", spice: "hot" },
+      { a: "전 애인과의 마지막 싸움만 다시 할 기회", b: "지금 연인과 가장 크게 한 거짓말을 취소할 기회", category: "power", spice: "hot" },
+      { a: "현관 앞에 작은 벤치 두기", b: "창가에 작은 독서 의자 두기", category: "life", spice: "mild" },
+      { a: "하루 집안일을 매일 조금씩 하기", b: "주말 오전에 한꺼번에 하기", category: "life", spice: "mild" },
+      { a: "동네 산책길에 강이 있기", b: "동네 산책길에 숲이 있기", category: "life", spice: "mild" },
+      { a: "일기를 손글씨로 쓰기", b: "하루를 사진 한 장으로 남기기", category: "life", spice: "mild" },
+      { a: "집에서 늘 은은한 조명 켜기", b: "햇빛이 충분할 때만 생활하기", category: "life", spice: "mild" },
+      { a: "혼자인 줄 알고 춤추다 창밖 이웃과 눈 마주치기", b: "이어폰 낀 줄 알고 영상 틀다 버스에서 소리 나기", category: "life", spice: "medium" },
+      { a: "택배 기사님에게 무심코 사랑한다고 인사하기", b: "처음 본 이웃에게 잘 자라고 인사하기", category: "life", spice: "medium" },
+      { a: "버릴 옷이라던 옷을 입고 친구 만나기", b: "안 산다던 물건 쇼핑백을 들고 친구 만나기", category: "life", spice: "medium" },
+      { a: "미용실에서 조용히 있고 싶은데 직업 이야기 계속하기", b: "신나게 이야기했는데 미용사가 다른 손님에게 한 질문이기", category: "life", spice: "medium" },
+      { a: "동거 비용은 반반인데 집안일은 내가 전부 하기", b: "집안일은 반반인데 생활비는 내가 전부 내기", category: "life", spice: "hot" },
+      { a: "결혼 전에 각자의 빚만 정확히 공개하기", b: "각자가 가족에게 보낼 돈까지 전부 합의하기", category: "life", spice: "hot" },
+      { a: "현 연인과 살 집이 전 애인과 살던 집이기", b: "새 집에 놓을 가구 절반이 전 애인과 고른 것이기", category: "life", spice: "hot" },
+      { a: "감자튀김 모양 케이크", b: "케이크 모양 감자튀김", category: "weird", spice: "mild" },
+      { a: "우산을 펴면 작은 별이 쏟아지기", b: "장화를 신으면 물웅덩이가 반짝이기", category: "weird", spice: "mild" },
+      { a: "손톱이 요일마다 다른 무늬로 바뀌기", b: "양말 무늬가 기분 따라 바뀌기", category: "weird", spice: "mild" },
+      { a: "말하는 주전자와 살기", b: "노래하는 냉장고와 살기", category: "weird", spice: "mild" },
+      { a: "푸딩처럼 흔들리는 의자", b: "마시멜로처럼 푹신한 책상", category: "weird", spice: "mild" },
+      { a: "허세를 부리면 코에서 비눗방울 나오기", b: "삐친 척하면 귀에서 휘파람 소리 나기", category: "weird", spice: "medium" },
+      { a: "셀카 찍을 때만 자동으로 윙크하기", b: "영상 통화할 때만 자동으로 볼하트 하기", category: "weird", spice: "medium" },
+      { a: "변명할 때마다 성악 발성으로 말하기", b: "사과할 때마다 뮤지컬 반주 나오기", category: "weird", spice: "medium" },
+      { a: "비싼 척한 물건이 진짜 가격을 외치기", b: "잘한다고 한 취미 도구가 실력을 점수로 말하기", category: "weird", spice: "medium" },
+      { a: "전 애인을 떠올리면 현 연인 휴대폰이 진동하기", b: "다른 사람에게 설레면 내 반지가 빨갛게 빛나기", category: "weird", spice: "hot" },
+      { a: "입맞춤 직전에 매번 협상 시작 종소리 나기", b: "밀당할 때마다 상대에게 내 전략 설명서 뜨기", category: "weird", spice: "hot" },
+      { a: "내가 숨긴 질투가 향수 이름으로 바뀌기", b: "내가 숨긴 허영심이 옷 가격표에 적히기", category: "weird", spice: "hot" },
+      { a: "낯선 도시의 아침 시장 구경", b: "낯선 도시의 밤 산책", category: "travel", spice: "mild" },
+      { a: "여행지에서 하루 요리 수업 듣기", b: "여행지에서 하루 공예 수업 듣기", category: "travel", spice: "mild" },
+      { a: "짐을 작은 가방 하나로 줄이기", b: "여유 공간 있는 큰 가방 챙기기", category: "travel", spice: "mild" },
+      { a: "일출 보러 새벽에 출발하기", b: "별 보러 밤늦게 출발하기", category: "travel", spice: "mild" },
+      { a: "숙소에서 엽서 쓰기", b: "현지 우체국에서 기념 도장 모으기", category: "travel", spice: "mild" },
+      { a: "지도 담당인데 같은 골목 세 번 돌기", b: "통역 담당인데 메뉴판부터 잘못 읽기", category: "travel", spice: "medium" },
+      { a: "혼자 쉬고 싶은데 동행이 계속 말 걸기", b: "수다 떨고 싶은데 동행이 계속 이어폰 끼기", category: "travel", spice: "medium" },
+      { a: "예약 담당이 날짜를 하루 착각하기", b: "짐 담당이 공용 충전기를 두고 오기", category: "travel", spice: "medium" },
+      { a: "여행 기념품을 줬는데 친구가 가격 검색하기", b: "기념품 받은 내가 친구 앞에서 가격 검색을 들키기", category: "travel", spice: "medium" },
+      { a: "커플 여행 경비를 낸 뒤 헤어져서 혼자 가기", b: "헤어진 뒤에도 환불 아까워 둘이 여행 가기", category: "travel", spice: "hot" },
+      { a: "전 애인과 갔던 여행지를 현 연인이 신혼여행지로 고르기", b: "현 연인이 전 애인과 갔던 곳을 신혼여행지로 추천하기", category: "travel", spice: "hot" },
+      { a: "여행 중 만난 사람과 강렬한 하룻밤의 설렘", b: "오래 연락하다 다음 여행에서 다시 만나는 설렘", category: "travel", spice: "hot" },
+      { a: "친구와 같은 책 읽고 이야기하기", b: "친구와 다른 책 읽고 서로 추천하기", category: "friends", spice: "mild" },
+      { a: "친구에게 직접 만든 작은 선물 받기", b: "친구가 골라준 중고책 받기", category: "friends", spice: "mild" },
+      { a: "친구와 동네 쓰레기 줍기", b: "친구와 유기동물 보호소 봉사하기", category: "friends", spice: "mild" },
+      { a: "친구가 추천한 취미 하루 배우기", b: "내 취미를 친구에게 하루 가르치기", category: "friends", spice: "mild" },
+      { a: "친구와 협동 보드게임 하기", b: "친구와 공동 플레이리스트 만들기", category: "friends", spice: "mild" },
+      { a: "친구의 긴 이야기 결말을 이미 알기", b: "내 긴 이야기 결말을 친구가 먼저 말하기", category: "friends", spice: "medium" },
+      { a: "친구 이름을 부르다 다른 친구 이름 세 번 말하기", b: "친구가 내 이름 대신 반려동물 이름 부르기", category: "friends", spice: "medium" },
+      { a: "친구에게 준 선물을 중고장터에서 발견하기", b: "친구에게 받은 선물을 팔다가 친구에게 문의받기", category: "friends", spice: "medium" },
+      { a: "단체 사진에서 나만 잘 나온 사진 올리기", b: "다들 잘 나왔는데 나만 눈 감은 사진 허락하기", category: "friends", spice: "medium" },
+      { a: "이 자리에서 가장 돈 빌려주기 싫은 사람 고르기", b: "이 자리에서 가장 연애 상담 믿기 어려운 사람 고르기", category: "friends", spice: "hot" },
+      { a: "친구가 내 연인의 재력을 부러워한다고 고백하기", b: "내가 친구 연인의 외모를 부러워한다고 고백하기", category: "friends", spice: "hot" },
+      { a: "절친에게 나와 사귈 생각 해봤는지 묻기", b: "절친에게 내가 고백하면 왜 거절할지 묻기", category: "friends", spice: "hot" },
+      { a: "학급 신문에 만화 그리기", b: "학급 방송에서 음악 소개하기", category: "school", spice: "mild" },
+      { a: "쉬는 시간 운동장 한 바퀴 걷기", b: "도서관에서 만화책 보기", category: "school", spice: "mild" },
+      { a: "과학 시간 실험 담당", b: "미술 시간 재료 담당", category: "school", spice: "mild" },
+      { a: "학교 텃밭에서 수확하기", b: "학교 벽화 함께 그리기", category: "school", spice: "mild" },
+      { a: "졸업 후 타임캡슐 열기", b: "졸업 후 옛 교실 둘러보기", category: "school", spice: "mild" },
+      { a: "동창에게 기억 안 나는 별명으로 불리기", b: "동창의 별명을 이름인 줄 알고 부르기", category: "school", spice: "medium" },
+      { a: "발표 자료의 연습용 농담을 지우지 않기", b: "발표 대본의 스스로 응원하는 문장까지 읽기", category: "school", spice: "medium" },
+      { a: "학급 회장 공약을 너무 크게 잡아 후회하기", b: "장기자랑 신청을 너무 자신 있게 해서 후회하기", category: "school", spice: "medium" },
+      { a: "수업 끝난 줄 알고 혼자 가방 싸기", b: "쉬는 시간 끝난 줄 알고 혼자 인사하기", category: "school", spice: "medium" },
+      { a: "성인이 된 동창과 비밀 연애하다 동창회에서 공개하기", b: "동창회에서 성인이 된 첫사랑에게 재고백하고 거절당하기", category: "school", spice: "hot" },
+      { a: "동창이 내 현재 연봉을 듣고 노골적으로 태도 바꾸기", b: "내가 동창의 재산을 듣고 태도 바꾼 걸 지적받기", category: "school", spice: "hot" },
+      { a: "성인 동창 모임에서 옛 인기도를 두고 전 애인과 다투기", b: "성인 동창 모임에서 현재 연인이 내 첫사랑에게 질투하기", category: "school", spice: "hot" },
+      { a: "전자책에 밑줄 긋기", b: "종이책에 포스트잇 붙이기", category: "tech", spice: "mild" },
+      { a: "가족 사진을 디지털 액자로 보기", b: "사진을 인화해서 벽에 걸기", category: "tech", spice: "mild" },
+      { a: "키보드는 조용한 타건감", b: "키보드는 경쾌한 타건감", category: "tech", spice: "mild" },
+      { a: "지도 앱으로 동네 새 길 찾기", b: "음악 앱으로 새 가수 찾기", category: "tech", spice: "mild" },
+      { a: "게임 캐릭터 외형 꾸미기", b: "게임 속 집 꾸미기", category: "tech", spice: "mild" },
+      { a: "자동 완성 때문에 존댓말 끝에 애교 붙기", b: "음성 입력 때문에 진지한 메시지에 엉뚱한 단어 들어가기", category: "tech", spice: "medium" },
+      { a: "영상 통화 필터를 끌 줄 몰라 고양이 얼굴로 상담하기", b: "회의 배경을 바꿀 줄 몰라 우주선 안에서 발표하기", category: "tech", spice: "medium" },
+      { a: "좋아요 없는 게시물을 친구에게 홍보하다 들키기", b: "내 게시물에 내가 댓글 단 부계정을 들키기", category: "tech", spice: "medium" },
+      { a: "중고 거래 닉네임이 모임 별명이 되기", b: "게임에서 쓴 허세 자기소개가 모임 유행어 되기", category: "tech", spice: "medium" },
+      { a: "연애 앱에서 현 연인과 내 절친이 서로 좋아요 한 걸 알기", b: "연애 앱에서 나와 전 애인의 절친이 서로 좋아요 누르기", category: "tech", spice: "hot" },
+      { a: "연인이 커플 사진보다 내 소비 내역 공유를 원하기", b: "연인이 소비 내역보다 내 위치 공유를 원하기", category: "tech", spice: "hot" },
+      { a: "비공개 계정에 올린 현 연인 불만을 직접 읽어주기", b: "헤어질까 고민하며 작성한 장단점 표를 현 연인에게 보여주기", category: "tech", spice: "hot" }
     ];
 
     /* ===== 🎯 이 중 누가? 모드 데이터 ===== */
@@ -1655,7 +1781,103 @@
       { text: "이 중에 소개팅에서 제일 어이없는 이유로 차일 것 같은 사람은?", category: "silly", spice: "hot" },
       { text: "이 중에 잠꼬대로 짝사랑 이름 부를 것 같은 사람은?", category: "silly", spice: "hot" },
       { text: "이 중에 이 질문 걸릴까 봐 제일 쫄고 있는 사람은?", category: "silly", spice: "hot" },
-      { text: "이 중에 오늘 집에 가서 이 대화 곱씹으며 이불킥 할 것 같은 사람은?", category: "silly", spice: "hot" }
+      { text: "이 중에 오늘 집에 가서 이 대화 곱씹으며 이불킥 할 것 같은 사람은?", category: "silly", spice: "hot" },
+
+      { text: "이 중에 외출 전에 날씨에 맞춰 가방을 챙길 것 같은 사람은?", category: "habit", spice: "mild" },
+      { text: "이 중에 장보기 목록을 냉장고에 붙여 둘 것 같은 사람은?", category: "habit", spice: "mild" },
+      { text: "이 중에 간식 봉지를 뜯으면 집게부터 찾을 것 같은 사람은?", category: "habit", spice: "mild" },
+      { text: "이 중에 집에서 쓰는 컵에 유난히 애착이 있을 것 같은 사람은?", category: "habit", spice: "mild" },
+      { text: "이 중에 낯선 동네에서도 산책 코스를 금방 찾을 것 같은 사람은?", category: "habit", spice: "mild" },
+      { text: "이 중에 옷의 세탁 표시를 꼼꼼하게 읽을 것 같은 사람은?", category: "habit", spice: "mild" },
+      { text: "이 중에 택배 상자를 반듯하게 접어 버릴 것 같은 사람은?", category: "habit", spice: "mild" },
+      { text: "이 중에 비싼 취미 용품을 사고 첫날만 쓸 것 같은 사람은?", category: "habit", spice: "medium" },
+      { text: "이 중에 정리 앱을 깔아 놓고 그 앱부터 방치할 것 같은 사람은?", category: "habit", spice: "medium" },
+      { text: "이 중에 휴대폰을 손에 들고 휴대폰을 찾을 것 같은 사람은?", category: "habit", spice: "medium" },
+      { text: "이 중에 냉장고 속 재료를 까먹고 똑같은 걸 또 살 것 같은 사람은?", category: "habit", spice: "medium" },
+      { text: "이 중에 쿠폰을 쓰려고 필요 없는 물건까지 살 것 같은 사람은?", category: "habit", spice: "medium" },
+      { text: "이 중에 생활비는 아낀다면서 은밀한 데이트 비용에는 아낌없을 것 같은 사람은?", category: "habit", spice: "hot" },
+      { text: "이 중에 연인의 물건보다 전 애인에게 받은 선물을 더 오래 간직할 것 같은 사람은?", category: "habit", spice: "hot" },
+      { text: "이 중에 사람을 만난 뒤 혼자 호감도 순위를 매겨 둘 것 같은 사람은?", category: "habit", spice: "hot" },
+      { text: "이 중에 연인에게 말한 취침 시간 이후 다른 사람과 연락할 것 같은 사람은?", category: "habit", spice: "hot" },
+      { text: "이 중에 새로 온 사람에게 복사기 사용법부터 알려줄 것 같은 사람은?", category: "work", spice: "mild" },
+      { text: "이 중에 회의록을 한눈에 읽히게 정리할 것 같은 사람은?", category: "work", spice: "mild" },
+      { text: "이 중에 책상 위에 작은 화분을 놓을 것 같은 사람은?", category: "work", spice: "mild" },
+      { text: "이 중에 학교나 직장에 새 동아리를 만들 것 같은 사람은?", category: "work", spice: "mild" },
+      { text: "이 중에 자료에 어울리는 제목을 잘 지을 것 같은 사람은?", category: "work", spice: "mild" },
+      { text: "이 중에 배운 내용을 다른 사람에게 쉽게 설명할 것 같은 사람은?", category: "work", spice: "mild" },
+      { text: "이 중에 퇴근길에 동료와 동네 빵집에 들를 것 같은 사람은?", category: "work", spice: "mild" },
+      { text: "이 중에 자기가 만든 문서를 보며 누가 만들었냐고 물을 것 같은 사람은?", category: "work", spice: "medium" },
+      { text: "이 중에 회의에서 멋진 용어를 썼다가 뜻을 되물을까 긴장할 것 같은 사람은?", category: "work", spice: "medium" },
+      { text: "이 중에 후배 앞에서만 유난히 바쁜 척할 것 같은 사람은?", category: "work", spice: "medium" },
+      { text: "이 중에 상사 농담이 안 웃겨도 가장 크게 웃을 것 같은 사람은?", category: "work", spice: "medium" },
+      { text: "이 중에 발표 연습 때는 완벽했다며 끝나고 제일 오래 해명할 것 같은 사람은?", category: "work", spice: "medium" },
+      { text: "이 중에 이 자리에 있는 사람과 동업한다면 계약서에 가장 많은 조건을 붙일 것 같은 사람은?", category: "work", spice: "hot" },
+      { text: "이 중에 친구의 성공을 축하하면서 속으로는 수입부터 계산할 것 같은 사람은?", category: "work", spice: "hot" },
+      { text: "이 중에 연애 상대를 고를 때 직업의 간판을 꽤 따질 것 같은 사람은?", category: "work", spice: "hot" },
+      { text: "이 중에 연인과 같은 회사에 다녀도 더 좋은 조건이면 혼자 이직할 것 같은 사람은?", category: "work", spice: "hot" },
+      { text: "이 중에 상대가 좋아하는 노래를 기억했다가 틀어줄 것 같은 사람은?", category: "love", spice: "mild" },
+      { text: "이 중에 데이트 중 예쁜 풍경을 보면 상대부터 사진에 담을 것 같은 사람은?", category: "love", spice: "mild" },
+      { text: "이 중에 말없이 걸어도 어색하지 않은 데이트를 할 것 같은 사람은?", category: "love", spice: "mild" },
+      { text: "이 중에 함께 도전할 취미를 열 가지쯤 제안할 것 같은 사람은?", category: "love", spice: "mild" },
+      { text: "이 중에 좋아하는 사람의 작은 성취도 크게 축하할 것 같은 사람은?", category: "love", spice: "mild" },
+      { text: "이 중에 추운 날 상대 주머니에 핫팩을 넣어줄 것 같은 사람은?", category: "love", spice: "mild" },
+      { text: "이 중에 로맨스 영화의 숨은 명장면을 잘 찾을 것 같은 사람은?", category: "love", spice: "mild" },
+      { text: "이 중에 소개팅 전에 상대보다 메뉴판을 더 오래 분석할 것 같은 사람은?", category: "love", spice: "medium" },
+      { text: "이 중에 연애 조언은 단호하게 해놓고 자기 차례에는 못 지킬 것 같은 사람은?", category: "love", spice: "medium" },
+      { text: "이 중에 썸 상대 앞에서 좋아하지도 않는 취미를 좋아한다고 할 것 같은 사람은?", category: "love", spice: "medium" },
+      { text: "이 중에 사귀기도 전에 커플 여행 일정을 상상할 것 같은 사람은?", category: "love", spice: "medium" },
+      { text: "이 중에 상대에게 잘 보이려다 평소 안 쓰는 단어를 쓸 것 같은 사람은?", category: "love", spice: "medium" },
+      { text: "이 중에 헤어질 때 솔직한 이유 대신 착한 사람으로 남을 말을 고를 것 같은 사람은?", category: "love", spice: "hot" },
+      { text: "이 중에 지금 이 자리에서 입맞춤을 상상해 본 상대가 있을 것 같은 사람은?", category: "love", spice: "hot" },
+      { text: "이 중에 연인이 잘나가는 전 애인을 칭찬하면 자존심이 크게 상할 것 같은 사람은?", category: "love", spice: "hot" },
+      { text: "이 중에 친구에게는 헤어지라고 하면서 본인은 같은 연애를 계속할 것 같은 사람은?", category: "love", spice: "hot" },
+      { text: "이 중에 단둘이 있을 때와 사람들 앞에서 스킨십 태도가 가장 다를 것 같은 사람은?", category: "love", spice: "hot" },
+      { text: "이 중에 처음 온 사람에게 게임 규칙을 차근차근 알려줄 것 같은 사람은?", category: "party", spice: "mild" },
+      { text: "이 중에 파티 장식의 색을 예쁘게 맞출 것 같은 사람은?", category: "party", spice: "mild" },
+      { text: "이 중에 모임에서 신청곡을 센스 있게 고를 것 같은 사람은?", category: "party", spice: "mild" },
+      { text: "이 중에 피크닉에 여분의 돗자리를 챙겨올 것 같은 사람은?", category: "party", spice: "mild" },
+      { text: "이 중에 마지막에 남아서 분리수거를 도울 것 같은 사람은?", category: "party", spice: "mild" },
+      { text: "이 중에 모임 사진으로 짧은 기념 영상을 만들 것 같은 사람은?", category: "party", spice: "mild" },
+      { text: "이 중에 말이 끊기면 모두가 답하기 쉬운 질문을 던질 것 같은 사람은?", category: "party", spice: "mild" },
+      { text: "이 중에 게임 설명을 안 듣다가 자기 차례에 규칙을 물을 것 같은 사람은?", category: "party", spice: "medium" },
+      { text: "이 중에 다 아는 노래라며 신청하고 가사는 하나도 모를 것 같은 사람은?", category: "party", spice: "medium" },
+      { text: "이 중에 파티 복장을 혼자만 너무 진지하게 준비할 것 같은 사람은?", category: "party", spice: "medium" },
+      { text: "이 중에 경품 추첨에서 담담한 척하다 당첨되면 가장 크게 반응할 것 같은 사람은?", category: "party", spice: "medium" },
+      { text: "이 중에 게임에서 진 뒤 규칙이 이상하다며 재경기를 요청할 것 같은 사람은?", category: "party", spice: "medium" },
+      { text: "이 중에 이 자리에서 사귀고 싶은 사람과 결혼하고 싶은 사람을 다르게 고를 것 같은 사람은?", category: "party", spice: "hot" },
+      { text: "이 중에 친구 커플이 헤어졌다는 소식에 은근히 기회를 느낄 것 같은 사람은?", category: "party", spice: "hot" },
+      { text: "이 중에 이 모임에 초대하고 싶지 않은 사람이 있어도 웃으며 맞을 것 같은 사람은?", category: "party", spice: "hot" },
+      { text: "이 중에 이 자리에서 받은 호감을 나중에 연인에게 은근히 자랑할 것 같은 사람은?", category: "party", spice: "hot" },
+      { text: "이 중에 미래에 동네 작은 영화관을 운영할 것 같은 사람은?", category: "future", spice: "mild" },
+      { text: "이 중에 외계인을 만나면 지구 음식을 먼저 소개할 것 같은 사람은?", category: "future", spice: "mild" },
+      { text: "이 중에 바닷속 도시의 첫 주민 모집에 지원할 것 같은 사람은?", category: "future", spice: "mild" },
+      { text: "이 중에 은퇴 후 동네 합창단에 들어갈 것 같은 사람은?", category: "future", spice: "mild" },
+      { text: "이 중에 미래의 집에 커다란 작업실을 만들 것 같은 사람은?", category: "future", spice: "mild" },
+      { text: "이 중에 새 행성에 가면 지명부터 재미있게 지을 것 같은 사람은?", category: "future", spice: "mild" },
+      { text: "이 중에 미래의 자신을 만나면 잘 지내냐보다 돈 얼마나 모았냐고 물을 것 같은 사람은?", category: "future", spice: "medium" },
+      { text: "이 중에 로봇 비서에게도 잘 보이려고 허세를 부릴 것 같은 사람은?", category: "future", spice: "medium" },
+      { text: "이 중에 복제 인간이 생기면 귀찮은 모임부터 대신 보낼 것 같은 사람은?", category: "future", spice: "medium" },
+      { text: "이 중에 미래 일기를 쓰다가 성공 소감만 세 페이지 쓸 것 같은 사람은?", category: "future", spice: "medium" },
+      { text: "이 중에 꿈을 녹화할 수 있게 되면 공개 전에 편집부터 할 것 같은 사람은?", category: "future", spice: "medium" },
+      { text: "이 중에 미래 배우자를 볼 수 있다면 얼굴보다 자산부터 확인할 것 같은 사람은?", category: "future", spice: "hot" },
+      { text: "이 중에 타임머신이 생기면 헤어진 연인을 붙잡기보다 차이기 전에 먼저 헤어질 것 같은 사람은?", category: "future", spice: "hot" },
+      { text: "이 중에 평생 한 사람에게만 설렌다는 조건이면 결혼을 망설일 것 같은 사람은?", category: "future", spice: "hot" },
+      { text: "이 중에 훗날 자서전에서 불리한 연애사는 전부 편집할 것 같은 사람은?", category: "future", spice: "hot" },
+      { text: "이 중에 빵 반죽에 이름을 붙여 키울 것 같은 사람은?", category: "silly", spice: "mild" },
+      { text: "이 중에 박물관 체험 버튼을 빠짐없이 눌러볼 것 같은 사람은?", category: "silly", spice: "mild" },
+      { text: "이 중에 퍼즐 마지막 한 조각을 끼우려고 끝까지 기다릴 것 같은 사람은?", category: "silly", spice: "mild" },
+      { text: "이 중에 버스 창밖 풍경을 보며 뮤직비디오 주인공이 될 것 같은 사람은?", category: "silly", spice: "mild" },
+      { text: "이 중에 눈사람에게 그럴듯한 직업을 정해줄 것 같은 사람은?", category: "silly", spice: "mild" },
+      { text: "이 중에 과자 모양으로 별자리 이야기를 만들 것 같은 사람은?", category: "silly", spice: "mild" },
+      { text: "이 중에 자동문이 안 열리면 손으로 마법 쓰는 시늉을 할 것 같은 사람은?", category: "silly", spice: "medium" },
+      { text: "이 중에 스마트 스피커와 말싸움을 하다가 진심으로 삐칠 것 같은 사람은?", category: "silly", spice: "medium" },
+      { text: "이 중에 비둘기가 다가오면 길을 비켜주고 존댓말까지 할 것 같은 사람은?", category: "silly", spice: "medium" },
+      { text: "이 중에 카페 진동벨이 울리면 전화 받듯 귀에 댈 것 같은 사람은?", category: "silly", spice: "medium" },
+      { text: "이 중에 멋있게 돌려던 의자에서 한 바퀴 더 돌아 타이밍을 놓칠 것 같은 사람은?", category: "silly", spice: "medium" },
+      { text: "이 중에 연애 고수인 척하다 마지막 키스가 언제냐는 질문에 말을 돌릴 것 같은 사람은?", category: "silly", spice: "hot" },
+      { text: "이 중에 질투 안 한다고 선언한 뒤 상대의 전 애인과 자기 장점을 비교할 것 같은 사람은?", category: "silly", spice: "hot" },
+      { text: "이 중에 비밀 연애 중 커플 할인 앞에서 정체를 밝힐 것 같은 사람은?", category: "silly", spice: "hot" },
+      { text: "이 중에 연인과 다툰 뒤 사과 문구보다 누가 더 아쉬운지 계산할 것 같은 사람은?", category: "silly", spice: "hot" }
     ];
 
     /* ===== 공통 설정 ===== */
@@ -1675,12 +1897,12 @@
         unit: "질문"
       },
       balance: {
-        label: "⚖️ 밸런스",
+        label: "⚖️ 밸런스게임",
         categories: balanceCategories,
         items: balanceItems,
-        placeholder: "아래 버튼을 눌러 밸런스 게임을 뽑아보세요 👇",
-        btnLabel: "밸런스 뽑기 ⚖️",
-        unit: "밸런스"
+        placeholder: "아래 버튼을 눌러 밸런스게임을 뽑아보세요 👇",
+        btnLabel: "밸런스게임 뽑기 ⚖️",
+        unit: "밸런스게임"
       },
       who: {
         label: "🎯 이 중 누가?",
