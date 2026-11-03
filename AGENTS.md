@@ -264,3 +264,5 @@ git push origin main
 - ❌ **회사 git 설정/계정 변경 금지**: `git config --global` 수정, `Chehok-developer` 계정 사용 금지.
 - ❌ **검토 요청 시 바로 푸시 금지**: 문서 변경 등에 대해 검토를 요청받았다면 `main`에 바로 푸시하지 말고 브랜치 + PR로 올려 확인을 받으세요.
 - ❌ 파일 인코딩을 UTF-8 이외로 바꾸지 마세요. (한글 깨짐)
+
+- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v7, 통계 요청은 캐시하지 않음.

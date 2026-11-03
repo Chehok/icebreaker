@@ -1,4 +1,4 @@
-const CACHE = 'icebreaker-v6';
+const CACHE = 'icebreaker-v7';
 const FONT_CACHE = 'icebreaker-fonts-v1';
 const FONT_ORIGIN = 'https://cdn.jsdelivr.net';
 const PRECACHE = [
@@ -30,6 +30,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
+  // GoatCounter 통계 요청은 가로채지 않고 네트워크로 바로 보냅니다(오프라인이면 조용히 실패).
+  if (url.hostname === 'gc.zgo.at' || url.hostname === 'goatcounter.com' || url.hostname.endsWith('.goatcounter.com')) return;
   // Pretendard 글꼴(CSS·woff2)은 처음 받은 뒤 캐시에서 바로 씁니다. 오프라인이면 시스템 글꼴로 대체됩니다.
   if (req.method === 'GET' && url.origin === FONT_ORIGIN && url.pathname.startsWith('/gh/orioncactus/pretendard@')) {
     event.respondWith((async () => {
