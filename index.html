@@ -69,6 +69,7 @@
       align-items: center;
       justify-content: center;
       padding: 48px 24px;
+      padding-top: calc(env(safe-area-inset-top) + 48px);
       color: var(--text);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
@@ -366,7 +367,16 @@
       font-variant-numeric: tabular-nums;
     }
 
-    .install-btn { margin-top: 16px; }
+    .chip.install-btn {
+      position: fixed;
+      top: calc(env(safe-area-inset-top) + 8px);
+      right: calc(env(safe-area-inset-right) + 8px);
+      z-index: 2;
+      padding: 5px 9px;
+      font-size: 0.75rem;
+      line-height: 1.4;
+      white-space: nowrap;
+    }
     .install-guide {
       margin: auto;
       width: min(360px, calc(100% - 32px));
@@ -518,6 +528,7 @@
     @media (max-width: 420px) {
       body {
         padding: 28px 16px;
+        padding-top: calc(env(safe-area-inset-top) + 48px);
         align-items: flex-start;
       }
       h1 {
@@ -577,6 +588,7 @@
   </style>
 </head>
 <body>
+  <button class="chip install-btn" id="installBtn" type="button" hidden>홈 화면에 추가</button>
   <div class="container">
     <h1>🧊 Icebreaker</h1>
     <p class="subtitle">대화 주제, 밸런스게임, 이 중 누가?로 어색한 분위기를 풀어보세요!<br />모드와 맛, 카테고리를 고르고 버튼을 눌러봐요.</p>
@@ -597,7 +609,6 @@
     <p class="sr-only" id="announcement" role="status" aria-live="polite" aria-atomic="true"></p>
     <button class="btn" id="pickBtn"></button>
     <p class="counter" id="counter"></p>
-    <button class="chip install-btn" id="installBtn" type="button" hidden>홈 화면에 추가</button>
   </div>
 
   <dialog class="install-guide" id="installGuide" aria-labelledby="installGuideTitle" aria-describedby="installGuideText">
