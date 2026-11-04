@@ -623,15 +623,21 @@
     const installGuide = document.getElementById("installGuide");
     const standaloneMode = window.matchMedia("(display-mode: standalone)");
     const ua = navigator.userAgent;
-    const isIOSSafari = (/iPhone|iPad|iPod/.test(ua) ||
-      (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) &&
-      /Version\/[\d.]+.*Safari\//.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+    const isIOS = /iPhone|iPad|iPod/.test(ua) ||
+      (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    const isIOSChrome = isIOS && /CriOS/.test(ua);
+    const isIOSOtherBrowser = isIOS && /FxiOS|EdgiOS/.test(ua);
+    const isIOSSafari = isIOS && /Version\/[\d.]+.*Safari\//.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+    const isIOSShareInstall = isIOSSafari || isIOSChrome || isIOSOtherBrowser;
+    const installGuideText = document.getElementById("installGuideText");
+    if (isIOSChrome) installGuideText.textContent = "크롬 오른쪽 위(또는 주소창)의 공유 버튼 → 홈 화면에 추가를 선택해 주세요.";
+    else if (isIOSOtherBrowser) installGuideText.textContent = "브라우저의 공유 버튼 → 홈 화면에 추가를 선택해 주세요.";
     let installPrompt = null;
     let appInstalled = false;
 
     function updateInstallButton() {
       const installed = appInstalled || standaloneMode.matches || navigator.standalone === true;
-      installBtn.hidden = installed || (!isIOSSafari && !installPrompt);
+      installBtn.hidden = installed || (!isIOSShareInstall && !installPrompt);
       if (installed) {
         installPrompt = null;
         if (installGuide.open) installGuide.close();
@@ -645,7 +651,7 @@
     });
     installBtn.addEventListener("click", async () => {
       if (installBtn.hidden) return;
-      if (isIOSSafari) {
+      if (isIOSShareInstall) {
         installGuide.showModal();
         return;
       }
@@ -668,7 +674,7 @@
     });
     if (standaloneMode.addEventListener) standaloneMode.addEventListener("change", updateInstallButton);
     else standaloneMode.addListener(updateInstallButton);
-    if (isIOSSafari) installBtn.setAttribute("aria-haspopup", "dialog");
+    if (isIOSShareInstall) installBtn.setAttribute("aria-haspopup", "dialog");
     updateInstallButton();
 
     /* ===== 💬 대화 주제 모드 데이터 ===== */
