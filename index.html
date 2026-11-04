@@ -366,6 +366,22 @@
       font-variant-numeric: tabular-nums;
     }
 
+    .install-btn { margin-top: 16px; }
+    .install-guide {
+      margin: auto;
+      width: min(360px, calc(100% - 32px));
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow-md);
+      text-align: center;
+    }
+    .install-guide::backdrop { background: rgba(23, 25, 35, 0.35); }
+    .install-guide h2 { font-size: 1.1rem; }
+    .install-guide p { margin: 16px 0; line-height: 1.65; }
+
     /* ---------- focus ---------- */
     .mode-btn:focus-visible,
     .spice-btn:focus-visible,
@@ -581,9 +597,69 @@
     <p class="sr-only" id="announcement" role="status" aria-live="polite" aria-atomic="true"></p>
     <button class="btn" id="pickBtn"></button>
     <p class="counter" id="counter"></p>
+    <button class="chip install-btn" id="installBtn" type="button" hidden>홈 화면에 추가</button>
   </div>
 
+  <dialog class="install-guide" id="installGuide" aria-labelledby="installGuideTitle" aria-describedby="installGuideText">
+    <h2 id="installGuideTitle">홈 화면에 추가</h2>
+    <p id="installGuideText">Safari에서 공유 → 홈 화면에 추가를 선택해 주세요.</p>
+    <form method="dialog"><button class="chip" type="submit" autofocus>닫기</button></form>
+  </dialog>
+
   <script>
+    /* 홈 화면 설치: 지원 브라우저에서만 표시 */
+    const installBtn = document.getElementById("installBtn");
+    const installGuide = document.getElementById("installGuide");
+    const standaloneMode = window.matchMedia("(display-mode: standalone)");
+    const ua = navigator.userAgent;
+    const isIOSSafari = (/iPhone|iPad|iPod/.test(ua) ||
+      (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) &&
+      /Version\/[\d.]+.*Safari\//.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+    let installPrompt = null;
+    let appInstalled = false;
+
+    function updateInstallButton() {
+      const installed = appInstalled || standaloneMode.matches || navigator.standalone === true;
+      installBtn.hidden = installed || (!isIOSSafari && !installPrompt);
+      if (installed) {
+        installPrompt = null;
+        if (installGuide.open) installGuide.close();
+      }
+    }
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      installPrompt = event;
+      updateInstallButton();
+    });
+    installBtn.addEventListener("click", async () => {
+      if (installBtn.hidden) return;
+      if (isIOSSafari) {
+        installGuide.showModal();
+        return;
+      }
+      const promptEvent = installPrompt;
+      if (!promptEvent) return;
+      installPrompt = null;
+      updateInstallButton();
+      try {
+        await promptEvent.prompt();
+        const { outcome } = await promptEvent.userChoice;
+        if (outcome === "accepted") appInstalled = true;
+      } catch {
+        /* 취소·브라우저 제한 시 다음 설치 가능 이벤트를 기다립니다. */
+      }
+      updateInstallButton();
+    });
+    window.addEventListener("appinstalled", () => {
+      appInstalled = true;
+      updateInstallButton();
+    });
+    if (standaloneMode.addEventListener) standaloneMode.addEventListener("change", updateInstallButton);
+    else standaloneMode.addListener(updateInstallButton);
+    if (isIOSSafari) installBtn.setAttribute("aria-haspopup", "dialog");
+    updateInstallButton();
+
     /* ===== 💬 대화 주제 모드 데이터 ===== */
     const categories = {
       imagine: { label: "🌈 상상 & 가정" },
