@@ -44,6 +44,9 @@ PWA 설치·오프라인은 GitHub Pages 또는 로컬 HTTP 서버에서 확인�
 ## 배포
 
 GitHub Pages가 `main` 브랜치 루트를 그대로 서비스합니다. Cloudflare에서도 같은 정적 파일을 사용하며, 기본 설정에서 `/balance.html`과 `/who.html`은 `/balance`와 `/who`로 이동합니다.
+
+Cloudflare Worker `icebreaker`의 **Settings → Builds**에서 `Chehok/icebreaker` 저장소의 `main` 브랜치를 연결합니다. 루트 경로에서 빌드 명령은 비워두고 배포 명령은 `npx wrangler deploy`를 사용합니다. 새 공개 파일을 추가할 때는 `.assetsignore`의 허용 목록에도 포함해 주세요.
+
 앱이나 캐시 파일을 수정하면 `sw.js`의 캐시 이름도 올려 주세요(현재 `icebreaker-v18`). 새 페이지는 온라인 방문 시 네트워크에서 우선 읽고, 통신 실패 시 캐시를 사용합니다.
 
 파일 수정 → `main`에 커밋 & 푸시 → 보통 1~2분 안에 자동 반영됩니다. (자세한 내용은 [AGENTS.md](./AGENTS.md))
