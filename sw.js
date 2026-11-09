@@ -1,4 +1,4 @@
-const CACHE = 'icebreaker-v18';
+const CACHE = 'icebreaker-v19';
 const FONT_CACHE = 'icebreaker-fonts-v1';
 const FONT_ORIGIN = 'https://cdn.jsdelivr.net';
 const APP_ROOT = new URL('./', self.location.href);
@@ -60,6 +60,15 @@ self.addEventListener('fetch', (event) => {
     event.respondWith((async () => {
       const cache = await caches.open(CACHE);
       const key = new URL(page, APP_ROOT).href;
+      const cached = await cache.match(key);
+      if (cached) {
+        event.waitUntil(fetch(req).then((res) => {
+          if (res.ok && res.type !== 'opaqueredirect') return cache.put(key, res);
+        }).catch(() => {}));
+        // Serve the app shell immediately and check for updates in the background.
+        if (cached.redirected) return new Response(cached.body, { headers: cached.headers });
+        return cached;
+      }
       let response;
       try {
         response = await fetch(req);
@@ -71,10 +80,10 @@ self.addEventListener('fetch', (event) => {
       } catch {
         // 오프라인이면 요청한 페이지를 캐시에서 찾습니다.
       }
-      const cached = await cache.match(key);
+      const fallback = await cache.match(key);
       // Cloudflare의 .html 리디렉션을 따라 받아 둔 응답도 탐색에 사용할 수 있게 합니다.
-      if (cached?.redirected) return new Response(cached.body, { headers: cached.headers });
-      return cached || response || Response.error();
+      if (fallback?.redirected) return new Response(fallback.body, { headers: fallback.headers });
+      return fallback || response || Response.error();
     })());
     return;
   }
