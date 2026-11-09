@@ -1,14 +1,18 @@
-const CACHE = 'icebreaker-v17';
+const CACHE = 'icebreaker-v18';
 const FONT_CACHE = 'icebreaker-fonts-v1';
 const FONT_ORIGIN = 'https://cdn.jsdelivr.net';
-const PRECACHE = [
-  './', './index.html', './manifest.webmanifest',
+const APP_ROOT = new URL('./', self.location.href);
+const PAGES = new Map([
+  ['', './'], ['index.html', './'],
+  ['balance', './balance.html'], ['balance.html', './balance.html'],
+  ['who', './who.html'], ['who.html', './who.html']
+]);
+const ASSETS = new Set([
+  './app.css', './app.js', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png',
   './icons/icon-512-maskable.png', './icons/apple-touch-icon.png'
-];
-const APP_ROOT = new URL('./', self.location.href);
-const INDEX = new URL('./index.html', APP_ROOT).href;
-const ASSETS = new Set(PRECACHE.map((file) => new URL(file, APP_ROOT).href));
+].map((file) => new URL(file, APP_ROOT).href));
+const PRECACHE = [...ASSETS, ...Array.from(new Set(PAGES.values()), (page) => new URL(page, APP_ROOT).href)];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -49,26 +53,33 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   // 같은 도메인의 다른 앱이나 알 수 없는 경로를 캐시하지 않습니다.
-  if (req.method !== 'GET' || !ASSETS.has(url.origin + url.pathname)) return;
+  if (req.method !== 'GET' || !url.href.startsWith(APP_ROOT.href)) return;
 
-  if (req.mode === 'navigate' || url.href.split('?')[0] === INDEX) {
+  const page = PAGES.get(url.pathname.slice(APP_ROOT.pathname.length));
+  if (req.mode === 'navigate' && page) {
     event.respondWith((async () => {
       const cache = await caches.open(CACHE);
+      const key = new URL(page, APP_ROOT).href;
+      let response;
       try {
-        const res = await fetch(req);
-        if (res.ok && res.type !== 'opaque' && new URL(res.url || req.url).origin === APP_ROOT.origin) {
-          // '/'와 'index.html'을 하나의 최신 캐시로 통일합니다.
-          await cache.put(INDEX, res.clone()).catch(() => {});
-          return res;
+        response = await fetch(req);
+        if (response.type === 'opaqueredirect') return response;
+        if (response.ok) {
+          await cache.put(key, response.clone()).catch(() => {});
+          return response;
         }
-        return (await cache.match(INDEX)) || res;
       } catch {
-        return (await cache.match(INDEX)) || Response.error();
+        // 오프라인이면 요청한 페이지를 캐시에서 찾습니다.
       }
+      const cached = await cache.match(key);
+      // Cloudflare의 .html 리디렉션을 따라 받아 둔 응답도 탐색에 사용할 수 있게 합니다.
+      if (cached?.redirected) return new Response(cached.body, { headers: cached.headers });
+      return cached || response || Response.error();
     })());
     return;
   }
 
+  if (!ASSETS.has(url.origin + url.pathname)) return;
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);
     return (await cache.match(req, { ignoreSearch: true })) || fetch(req);

@@ -22,8 +22,10 @@
 
 | 파일 | 설명 |
 |---|---|
-| `index.html` | 앱 전체 (HTML + CSS + JS + 질문 데이터). **단일 파일**, 빌드 없음, 의존성 없음 |
-| `sw.js` | 앱 셸 오프라인 캐시, 버전 `icebreaker-v14`, 글꼴 캐시 `icebreaker-fonts-v1` |
+| `index.html` | 첫 화면 및 대화 주제 페이지 |
+| `balance.html`, `who.html` | 밸런스게임 및 이 중 누가? 페이지 |
+| `app.css`, `app.js` | 공통 스타일, 뽑기 로직, 질문 데이터. 빌드 없음 |
+| `sw.js` | 앱 셸 오프라인 캐시, 버전 `icebreaker-v18`, 글꼴 캐시 `icebreaker-fonts-v1` |
 | `manifest.webmanifest` | 상대 경로 시작 URL·범위·설치 아이콘 |
 | `icons/` | PWA 및 Apple 터치 아이콘 |
 | `README.md` | 사람용 간단 소개 |
@@ -34,12 +36,11 @@
 
 - 탭 제목: `<title>Icebreaker</title>`
 - 파비콘: 🧊 이모지를 담은 SVG data URI (`<link rel="icon" href="data:image/svg+xml,...🧊...">`) — 별도 이미지 파일 없음
-- 마지막 사용 모드 저장: `localStorage` 키 **`icebreaker:mode`** (값: `"topic"`, `"balance"`, `"who"`)
-  - `localStorage`를 쓸 수 없는 환경에서는 조용히 무시하고 기본값 `topic`으로 시작합니다.
+- 현재 모드는 페이지 주소와 HTML의 `data-mode`로 결정됩니다. 첫 화면은 항상 대화 주제를 엽니다.
 
-### 데이터 구조 (`index.html`의 `<script>` 안)
+### 데이터 구조 (`app.js`)
 
-모든 질문 데이터는 `index.html` 하단 `<script>`에 JS 상수로 들어 있습니다.
+모든 질문 데이터는 `app.js`에 JS 상수로 들어 있습니다.
 
 #### 💬 대화 주제 모드
 
@@ -123,12 +124,10 @@ const spices = {
 };
 
 const modes = {
-  topic:   { label: "💬 대화 주제",   categories, items: questions, ... },
-  balance: { label: "⚖️ 밸런스게임", categories: balanceCategories, items: balanceItems, ... },
-  who:     { label: "🎯 이 중 누가?", categories: whoCategories, items: whoItems, ... }
+  topic:   { categories, items: questions, ... },
+  balance: { categories: balanceCategories, items: balanceItems, ... },
+  who:     { categories: whoCategories, items: whoItems, ... }
 };
-
-const STORAGE_KEY = "icebreaker:mode";
 const SPICE_KEY = "icebreaker:spice"; // 예전 값 "spicy"는 "medium"으로 자동 이전
 ```
 
@@ -137,7 +136,7 @@ const SPICE_KEY = "icebreaker:spice"; // 예전 값 "spicy"는 "medium"으로 �
 - 뽑기 풀 = 현재 모드의 `items` 중 `spice`가 선택한 맛과 같고, 카테고리가 `전체`이거나 선택한 카테고리와 같은 것. 직전과 같은 질문은 연속으로 나오지 않습니다.
 - 풀(모드·맛·카테고리, 전체는 독립)마다 Fisher-Yates 셔플 백으로 한 바퀴 동안 중복 없이 뽑고 회차 경계의 연속 중복도 피하며(2개 이상), `icebreaker:bags`에 남은 풀 내부 인덱스·마지막 인덱스·크기를 저장·검증하고 상태 줄에 회차 진행도를 표시합니다.
 
-### 현재 수량 (2026-11-04 기준, `index.html`에서 직접 집계)
+### 현재 수량 (2026-11-04 기준, `app.js`에서 직접 집계)
 
 | 모드 | 카테고리 | 질문 수 | 내역 |
 |---|---|---|---|
@@ -153,7 +152,7 @@ const SPICE_KEY = "icebreaker:spice"; // 예전 값 "spicy"는 "medium"으로 �
 
 ### 대화 주제 질문 추가
 
-1. `index.html`을 UTF-8로 엽니다. (VS Code 권장. 메모장 등으로 인코딩이 바뀌지 않게 주의)
+1. `app.js`를 UTF-8로 엽니다. (VS Code 권장. 메모장 등으로 인코딩이 바뀌지 않게 주의)
 2. 순한맛이면 `mildQuestions`, 매운맛이면 `mediumQuestions`, 핵매운맛이면 `hotQuestions` 배열을 찾습니다.
 3. 같은 카테고리 질문들이 모여 있는 위치에 한 줄을 추가합니다.
 4. `category` 값은 반드시 `categories`에 **이미 있는 키**여야 합니다. 없는 키를 쓰면 뽑을 때 오류가 납니다.
@@ -207,12 +206,11 @@ const mildQuestions = [
 - [ ] `✨ 전체`와 각 카테고리(특히 새로 추가/수정한 카테고리)에서 뽑기가 된다
 - [ ] 하단 카운터의 질문 수가 예상대로 늘었다/줄었다
 - [ ] 밸런스게임에서 A/B 선택이 정상 표시된다
-- [ ] 새로고침 후 마지막 모드가 유지된다 (`icebreaker:mode`)
+- [ ] 메뉴 이동 시 주소가 바뀌고 주소 직접 접속과 새로고침으로 같은 모드가 열린다
 - [ ] 한글이 깨지지 않는다 (파일이 UTF-8로 저장됨)
 - [ ] 모바일 폭(개발자 도구의 기기 모드)에서도 레이아웃이 괜찮다
-- [ ] 탭 제목 `Icebreaker`와 🧊 파비콘이 그대로다
+- [ ] 페이지별 탭 제목과 🧊 파비콘이 표시된다
 
-- [ ] 잘못된 저장 모드(`toString`, `__proto__`, 삭제된 모드)와 저장소 사용 불가 환경에서도 시작된다
 - [ ] 맛·카테고리 변경 시 이전 질문이 사라지고 선택 상태가 스크린 리더에 전달된다
 - [ ] 질문과 A/B 내용이 라이브 영역에 전달되고 키보드 포커스가 보인다
 - [ ] 빠른 연속 뽑기, 질문 0개·1개·동일 문구만 있는 풀에서도 멈추지 않는다
@@ -228,8 +226,8 @@ const mildQuestions = [
 
 ### PWA 캐시 유지보수
 
-- 캐시 대상: `./`, `./index.html`, manifest, icons. 앱 진입은 네트워크 우선, 실패 시 동일한 index 캐시를 사용합니다.
-- 캐시 파일을 수정하면 `sw.js` 캐시 이름도 반드시 증가시키세요(현재 `icebreaker-v14`).
+- 캐시 대상은 세 메뉴의 HTML, 공통 CSS·JS, manifest, 아이콘입니다. 각 페이지는 네트워크를 우선하고 연결 실패 시 해당 페이지의 캐시를 사용합니다. Cloudflare의 확장자 없는 주소도 같은 페이지 캐시에 연결됩니다.
+- 캐시 파일을 수정하면 `sw.js` 캐시 이름도 반드시 증가시키세요(현재 `icebreaker-v18`).
 - 업데이트 설치 시 HTTP 캐시를 새로 검증하며, 이전 Icebreaker 버전 캐시만 정리하고 글꼴 캐시는 유지합니다.
 - `file://`에서는 질문 뽑기만 동작합니다. 서비스 워커는 HTTPS 또는 localhost에서 확인합니다.
 - Pretendard는 jsDelivr CDN(`pretendard@v1.3.9` 다이내믹 서브셋)에서 불러오고 서비스 워커가 캐시 우선으로 저장합니다. 불러오지 못하면 시스템 한글 글꼴을 사용합니다.
@@ -239,8 +237,8 @@ const mildQuestions = [
 ```powershell
 cd C:\git\icebreaker
 git pull
-# index.html 수정 후 로컬에서 테스트
-git add index.html
+# 질문 수정 후 로컬에서 테스트
+git add app.js sw.js
 git commit -m "질문 추가: ..."
 git push origin main
 ```
@@ -266,10 +264,10 @@ git push origin main
 ## 7. 하지 말아야 할 것 (Don'ts)
 
 - ❌ **비밀정보 금지**: API 키, 토큰, 비밀번호 등은 이 저장소에 절대 넣지 마세요. 현재 비밀정보는 전혀 없으며, 필요하지도 않습니다.
-- ❌ **단일 파일·무빌드 구조 유지**: 프레임워크, 번들러, npm 패키지, 외부 CDN 등을 추가하지 마세요. `index.html` 하나로 열면 바로 동작해야 합니다.
+- ❌ **정적·무빌드 구조 유지**: 프레임워크, 번들러, npm 패키지, 외부 CDN 등을 추가하지 마세요. 저장소의 `index.html`을 브라우저로 직접 열어도 동작해야 합니다.
 - ❌ **저장소 비공개 전환 금지**: 무료 플랜의 GitHub Pages는 공개 저장소가 필요합니다. 비공개로 바꾸면 사이트가 내려갑니다.
 - ❌ **회사 git 설정/계정 변경 금지**: `git config --global` 수정, `Chehok-developer` 계정 사용 금지.
 - ❌ **검토 요청 시 바로 푸시 금지**: 문서 변경 등에 대해 검토를 요청받았다면 `main`에 바로 푸시하지 말고 브랜치 + PR로 올려 확인을 받으세요.
 - ❌ 파일 인코딩을 UTF-8 이외로 바꾸지 마세요. (한글 깨짐)
 
-- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v14, 통계 요청은 캐시하지 않음.
+- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v18, 통계 요청은 캐시하지 않음.

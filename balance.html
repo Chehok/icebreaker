@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>🧊</text></svg>">
+  <title>밸런스 게임 | Icebreaker</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#f4f5f9" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Icebreaker" />
+  <meta name="description" content="음식, 여행, 인간관계 등 양자택일 질문으로 즐기는 밸런스 게임. A와 B 중 하나를 골라보세요." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://chehok.github.io/icebreaker/balance.html" />
+  <meta property="og:title" content="밸런스 게임 | Icebreaker" />
+  <meta property="og:description" content="음식, 여행, 인간관계 등 양자택일 질문으로 즐기는 밸런스 게임. A와 B 중 하나를 골라보세요." />
+  <meta property="og:image" content="https://chehok.github.io/icebreaker/icons/icon-512.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="512" />
+  <meta property="og:image:height" content="512" />
+  <meta property="og:image:alt" content="Icebreaker 앱 아이콘" />
+  <meta property="og:locale" content="ko_KR" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="밸런스 게임 | Icebreaker" />
+  <meta name="twitter:description" content="음식, 여행, 인간관계 등 양자택일 질문으로 즐기는 밸런스 게임. A와 B 중 하나를 골라보세요." />
+  <meta name="twitter:image" content="https://chehok.github.io/icebreaker/icons/icon-512.png" />
+  <meta name="twitter:image:alt" content="Icebreaker 앱 아이콘" />
+  <link rel="stylesheet" href="./app.css" />
+  <script src="./app.js" defer></script>
+</head>
+<body data-mode="balance">
+  <button class="chip install-btn" id="installBtn" type="button" hidden>홈 화면에 추가</button>
+  <main class="container">
+    <h1>🧊 Icebreaker</h1>
+    <p class="subtitle">두 가지 선택지 중 하나를 고르고, 왜 골랐는지 서로 이야기해 보세요.<br />맛과 카테고리를 고르면 새로운 선택지가 나와요.</p>
+
+    <p class="subtitle">답하기 곤란하면 언제든 건너뛰세요. 실명이나 타인의 비밀은 말하지 않아도 돼요.</p>
+
+    <nav class="modes" aria-label="게임 모드">
+      <a class="mode-btn" href="./index.html">💬 대화 주제</a>
+      <a class="mode-btn" href="./balance.html" aria-current="page">⚖️ 밸런스게임</a>
+      <a class="mode-btn" href="./who.html">🎯 이 중 누가?</a>
+    </nav>
+    <div class="spices" id="spices" role="group" aria-label="맛 선택"></div>
+    <div class="categories" id="categories" role="group" aria-label="카테고리 선택"></div>
+
+    <div class="card balance" id="card">
+      <span class="badge" id="badge"></span>
+      <p class="question placeholder" id="question"></p>
+      <div class="versus" id="versus"></div>
+      <p class="who-hint" id="whoHint">👉 참여하고 싶은 사람끼리, 하나 둘 셋에 가리켜 주세요!</p>
+    </div>
+
+    <p class="sr-only" id="announcement" role="status" aria-live="polite" aria-atomic="true"></p>
+    <button class="btn" id="pickBtn"></button>
+    <p class="counter" id="counter"></p>
+    <div data-ad-slot aria-label="광고" hidden></div>
+  </main>
+
+  <dialog class="install-guide" id="installGuide" aria-labelledby="installGuideTitle" aria-describedby="installGuideText">
+    <h2 id="installGuideTitle">홈 화면에 추가</h2>
+    <p id="installGuideText">Safari에서 공유 → 홈 화면에 추가를 선택해 주세요.</p>
+    <form method="dialog"><button class="chip" type="submit" autofocus>닫기</button></form>
+  </dialog>
+
+<script data-goatcounter="https://icebreaker.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
