@@ -1968,3 +1968,28 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
     /* 오프라인 첫 방문·등록 제한 환경에서도 질문 뽑기는 계속 동작합니다. */
   });
 }
+
+const moveNoticeKey = "icebreaker:move-notice-dismissed";
+const moveNotice = document.createElement("dialog");
+moveNotice.className = "move-notice";
+moveNotice.setAttribute("aria-labelledby", "moveNoticeTitle");
+moveNotice.setAttribute("aria-describedby", "moveNoticeDescription");
+moveNotice.innerHTML = `
+  <h2 id="moveNoticeTitle">Icebreaker 주소가 바뀌었습니다</h2>
+  <p id="moveNoticeDescription">새 주소에서도 대화 주제, 밸런스게임, 이 중 누가?를 그대로 이용할 수 있어요.</p>
+  <p class="move-note">이전 주소는 잠시 더 이용할 수 있지만, 새 기능과 업데이트는 새 주소에 먼저 적용됩니다. 이전 주소는 추후 종료될 예정입니다.</p>
+  <div class="move-notice-actions">
+    <a class="move-primary" href="https://icebreaker-de4.pages.dev/">새 Icebreaker로 이동</a>
+    <button type="button">현재 페이지 그대로 사용</button>
+  </div>
+`;
+document.body.appendChild(moveNotice);
+moveNotice.querySelector("button").addEventListener("click", () => moveNotice.close());
+moveNotice.addEventListener("close", () => {
+  try { localStorage.setItem(moveNoticeKey, "1"); } catch (e) { /* 저장소 사용 불가 시 이번 방문에서만 닫기 */ }
+});
+try {
+  if (!localStorage.getItem(moveNoticeKey)) moveNotice.showModal();
+} catch (e) {
+  moveNotice.showModal();
+}
