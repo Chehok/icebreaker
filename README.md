@@ -47,8 +47,8 @@ GitHub Pages는 `github-pages` 브랜치의 루트를 서비스합니다. 이 �
 
 Cloudflare Worker `icebreaker`의 **Settings → Builds**에서 `Chehok/icebreaker` 저장소의 `main` 브랜치를 연결합니다. 루트 경로에서 빌드 명령은 비워두고 배포 명령은 `npx wrangler deploy`를 사용합니다. 새 공개 파일을 추가할 때는 `.assetsignore`의 허용 목록에도 포함해 주세요.
 
-앱이나 캐시 파일을 수정하면 `sw.js`의 캐시 이름도 올려 주세요(현재 `icebreaker-v21`). 설치된 앱은 저장된 페이지를 바로 표시하고, 최신 버전은 뒤에서 확인합니다. 오프라인에서는 마지막으로 저장한 페이지를 사용합니다.
+앱이나 캐시 파일을 수정하면 `sw.js`의 캐시 이름도 올려 주세요(현재 `icebreaker-v22`). 설치된 앱은 저장된 페이지를 바로 표시하고, 최신 버전은 뒤에서 확인합니다. 오프라인에서는 마지막으로 저장한 페이지를 사용합니다.
 
 파일 수정 → `main`에 커밋 & 푸시 → 보통 1~2분 안에 자동 반영됩니다. (자세한 내용은 [AGENTS.md](./AGENTS.md))
 
-- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v21, 통계 요청은 캐시하지 않음.
+- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v22, 통계 요청은 캐시하지 않음.
