@@ -13,7 +13,9 @@
 - **🎯 이 중 누가? 모드**: 질문에 어울리는 사람을 함께 가리키기(참여는 선택)
 - **📱 PWA**: 설치 및 최초 온라인 캐시 이후 오프라인 사용
 
-- 라이브 주소: https://chehok.github.io/icebreaker/
+- 라이브 주소: https://icebreaker-de4.pages.dev/ (Cloudflare Pages, `main`)
+- 미리보기 주소: https://stage.icebreaker-de4.pages.dev/ (`stage`)
+- 예전 주소 https://chehok.github.io/icebreaker/ 는 `github-pages` 브랜치의 이전 안내 페이지만 보여줍니다.
 - 저장소: https://github.com/Chehok/icebreaker (공개 저장소)
 
 ## 2. 구조
@@ -26,7 +28,7 @@
 | `balance.html`, `who.html` | 밸런스게임 및 이 중 누가? 페이지 |
 | `privacy.html` | 개인정보처리방침(브라우저 저장소·GoatCounter·AdSense 안내). 자체 인라인 스타일, 광고·통계 스크립트 없음 |
 | `app.css`, `app.js` | 공통 스타일, 뽑기 로직, 질문 데이터. 빌드 없음 |
-| `sw.js` | 앱 셸 오프라인 캐시, 버전 `icebreaker-v21`, 글꼴 캐시 `icebreaker-fonts-v1` |
+| `sw.js` | 앱 셸 오프라인 캐시, 버전 `icebreaker-v22`, 글꼴 캐시 `icebreaker-fonts-v1` |
 | `manifest.webmanifest` | 상대 경로 시작 URL·범위·설치 아이콘 |
 | `icons/` | PWA 및 Apple 터치 아이콘 |
 | `README.md` | 사람용 간단 소개 |
@@ -57,7 +59,7 @@ const mildQuestions = [   // 😋 순한맛
   // ...
 ];
 
-const mediumQuestions = [  // 🌶️ 매운맛 (예전 매운맛)
+const mediumQuestions = [  // 🌶️ 매운맛
   // ...
 ];
 
@@ -219,16 +221,18 @@ const mildQuestions = [
 - [ ] 기존 버전에서 업데이트 후 `./`, `./index.html`, 쿼리 URL에서 최신 질문이 보인다
 - [ ] 캐시 정리 시 다른 앱 캐시를 삭제하지 않는다
 
-## 5. 배포 (GitHub Pages)
+## 5. 배포 (Cloudflare Pages)
 
-- GitHub Pages가 **`main` 브랜치 루트(`/`)** 를 그대로 서비스합니다. 빌드 단계 없음.
-- 라이브: https://chehok.github.io/icebreaker/
+- Cloudflare Pages가 저장소 루트(`/`)를 그대로 배포합니다. 빌드 단계 없음.
+- 운영: https://icebreaker-de4.pages.dev/ (`main`) · 미리보기: https://stage.icebreaker-de4.pages.dev/ (`stage`)
+- 작업 순서: 작업 브랜치 → `stage` 머지 후 미리보기 확인 → `stage`를 `main`에 머지.
+- GitHub의 "Workers Builds: icebreaker" 체크는 예전 Worker 연동이 남아 실패로 표시될 수 있으며, 실제 배포는 "Cloudflare Pages" 체크로 확인합니다.
 - 사용자 PC 작업 폴더: `C:\git\icebreaker` (Windows, PowerShell)
 
 ### PWA 캐시 유지보수
 
 - 캐시 대상은 세 메뉴와 개인정보처리방침 HTML, 공통 CSS·JS, manifest, 아이콘입니다. 저장된 페이지를 바로 보여준 뒤 최신 버전을 확인하며, 온라인 첫 방문 또는 캐시 누락 시에는 네트워크에서 가져옵니다. Cloudflare의 확장자 없는 주소도 같은 페이지 캐시에 연결됩니다.
-- 캐시 파일을 수정하면 `sw.js` 캐시 이름도 반드시 증가시키세요(현재 `icebreaker-v21`).
+- 캐시 파일을 수정하면 `sw.js` 캐시 이름도 반드시 증가시키세요(현재 `icebreaker-v22`).
 - 업데이트 설치 시 HTTP 캐시를 새로 검증하며, 이전 Icebreaker 버전 캐시만 정리하고 글꼴 캐시는 유지합니다.
 - `file://`에서는 질문 뽑기만 동작합니다. 서비스 워커는 HTTPS 또는 localhost에서 확인합니다.
 - Pretendard는 jsDelivr CDN(`pretendard@v1.3.9` 다이내믹 서브셋)에서 불러오고 서비스 워커가 캐시 우선으로 저장합니다. 불러오지 못하면 시스템 한글 글꼴을 사용합니다.
@@ -237,17 +241,20 @@ const mildQuestions = [
 
 ```powershell
 cd C:\git\icebreaker
-git pull
+git switch main; git pull
+git switch -c fix/질문-수정
 # 질문 수정 후 로컬에서 테스트
 git add app.js sw.js
 git commit -m "질문 추가: ..."
-git push origin main
+git switch stage; git pull; git merge --no-ff fix/질문-수정; git push origin stage
+# https://stage.icebreaker-de4.pages.dev/ 에서 확인한 뒤
+git switch main; git merge --no-ff stage; git push origin main
 ```
 
-1. `main`에 푸시하면 GitHub Pages가 자동으로 다시 빌드합니다. (보통 1~2분 이내)
+1. `stage`나 `main`에 푸시하면 Cloudflare Pages가 자동으로 다시 배포합니다. (보통 1~2분 이내)
 2. 라이브 확인:
-   - 브라우저에서 https://chehok.github.io/icebreaker/ 접속 후 **강력 새로고침** (Ctrl+F5 / Ctrl+Shift+R)
-   - 또는 `curl.exe -s https://chehok.github.io/icebreaker/ | Select-String "확인할 문구"`
+   - 브라우저에서 https://icebreaker-de4.pages.dev/ 접속 후 **강력 새로고침** (Ctrl+F5 / Ctrl+Shift+R)
+   - 또는 `curl.exe -s https://icebreaker-de4.pages.dev/ | Select-String "확인할 문구"`
 3. **한글 확인 팁:** PowerShell 콘솔은 인코딩 문제로 한글이 깨져 보일 수 있습니다. 이는 표시 문제일 뿐 파일이 잘못된 것이 아닙니다. 한글 내용은 브라우저로 아래 raw 주소를 열어 확인하세요.
    - https://raw.githubusercontent.com/Chehok/icebreaker/main/index.html
 
@@ -266,11 +273,11 @@ git push origin main
 
 - ❌ **비밀정보 금지**: API 키, 토큰, 비밀번호 등은 이 저장소에 절대 넣지 마세요. 현재 비밀정보는 전혀 없으며, 필요하지도 않습니다.
 - ❌ **정적·무빌드 구조 유지**: 프레임워크, 번들러, npm 패키지, 외부 CDN 등을 추가하지 마세요. 저장소의 `index.html`을 브라우저로 직접 열어도 동작해야 합니다. 예외로 허용된 외부 리소스는 Pretendard(jsDelivr), GoatCounter, Google AdSense뿐이며, 모두 없어도 질문 뽑기는 동작해야 합니다.
-- ❌ **저장소 비공개 전환 금지**: 무료 플랜의 GitHub Pages는 공개 저장소가 필요합니다. 비공개로 바꾸면 사이트가 내려갑니다.
+- ❌ **저장소 비공개 전환 금지**: 예전 주소의 GitHub Pages 안내 페이지는 무료 플랜에서 공개 저장소가 필요합니다. 비공개로 바꾸면 예전 주소가 내려갑니다.
 - ❌ **회사 git 설정/계정 변경 금지**: `git config --global` 수정, `Chehok-developer` 계정 사용 금지.
 - ❌ **검토 요청 시 바로 푸시 금지**: 문서 변경 등에 대해 검토를 요청받았다면 `main`에 바로 푸시하지 말고 브랜치 + PR로 올려 확인을 받으세요.
 - ❌ 파일 인코딩을 UTF-8 이외로 바꾸지 마세요. (한글 깨짐)
 
-- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v21, 통계 요청은 캐시하지 않음.
+- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v22, 통계 요청은 캐시하지 않음.
 - 광고: Google AdSense 자동 광고(`ca-pub-9717375299017347`). AdSense는 쿠키를 사용하므로 수집 항목이 바뀌면 `privacy.html` 내용과 시행일을 함께 갱신하세요.
 - 배포 브랜치: 작업 브랜치 → `stage` 머지(확인) → `stage`를 `main`에 머지.
