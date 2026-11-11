@@ -1,11 +1,12 @@
-const CACHE = 'icebreaker-v20';
+const CACHE = 'icebreaker-v21';
 const FONT_CACHE = 'icebreaker-fonts-v1';
 const FONT_ORIGIN = 'https://cdn.jsdelivr.net';
 const APP_ROOT = new URL('./', self.location.href);
 const PAGES = new Map([
   ['', './'], ['index.html', './'],
   ['balance', './balance.html'], ['balance.html', './balance.html'],
-  ['who', './who.html'], ['who.html', './who.html']
+  ['who', './who.html'], ['who.html', './who.html'],
+  ['privacy', './privacy.html'], ['privacy.html', './privacy.html']
 ]);
 const ASSETS = new Set([
   './app.css', './app.js', './manifest.webmanifest',
