@@ -1,4 +1,4 @@
-const CACHE = 'icebreaker-v22';
+const CACHE = 'icebreaker-v23';
 const FONT_CACHE = 'icebreaker-fonts-v1';
 const FONT_ORIGIN = 'https://cdn.jsdelivr.net';
 const APP_ROOT = new URL('./', self.location.href);
