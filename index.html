@@ -64,7 +64,10 @@
     <p class="counter" id="counter"></p>
     <div data-ad-slot aria-label="광고" hidden></div>
     <!-- content:start (tools/generate-content.js가 생성하는 구간입니다. 직접 수정하지 마세요) -->
-    <section class="page-content" aria-labelledby="howto-title">
+    <button class="guide-btn" id="guideBtn" type="button" aria-haspopup="dialog" aria-controls="guideDialog">📖 사용법 · 질문 모음</button>
+    <dialog class="guide-dialog" id="guideDialog" aria-labelledby="howto-title">
+    <form method="dialog" class="guide-close-form"><button class="guide-close" type="submit" aria-label="닫기">✕</button></form>
+    <section class="page-content">
       <h2 id="howto-title">💬 대화 주제 이렇게 즐겨요</h2>
       <p>돌아가며 답하는 열린 질문이에요. 첫 만남에 편한 순한맛부터 조금 더 솔직해지는 매운맛까지, 23개 주제로 나눠 두었어요.</p>
       <ol>
@@ -121,6 +124,7 @@
           <li><a href="./guide/index.html">가이드 전체 보기</a></li>
       </ul>
     </section>
+    </dialog>
     <!-- content:end -->
     <p class="site-links"><a href="./questions/index.html">질문 모음</a> · <a href="./guide/index.html">가이드</a> · <a href="./about.html">소개</a> · <a href="./contact.html">문의</a> · <a href="./privacy.html">개인정보처리방침</a></p>
   </main>

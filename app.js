@@ -48,6 +48,23 @@ installBtn.addEventListener("click", async () => {
   }
   updateInstallButton();
 });
+/* ===== 사용법 · 질문 모음 팝업 ===== */
+const guideBtn = document.getElementById("guideBtn");
+const guideDialog = document.getElementById("guideDialog");
+if (guideBtn && guideDialog && typeof guideDialog.showModal === "function") {
+  guideBtn.addEventListener("click", () => {
+    guideDialog.showModal();
+    guideDialog.scrollTop = 0;
+  });
+  // 바깥(배경)을 누르면 닫기
+  guideDialog.addEventListener("click", (event) => {
+    if (event.target === guideDialog) guideDialog.close();
+  });
+} else if (guideBtn) {
+  // <dialog>를 지원하지 않는 오래된 브라우저에서는 질문 모음 페이지로 이동
+  guideBtn.addEventListener("click", () => { location.href = "./questions/index.html"; });
+}
+
 window.addEventListener("appinstalled", () => {
   appInstalled = true;
   updateInstallButton();

@@ -337,7 +337,10 @@ function appSection(data, mode) {
   const chips = cats.map((k) => `<a class="cat-link" href="./questions/${catFile(mode, k)}">${esc(data[mode].categories[k].label)}</a>`).join("\n          ");
   const guides = GUIDES.slice(0, 4).map((g) => `<li><a href="./guide/${g.slug}.html">${esc(g.title.split(":")[0])}</a></li>`).join("\n          ");
   return `<!-- content:start (tools/generate-content.js가 생성하는 구간입니다. 직접 수정하지 마세요) -->
-    <section class="page-content" aria-labelledby="howto-title">
+    <button class="guide-btn" id="guideBtn" type="button" aria-haspopup="dialog" aria-controls="guideDialog">📖 사용법 · 질문 모음</button>
+    <dialog class="guide-dialog" id="guideDialog" aria-labelledby="howto-title">
+    <form method="dialog" class="guide-close-form"><button class="guide-close" type="submit" aria-label="닫기">✕</button></form>
+    <section class="page-content">
       <h2 id="howto-title">${info.emoji} ${info.name} 이렇게 즐겨요</h2>
       <p>${esc(info.hubIntro)}</p>
       <ol>
@@ -361,6 +364,7 @@ function appSection(data, mode) {
           <li><a href="./guide/index.html">가이드 전체 보기</a></li>
       </ul>
     </section>
+    </dialog>
     <!-- content:end -->`;
 }
 
