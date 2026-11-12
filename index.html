@@ -52,7 +52,22 @@
       <a class="mode-btn" href="./who.html">🎯 이 중 누가?</a>
     </nav>
     <div class="spices" id="spices" role="group" aria-label="맛 선택"></div>
-    <div class="categories" id="categories" role="group" aria-label="카테고리 선택"></div>
+    <div class="category-slot" id="categorySlot">
+      <div class="categories" id="categories" role="group" aria-label="카테고리 선택"></div>
+    </div>
+    <button class="category-trigger" id="categoryTrigger" type="button" aria-haspopup="dialog" aria-controls="categorySheet" hidden>
+      <span class="category-trigger-label">카테고리</span>
+      <span class="category-trigger-value" id="categoryTriggerValue">✨ 전체</span>
+      <span class="category-trigger-icon" aria-hidden="true">▾</span>
+    </button>
+    <dialog class="category-sheet" id="categorySheet" aria-labelledby="categorySheetTitle">
+      <div class="category-sheet-handle" aria-hidden="true"></div>
+      <div class="category-sheet-head">
+        <h2 id="categorySheetTitle">카테고리 고르기</h2>
+        <form method="dialog"><button class="guide-close" type="submit" aria-label="닫기">✕</button></form>
+      </div>
+      <div class="category-sheet-body" id="categorySheetBody"></div>
+    </dialog>
 
     <div class="card" id="card">
       <span class="badge" id="badge"></span>
