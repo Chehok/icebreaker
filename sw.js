@@ -1,4 +1,4 @@
-const CACHE = 'icebreaker-v27';
+const CACHE = 'icebreaker-v28';
 const FONT_CACHE = 'icebreaker-fonts-v1';
 const FONT_ORIGIN = 'https://cdn.jsdelivr.net';
 const APP_ROOT = new URL('./', self.location.href);
@@ -11,7 +11,8 @@ const PAGES = new Map([
 const ASSETS = new Set([
   './app.css', './app.js', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png',
-  './icons/icon-512-maskable.png', './icons/apple-touch-icon.png'
+  './icons/icon-512-maskable.png', './icons/apple-touch-icon.png',
+  './favicon.ico', './favicon-32.png', './favicon-16.png'
 ].map((file) => new URL(file, APP_ROOT).href));
 const PRECACHE = [...ASSETS, ...Array.from(new Set(PAGES.values()), (page) => new URL(page, APP_ROOT).href)];
 
