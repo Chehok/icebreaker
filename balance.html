@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>🧊</text></svg>">
-  <title>밸런스 게임 | Icebreaker</title>
+  <title>밸런스게임 | Icebreaker</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
   <link rel="manifest" href="manifest.webmanifest" />
@@ -14,21 +14,22 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Icebreaker" />
-  <meta name="description" content="음식, 여행, 인간관계 등 양자택일 질문으로 즐기는 밸런스 게임. A와 B 중 하나를 골라보세요." />
+  <link rel="canonical" href="https://icebreaker-de4.pages.dev/balance" />
+  <meta name="description" content="음식, 여행, 인간관계 등 양자택일 질문으로 즐기는 밸런스게임. A와 B 중 하나를 골라보세요." />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://chehok.github.io/icebreaker/balance.html" />
-  <meta property="og:title" content="밸런스 게임 | Icebreaker" />
-  <meta property="og:description" content="음식, 여행, 인간관계 등 양자택일 질문으로 즐기는 밸런스 게임. A와 B 중 하나를 골라보세요." />
-  <meta property="og:image" content="https://chehok.github.io/icebreaker/icons/icon-512.png" />
+  <meta property="og:url" content="https://icebreaker-de4.pages.dev/balance" />
+  <meta property="og:title" content="밸런스게임 | Icebreaker" />
+  <meta property="og:description" content="음식, 여행, 인간관계 등 양자택일 질문으로 즐기는 밸런스게임. A와 B 중 하나를 골라보세요." />
+  <meta property="og:image" content="https://icebreaker-de4.pages.dev/icons/icon-512.png" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="512" />
   <meta property="og:image:height" content="512" />
   <meta property="og:image:alt" content="Icebreaker 앱 아이콘" />
   <meta property="og:locale" content="ko_KR" />
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="밸런스 게임 | Icebreaker" />
-  <meta name="twitter:description" content="음식, 여행, 인간관계 등 양자택일 질문으로 즐기는 밸런스 게임. A와 B 중 하나를 골라보세요." />
-  <meta name="twitter:image" content="https://chehok.github.io/icebreaker/icons/icon-512.png" />
+  <meta name="twitter:title" content="밸런스게임 | Icebreaker" />
+  <meta name="twitter:description" content="음식, 여행, 인간관계 등 양자택일 질문으로 즐기는 밸런스게임. A와 B 중 하나를 골라보세요." />
+  <meta name="twitter:image" content="https://icebreaker-de4.pages.dev/icons/icon-512.png" />
   <meta name="twitter:image:alt" content="Icebreaker 앱 아이콘" />
   <link rel="stylesheet" href="./app.css" />
   <script src="./app.js" defer></script>
@@ -55,14 +56,68 @@
       <span class="badge" id="badge"></span>
       <p class="question placeholder" id="question"></p>
       <div class="versus" id="versus"></div>
-      <p class="who-hint" id="whoHint">👉 참여하고 싶은 사람끼리, 하나 둘 셋에 가리켜 주세요!</p>
+      <p class="who-hint" id="whoHint">👉 참여하고 싶은 사람끼리 하나, 둘, 셋에 가리켜 주세요!</p>
     </div>
 
     <p class="sr-only" id="announcement" role="status" aria-live="polite" aria-atomic="true"></p>
     <button class="btn" id="pickBtn"></button>
     <p class="counter" id="counter"></p>
     <div data-ad-slot aria-label="광고" hidden></div>
-    <p class="site-links"><a href="./privacy.html">개인정보처리방침</a></p>
+    <!-- content:start (tools/generate-content.js가 생성하는 구간입니다. 직접 수정하지 마세요) -->
+    <button class="guide-btn" id="guideBtn" type="button" aria-haspopup="dialog" aria-controls="guideDialog">📖 사용법 · 질문 모음</button>
+    <dialog class="guide-dialog" id="guideDialog" aria-labelledby="howto-title">
+    <form method="dialog" class="guide-close-form"><button class="guide-close" type="submit" aria-label="닫기">✕</button></form>
+    <section class="page-content">
+      <h2 id="howto-title">⚖️ 밸런스게임 이렇게 즐겨요</h2>
+      <p>A와 B 중 하나를 고르고 이유를 이야기하는 양자택일 게임이에요. 고르는 데는 1초, 이유를 듣는 데는 10분이 걸려요.</p>
+      <ol>
+        <li>질문을 뽑아 큰 소리로 읽고, 셋을 센 뒤 모두 동시에 A 또는 B를 손가락으로 표시해요.</li>
+        <li>소수파부터 왜 그쪽을 골랐는지 변론하고, 다수파가 반박해 보세요.</li>
+        <li>설득당한 사람이 있으면 한 번 더 투표해서 결과가 바뀌는지 확인해 보세요.</li>
+        <li>둘 다 고르기 싫다면 '그래도 굳이 고른다면?'으로 한 번만 더 물어보고, 그래도 어려우면 넘어가요.</li>
+      </ol>
+
+      <h2>예시 질문</h2>
+      <ul class="q-list">
+        <li class="vs-item"><span class="opt">짜장면만 평생 먹기</span><span class="vs-mark">vs</span><span class="opt">짬뽕만 평생 먹기</span></li>
+        <li class="vs-item"><span class="opt">내가 먼저 고백하기</span><span class="vs-mark">vs</span><span class="opt">고백받을 때까지 기다리기</span></li>
+        <li class="vs-item"><span class="opt">돈 많은 백수로 살기</span><span class="vs-mark">vs</span><span class="opt">바쁘지만 즐거운 직업으로 살기</span></li>
+        <li class="vs-item"><span class="opt">과거로 돌아가기</span><span class="vs-mark">vs</span><span class="opt">미래로 가보기</span></li>
+        <li class="vs-item"><span class="opt">평생 여름인 곳에서 살기</span><span class="vs-mark">vs</span><span class="opt">평생 겨울인 곳에서 살기</span></li>
+        <li class="vs-item"><span class="opt">뉴스 앵커 목소리로 일상 대화하기</span><span class="vs-mark">vs</span><span class="opt">만화 주인공 목소리로 일상 대화하기</span></li>
+      </ul>
+
+      <h2>카테고리별 질문 모음</h2>
+      <p>뽑기 전에 어떤 질문이 있는지 카테고리별로 미리 살펴볼 수 있어요.</p>
+      <div class="cat-links">
+          <a class="cat-link" href="./questions/balance-food.html">🍜 음식</a>
+          <a class="cat-link" href="./questions/balance-love.html">💘 연애</a>
+          <a class="cat-link" href="./questions/balance-work.html">💼 직장 &amp; 돈</a>
+          <a class="cat-link" href="./questions/balance-power.html">🦸 초능력 &amp; 상상</a>
+          <a class="cat-link" href="./questions/balance-life.html">🌀 일상 &amp; 극한 상황</a>
+          <a class="cat-link" href="./questions/balance-weird.html">🤪 엽기 &amp; 괴식</a>
+          <a class="cat-link" href="./questions/balance-travel.html">✈️ 여행 &amp; 휴가</a>
+          <a class="cat-link" href="./questions/balance-friends.html">🤝 친구 &amp; 인간관계</a>
+          <a class="cat-link" href="./questions/balance-school.html">🏫 학교 &amp; 추억</a>
+          <a class="cat-link" href="./questions/balance-tech.html">📱 테크 &amp; SNS</a>
+          <a class="cat-link" href="./questions/balance-home.html">🏠 집 &amp; 생활</a>
+          <a class="cat-link" href="./questions/balance-media.html">🎬 영화 &amp; 음악</a>
+          <a class="cat-link" href="./questions/balance-body.html">💪 운동 &amp; 외모</a>
+          <a class="cat-link" href="./questions/balance-family.html">👪 가족 &amp; 결혼</a>
+      </div>
+
+      <h2>진행 가이드</h2>
+      <ul>
+          <li><a href="./guide/how-to-icebreak.html">아이스브레이킹 진행 가이드</a></li>
+          <li><a href="./guide/situations.html">상황별 아이스브레이킹 추천</a></li>
+          <li><a href="./guide/balance-game-tips.html">밸런스게임 더 재밌게 하는 법</a></li>
+          <li><a href="./guide/who-game-guide.html">'이 중 누가?' 게임 진행법과 모두가 즐거운 배려 규칙</a></li>
+          <li><a href="./guide/index.html">가이드 전체 보기</a></li>
+      </ul>
+    </section>
+    </dialog>
+    <!-- content:end -->
+    <p class="site-links"><a href="./questions/index.html">질문 모음</a> · <a href="./guide/index.html">가이드</a> · <a href="./about.html">소개</a> · <a href="./contact.html">문의</a> · <a href="./privacy.html">개인정보처리방침</a></p>
   </main>
 
   <dialog class="install-guide" id="installGuide" aria-labelledby="installGuideTitle" aria-describedby="installGuideText">

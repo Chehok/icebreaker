@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://icebreaker-de4.pages.dev/sitemap.xml

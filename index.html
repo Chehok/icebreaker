@@ -14,12 +14,15 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Icebreaker" />
+  <meta name="google-site-verification" content="2lnyP3t2mmgP6Hsc38QsWGOAUdmU66fPzzFMIPpKUXg" />
+  <meta name="naver-site-verification" content="9cd51c41b0ce2582d2a7d48ef366637f7703071e" />
+  <link rel="canonical" href="https://icebreaker-de4.pages.dev/" />
   <meta name="description" content="모임의 첫마디를 열어주는 랜덤 대화 주제. 맛과 카테고리를 골라 질문을 뽑아보세요." />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://chehok.github.io/icebreaker/" />
+  <meta property="og:url" content="https://icebreaker-de4.pages.dev/" />
   <meta property="og:title" content="Icebreaker" />
   <meta property="og:description" content="모임의 첫마디를 열어주는 랜덤 대화 주제. 맛과 카테고리를 골라 질문을 뽑아보세요." />
-  <meta property="og:image" content="https://chehok.github.io/icebreaker/icons/icon-512.png" />
+  <meta property="og:image" content="https://icebreaker-de4.pages.dev/icons/icon-512.png" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="512" />
   <meta property="og:image:height" content="512" />
@@ -28,7 +31,7 @@
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="Icebreaker" />
   <meta name="twitter:description" content="모임의 첫마디를 열어주는 랜덤 대화 주제. 맛과 카테고리를 골라 질문을 뽑아보세요." />
-  <meta name="twitter:image" content="https://chehok.github.io/icebreaker/icons/icon-512.png" />
+  <meta name="twitter:image" content="https://icebreaker-de4.pages.dev/icons/icon-512.png" />
   <meta name="twitter:image:alt" content="Icebreaker 앱 아이콘" />
   <link rel="stylesheet" href="./app.css" />
   <script src="./app.js" defer></script>
@@ -55,14 +58,77 @@
       <span class="badge" id="badge"></span>
       <p class="question placeholder" id="question"></p>
       <div class="versus" id="versus"></div>
-      <p class="who-hint" id="whoHint">👉 참여하고 싶은 사람끼리, 하나 둘 셋에 가리켜 주세요!</p>
+      <p class="who-hint" id="whoHint">👉 참여하고 싶은 사람끼리 하나, 둘, 셋에 가리켜 주세요!</p>
     </div>
 
     <p class="sr-only" id="announcement" role="status" aria-live="polite" aria-atomic="true"></p>
     <button class="btn" id="pickBtn"></button>
     <p class="counter" id="counter"></p>
     <div data-ad-slot aria-label="광고" hidden></div>
-    <p class="site-links"><a href="./privacy.html">개인정보처리방침</a></p>
+    <!-- content:start (tools/generate-content.js가 생성하는 구간입니다. 직접 수정하지 마세요) -->
+    <button class="guide-btn" id="guideBtn" type="button" aria-haspopup="dialog" aria-controls="guideDialog">📖 사용법 · 질문 모음</button>
+    <dialog class="guide-dialog" id="guideDialog" aria-labelledby="howto-title">
+    <form method="dialog" class="guide-close-form"><button class="guide-close" type="submit" aria-label="닫기">✕</button></form>
+    <section class="page-content">
+      <h2 id="howto-title">💬 대화 주제 이렇게 즐겨요</h2>
+      <p>돌아가며 답하는 열린 질문이에요. 첫 만남에 편한 순한맛부터 조금 더 솔직해지는 매운맛까지, 23개 주제로 나눠 두었어요.</p>
+      <ol>
+        <li>둥글게 앉아 질문을 하나 뽑고, 뽑은 사람부터 시계 방향으로 돌아가며 답해요.</li>
+        <li>한 사람당 30초~1분 정도로 짧게 답하면 지루하지 않게 여러 질문을 나눌 수 있어요.</li>
+        <li>답을 들은 뒤 '왜?', '그때 기분은 어땠어?'처럼 꼬리 질문을 하나만 붙이면 대화가 훨씬 깊어져요.</li>
+        <li>답하기 곤란한 질문은 누구든 '패스'를 외치고 넘어갈 수 있어요.</li>
+      </ol>
+
+      <h2>예시 질문</h2>
+      <ol class="q-list">
+        <li>무인도에 딱 3가지만 가져갈 수 있다면?</li>
+        <li>옷을 한 가지 색으로만 입는다면 무슨 색을 고를래?</li>
+        <li>가장 최근에 크게 웃었던 순간은 언제였어?</li>
+        <li>식사 기도를 한다면 오늘은 무엇에 감사하고 싶어?</li>
+        <li>내 이상형의 조건 딱 3가지만 꼽는다면?</li>
+        <li>사람들이 나에 대해 가장 많이 오해하는 점은?</li>
+      </ol>
+
+      <h2>카테고리별 질문 모음</h2>
+      <p>뽑기 전에 어떤 질문이 있는지 카테고리별로 미리 살펴볼 수 있어요.</p>
+      <div class="cat-links">
+          <a class="cat-link" href="./questions/topic-imagine.html">🌈 상상 &amp; 가정</a>
+          <a class="cat-link" href="./questions/topic-favorite.html">🍔 취향 &amp; 최애</a>
+          <a class="cat-link" href="./questions/topic-daily.html">💬 나의 일상</a>
+          <a class="cat-link" href="./questions/topic-faith.html">✝️ 신앙 이야기</a>
+          <a class="cat-link" href="./questions/topic-love.html">💘 연애 &amp; 썸</a>
+          <a class="cat-link" href="./questions/topic-tmi.html">👥 자기소개 &amp; TMI</a>
+          <a class="cat-link" href="./questions/topic-hobby.html">🎮 덕질 &amp; 취미</a>
+          <a class="cat-link" href="./questions/topic-deep.html">🥲 진지 토크</a>
+          <a class="cat-link" href="./questions/topic-travel.html">🌏 여행 &amp; 버킷리스트</a>
+          <a class="cat-link" href="./questions/topic-food.html">🍽️ 먹부림 &amp; 맛집</a>
+          <a class="cat-link" href="./questions/topic-memory.html">🕰️ 어린 시절 &amp; 추억</a>
+          <a class="cat-link" href="./questions/topic-politics.html">🏛️ 정치 &amp; 사회</a>
+          <a class="cat-link" href="./questions/topic-invest.html">📈 투자 &amp; 돈</a>
+          <a class="cat-link" href="./questions/topic-work.html">💼 직장 &amp; 학교</a>
+          <a class="cat-link" href="./questions/topic-content.html">📺 콘텐츠 &amp; 드라마</a>
+          <a class="cat-link" href="./questions/topic-season.html">☀️ 날씨 &amp; 계절</a>
+          <a class="cat-link" href="./questions/topic-place.html">🏘️ 동네 &amp; 장소</a>
+          <a class="cat-link" href="./questions/topic-pet.html">🐶 반려동물 &amp; 동물</a>
+          <a class="cat-link" href="./questions/topic-habit.html">⏰ 습관 &amp; 루틴</a>
+          <a class="cat-link" href="./questions/topic-shop.html">🛍️ 쇼핑 &amp; 소비</a>
+          <a class="cat-link" href="./questions/topic-school.html">🎒 학창시절</a>
+          <a class="cat-link" href="./questions/topic-silly.html">👽 만약에 &amp; 엉뚱 질문</a>
+          <a class="cat-link" href="./questions/topic-thanks.html">💐 칭찬 &amp; 고마움</a>
+      </div>
+
+      <h2>진행 가이드</h2>
+      <ul>
+          <li><a href="./guide/how-to-icebreak.html">아이스브레이킹 진행 가이드</a></li>
+          <li><a href="./guide/situations.html">상황별 아이스브레이킹 추천</a></li>
+          <li><a href="./guide/balance-game-tips.html">밸런스게임 더 재밌게 하는 법</a></li>
+          <li><a href="./guide/who-game-guide.html">'이 중 누가?' 게임 진행법과 모두가 즐거운 배려 규칙</a></li>
+          <li><a href="./guide/index.html">가이드 전체 보기</a></li>
+      </ul>
+    </section>
+    </dialog>
+    <!-- content:end -->
+    <p class="site-links"><a href="./questions/index.html">질문 모음</a> · <a href="./guide/index.html">가이드</a> · <a href="./about.html">소개</a> · <a href="./contact.html">문의</a> · <a href="./privacy.html">개인정보처리방침</a></p>
   </main>
 
   <dialog class="install-guide" id="installGuide" aria-labelledby="installGuideTitle" aria-describedby="installGuideText">
