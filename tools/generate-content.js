@@ -58,8 +58,6 @@ function write(rel, html) {
 }
 
 /* ---------- 공통 레이아웃 ---------- */
-const FAVICON = `data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>🧊</text></svg>`;
-
 // base: 루트까지의 상대 경로("" 또는 "../")
 function layout({ rel, base, title, description, body, ads = true, noindex = false, ogType = "website" }) {
   const url = cleanUrl(rel);
@@ -69,7 +67,9 @@ function layout({ rel, base, title, description, body, ads = true, noindex = fal
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" href="${FAVICON}">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
   <title>${esc(fullTitle)}</title>
   <meta name="description" content="${esc(description)}" />
 ${noindex ? `  <meta name="robots" content="noindex" />\n` : `  <link rel="canonical" href="${url}" />\n`}  <meta name="theme-color" content="#f4f5f9" />

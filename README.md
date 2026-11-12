@@ -57,9 +57,9 @@ Cloudflare Pages가 저장소 루트를 빌드 없이 그대로 배포합니다.
 
 예전 Cloudflare Worker 연동(`wrangler.toml`, `npx wrangler deploy`)도 저장소에 남아 있어 GitHub에 "Workers Builds: icebreaker" 실패가 표시될 수 있습니다. 실제 배포 결과는 "Cloudflare Pages" 체크로 확인하세요. 새 공개 파일을 추가할 때는 `.assetsignore`의 허용 목록에도 포함해 주세요.
 
-앱이나 캐시 파일을 수정하면 `sw.js`의 캐시 이름도 올려 주세요(현재 `icebreaker-v27`). 설치된 앱은 저장된 페이지를 바로 표시하고, 최신 버전은 뒤에서 확인합니다. 오프라인에서는 마지막으로 저장한 페이지를 사용합니다.
+앱이나 캐시 파일을 수정하면 `sw.js`의 캐시 이름도 올려 주세요(현재 `icebreaker-v28`). 설치된 앱은 저장된 페이지를 바로 표시하고, 최신 버전은 뒤에서 확인합니다. 오프라인에서는 마지막으로 저장한 페이지를 사용합니다.
 
 작업 브랜치에서 수정 → `stage`에 머지해 미리보기 확인 → `stage`를 `main`에 머지 → 보통 1~2분 안에 운영에 반영됩니다. (자세한 내용은 [AGENTS.md](./AGENTS.md))
 
-- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v27, 통계 요청은 캐시하지 않음.
+- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v28, 통계 요청은 캐시하지 않음.
 - 광고: Google AdSense 자동 광고 코드(`ca-pub-9717375299017347`)를 세 페이지 `<head>`에 넣었습니다. 광고 쿠키 안내는 `privacy.html`(개인정보처리방침)에 있고, 세 페이지 하단에서 링크합니다.
