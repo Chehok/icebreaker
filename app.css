@@ -582,3 +582,41 @@ body.spicy-mode .who-hint { background: #fff0f0; color: #b71c1c; }
   outline-offset: 3px;
   border-radius: 4px;
 }
+
+/* ===== 앱 아래 안내 구간 (tools/generate-content.js가 생성) ===== */
+.page-content {
+  margin-top: 36px;
+  padding: 4px 22px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-2);
+  font-size: 0.94rem;
+  line-height: 1.7;
+  text-align: left;
+}
+.page-content h2 {
+  margin: 22px 0 8px;
+  color: var(--text);
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+}
+.page-content p { margin: 6px 0; }
+.page-content ol, .page-content ul { margin: 6px 0; padding-left: 1.3em; }
+.page-content li { margin: 4px 0; }
+.page-content a { color: var(--accent-ink); text-underline-offset: 3px; }
+.page-content .q-list { padding-left: 0; list-style: none; }
+.page-content .q-list li {
+  margin: 6px 0;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-2);
+}
+.page-content .vs-item { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; text-align: center; }
+.page-content .vs-mark { color: var(--accent); font-size: 0.78rem; font-weight: 800; text-transform: uppercase; }
+.page-content .cat-links { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.page-content .cat-link { padding: 5px 11px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--text-2); font-size: 0.82rem; font-weight: 600; text-decoration: none; }
+.page-content .cat-link:hover { border-color: var(--accent); color: var(--accent-ink); }
+.page-content a:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
