@@ -28,7 +28,7 @@
 | `balance.html`, `who.html` | 밸런스게임 및 이 중 누가? 페이지 |
 | `privacy.html` | 개인정보처리방침(브라우저 저장소·GoatCounter·AdSense 안내). 자체 인라인 스타일, 광고·통계 스크립트 없음 |
 | `app.css`, `app.js` | 공통 스타일, 뽑기 로직, 질문 데이터. 빌드 없음 |
-| `sw.js` | 앱 셸 오프라인 캐시, 버전 `icebreaker-v25`, 글꼴 캐시 `icebreaker-fonts-v1` |
+| `sw.js` | 앱 셸 오프라인 캐시, 버전 `icebreaker-v26`, 글꼴 캐시 `icebreaker-fonts-v1` |
 | `manifest.webmanifest` | 상대 경로 시작 URL·범위·설치 아이콘 |
 | `icons/` | PWA 및 Apple 터치 아이콘 |
 | `questions/`, `guide/` | 카테고리별 질문 모음(순한맛·매운맛만, 핵매운맛 제외)과 가이드 글. **생성물**이므로 직접 고치지 말고 `tools/generate-content.js`로 다시 만듭니다 |
@@ -142,6 +142,7 @@ const SPICE_KEY = "icebreaker:spice"; // 예전 값 "spicy"는 "medium"으로 �
 
 - 세 모드 모두 핵매운맛 버튼은 기본 `hidden`이며, 제목을 매번 1.5초 이내 간격으로 5번 클릭/탭하면 잠금이 전환됩니다(제목 흔들림 피드백). 잠금 해제는 메모리에만 유지합니다. 다시 잠글 때 핵매운맛 선택 중이면 `selectSpice("medium")`으로 저장·질문 초기화하고, 로드 시 저장된 `hot`/`핵매운맛`도 `medium`으로 이전합니다. iPhone Safari를 위해 제목의 터치·선택 방지 CSS와 단일 `click` 리스너를 유지하세요.
 - 화면의 카테고리 칩은 `categories` / `balanceCategories` / `whoCategories` 객체에서 자동 생성됩니다. (`✨ 전체` 칩은 코드에서 따로 추가)
+- 화면 폭 559px 이하(휴대폰)에서는 칩 목록(`#categories`)을 `#categorySheet` 바텀시트(`<dialog>`)로 옮기고, 그 자리에 현재 카테고리를 보여주는 `#categoryTrigger` 버튼을 표시합니다. 칩을 고르거나 바깥·✕·Esc를 누르면 닫힙니다. 넓은 화면이나 `<dialog>` 미지원 브라우저에서는 칩을 원래 자리에 펼쳐 둡니다.
 - 뽑기 풀 = 현재 모드의 `items` 중 `spice`가 선택한 맛과 같고, 카테고리가 `전체`이거나 선택한 카테고리와 같은 것. 직전과 같은 질문은 연속으로 나오지 않습니다.
 - 풀(모드·맛·카테고리, 전체는 독립)마다 Fisher-Yates 셔플 백으로 한 바퀴 동안 중복 없이 뽑고 회차 경계의 연속 중복도 피하며(2개 이상), `icebreaker:bags`에 남은 풀 내부 인덱스·마지막 인덱스·크기를 저장·검증하고 상태 줄에 회차 진행도를 표시합니다.
 
@@ -231,6 +232,7 @@ git add -A
 - [ ] 메뉴 이동 시 주소가 바뀌고 주소 직접 접속과 새로고침으로 같은 모드가 열린다
 - [ ] 한글이 깨지지 않는다 (파일이 UTF-8로 저장됨)
 - [ ] 모바일 폭(개발자 도구의 기기 모드)에서도 레이아웃이 괜찮다
+- [ ] 모바일 폭에서 카테고리 버튼 → 바텀시트 열기 → 칩 선택 시 닫히고 버튼 문구가 바뀐다. 창을 넓히면 칩이 원래 자리로 돌아온다
 - [ ] 페이지별 탭 제목과 🧊 파비콘이 표시된다
 
 - [ ] 맛·카테고리 변경 시 이전 질문이 사라지고 선택 상태가 스크린 리더에 전달된다
@@ -253,7 +255,7 @@ git add -A
 ### PWA 캐시 유지보수
 
 - 캐시 대상은 세 메뉴와 개인정보처리방침 HTML, 공통 CSS·JS, manifest, 아이콘입니다. 저장된 페이지를 바로 보여준 뒤 최신 버전을 확인하며, 온라인 첫 방문 또는 캐시 누락 시에는 네트워크에서 가져옵니다. Cloudflare의 확장자 없는 주소도 같은 페이지 캐시에 연결됩니다.
-- 캐시 파일을 수정하면 `sw.js` 캐시 이름도 반드시 증가시키세요(현재 `icebreaker-v25`).
+- 캐시 파일을 수정하면 `sw.js` 캐시 이름도 반드시 증가시키세요(현재 `icebreaker-v26`).
 - 업데이트 설치 시 HTTP 캐시를 새로 검증하며, 이전 Icebreaker 버전 캐시만 정리하고 글꼴 캐시는 유지합니다.
 - `file://`에서는 질문 뽑기만 동작합니다. 서비스 워커는 HTTPS 또는 localhost에서 확인합니다.
 - Pretendard는 jsDelivr CDN(`pretendard@v1.3.9` 다이내믹 서브셋)에서 불러오고 서비스 워커가 캐시 우선으로 저장합니다. 불러오지 못하면 시스템 한글 글꼴을 사용합니다.
@@ -299,6 +301,6 @@ git switch main; git merge --no-ff stage; git push origin main
 - ❌ **검토 요청 시 바로 푸시 금지**: 문서 변경 등에 대해 검토를 요청받았다면 `main`에 바로 푸시하지 말고 브랜치 + PR로 올려 확인을 받으세요.
 - ❌ 파일 인코딩을 UTF-8 이외로 바꾸지 마세요. (한글 깨짐)
 
-- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v25, 통계 요청은 캐시하지 않음.
+- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v26, 통계 요청은 캐시하지 않음.
 - 광고: Google AdSense 자동 광고(`ca-pub-9717375299017347`). AdSense는 쿠키를 사용하므로 수집 항목이 바뀌면 `privacy.html` 내용과 시행일을 함께 갱신하세요.
 - 배포 브랜치: 작업 브랜치 → `stage` 머지(확인) → `stage`를 `main`에 머지.

@@ -1815,6 +1815,64 @@ function renderChips() {
   });
 }
 
+/* 휴대폰 폭에서는 카테고리 칩을 바텀시트로 옮기고, 넓은 화면에서는 제자리에 펼쳐 둡니다. */
+const categorySlotEl = document.getElementById("categorySlot");
+const categoryTriggerEl = document.getElementById("categoryTrigger");
+const categoryTriggerValueEl = document.getElementById("categoryTriggerValue");
+const categorySheetEl = document.getElementById("categorySheet");
+const categorySheetBodyEl = document.getElementById("categorySheetBody");
+const sheetSupported = !!(categorySheetEl && typeof categorySheetEl.showModal === "function");
+const compactQuery = window.matchMedia ? window.matchMedia("(max-width: 559px)") : null;
+
+function categoryLabel(key) {
+  return key === "all" ? "✨ 전체" : mode.categories[key].label;
+}
+
+function updateCategoryTrigger() {
+  if (categoryTriggerValueEl) categoryTriggerValueEl.textContent = categoryLabel(currentCategory);
+}
+
+function placeCategories() {
+  if (!sheetSupported || !categorySlotEl || !categoryTriggerEl) return;
+  const compact = !!(compactQuery && compactQuery.matches);
+  const target = compact ? categorySheetBodyEl : categorySlotEl;
+  if (categoriesEl.parentElement !== target) target.appendChild(categoriesEl);
+  categoryTriggerEl.hidden = !compact;
+  if (!compact && categorySheetEl.open) categorySheetEl.close();
+}
+
+function closeCategorySheet() {
+  if (!categorySheetEl.open) return;
+  categorySheetEl.classList.add("closing");
+  const done = () => {
+    categorySheetEl.classList.remove("closing");
+    if (categorySheetEl.open) categorySheetEl.close();
+  };
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) done();
+  else setTimeout(done, 180);
+}
+
+if (sheetSupported && categoryTriggerEl) {
+  categoryTriggerEl.addEventListener("click", () => {
+    categorySheetEl.showModal();
+    const active = categoriesEl.querySelector(".chip.active");
+    if (active) active.focus();
+  });
+  categorySheetEl.addEventListener("click", (event) => {
+    if (event.target === categorySheetEl) closeCategorySheet();
+  });
+  categorySheetEl.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    closeCategorySheet();
+  });
+  categorySheetEl.addEventListener("close", () => categoryTriggerEl.focus());
+  if (compactQuery) {
+    if (compactQuery.addEventListener) compactQuery.addEventListener("change", placeCategories);
+    else if (compactQuery.addListener) compactQuery.addListener(placeCategories);
+  }
+}
+
 function getPool(mode = currentMode, spice = currentSpice, category = currentCategory) {
   return modes[mode].items.filter(
     (q) =>
@@ -1880,6 +1938,8 @@ function selectCategory(key) {
     c.classList.toggle("active", on);
     c.setAttribute("aria-pressed", String(on));
   });
+  updateCategoryTrigger();
+  if (sheetSupported && categorySheetEl.open) closeCategorySheet();
   showPlaceholder();
   updateCounter();
 }
@@ -1978,6 +2038,8 @@ function pickQuestion() {
 btn.addEventListener("click", pickQuestion);
 btn.textContent = mode.btnLabel;
 renderChips();
+placeCategories();
+updateCategoryTrigger();
 selectSpice(currentSpice);
 
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
