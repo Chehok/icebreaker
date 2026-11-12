@@ -1815,14 +1815,13 @@ function renderChips() {
   });
 }
 
-/* 휴대폰 폭에서는 카테고리 칩을 바텀시트로 옮기고, 넓은 화면에서는 제자리에 펼쳐 둡니다. */
+/* 카테고리 칩은 화면 폭과 관계없이 바텀시트에 둡니다. <dialog> 미지원 브라우저에서는 제자리에 펼쳐 둡니다. */
 const categorySlotEl = document.getElementById("categorySlot");
 const categoryTriggerEl = document.getElementById("categoryTrigger");
 const categoryTriggerValueEl = document.getElementById("categoryTriggerValue");
 const categorySheetEl = document.getElementById("categorySheet");
 const categorySheetBodyEl = document.getElementById("categorySheetBody");
 const sheetSupported = !!(categorySheetEl && typeof categorySheetEl.showModal === "function");
-const compactQuery = window.matchMedia ? window.matchMedia("(max-width: 559px)") : null;
 
 function categoryLabel(key) {
   return key === "all" ? "✨ 전체" : mode.categories[key].label;
@@ -1834,11 +1833,8 @@ function updateCategoryTrigger() {
 
 function placeCategories() {
   if (!sheetSupported || !categorySlotEl || !categoryTriggerEl) return;
-  const compact = !!(compactQuery && compactQuery.matches);
-  const target = compact ? categorySheetBodyEl : categorySlotEl;
-  if (categoriesEl.parentElement !== target) target.appendChild(categoriesEl);
-  categoryTriggerEl.hidden = !compact;
-  if (!compact && categorySheetEl.open) categorySheetEl.close();
+  categorySheetBodyEl.appendChild(categoriesEl);
+  categoryTriggerEl.hidden = false;
 }
 
 function closeCategorySheet() {
@@ -1867,10 +1863,6 @@ if (sheetSupported && categoryTriggerEl) {
     closeCategorySheet();
   });
   categorySheetEl.addEventListener("close", () => categoryTriggerEl.focus());
-  if (compactQuery) {
-    if (compactQuery.addEventListener) compactQuery.addEventListener("change", placeCategories);
-    else if (compactQuery.addListener) compactQuery.addListener(placeCategories);
-  }
 }
 
 function getPool(mode = currentMode, spice = currentSpice, category = currentCategory) {
