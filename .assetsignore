@@ -2,6 +2,12 @@
 !/*.html
 !/app.css
 !/app.js
+!/content.css
 !/sw.js
 !/manifest.webmanifest
+!/robots.txt
+!/sitemap.xml
+!/ads.txt
 !/icons/
+!/questions/
+!/guide/

@@ -28,9 +28,15 @@
 | `balance.html`, `who.html` | 밸런스게임 및 이 중 누가? 페이지 |
 | `privacy.html` | 개인정보처리방침(브라우저 저장소·GoatCounter·AdSense 안내). 자체 인라인 스타일, 광고·통계 스크립트 없음 |
 | `app.css`, `app.js` | 공통 스타일, 뽑기 로직, 질문 데이터. 빌드 없음 |
-| `sw.js` | 앱 셸 오프라인 캐시, 버전 `icebreaker-v22`, 글꼴 캐시 `icebreaker-fonts-v1` |
+| `sw.js` | 앱 셸 오프라인 캐시, 버전 `icebreaker-v23`, 글꼴 캐시 `icebreaker-fonts-v1` |
 | `manifest.webmanifest` | 상대 경로 시작 URL·범위·설치 아이콘 |
 | `icons/` | PWA 및 Apple 터치 아이콘 |
+| `questions/`, `guide/` | 카테고리별 질문 모음(순한맛·매운맛만, 핵매운맛 제외)과 가이드 글. **생성물**이므로 직접 고치지 말고 `tools/generate-content.js`로 다시 만듭니다 |
+| `about.html`, `contact.html`, `404.html`, `sitemap.xml` | 소개·문의·404 페이지와 사이트맵. 역시 생성물 |
+| `content.css` | 질문 모음·가이드·소개 등 읽는 페이지 공통 스타일 |
+| `robots.txt`, `ads.txt` | 크롤러 안내(사이트맵 위치), AdSense 판매자 인증 |
+| `tools/generate-content.js` | 의존성 없는 Node 스크립트. `app.js` 질문과 `tools/content/*.js` 원고로 위 생성물과 세 앱 페이지의 `<!-- content:start -->`~`<!-- content:end -->` 구간을 만듭니다. 배포 시 실행하지 않습니다(결과물을 커밋) |
+| `tools/content/categories.js`, `tools/content/guides.js` | 모드·카테고리 소개 문구, 가이드 원고 |
 | `README.md` | 사람용 간단 소개 |
 | `AGENTS.md` | 이 문서 (상세 인수인계) |
 | `CLAUDE.md` | `@AGENTS.md` 한 줄 (Claude Code가 이 문서를 읽도록 연결) |
@@ -197,6 +203,19 @@ const mildQuestions = [
 - 해당 줄의 문구를 고치거나 줄을 지우면 됩니다. 삭제 후 쉼표(특히 배열 마지막 줄)를 확인하세요.
 - 중복 질문이 없는지 확인하세요. (같은 `text`나 같은 `a`/`b` 조합)
 
+### 질문·원고를 바꾼 뒤 (중요)
+
+AdSense 심사와 검색 노출을 위해 질문을 정적 HTML 페이지(`questions/`)로도 공개합니다. `app.js`의 질문, 카테고리, 또는 `tools/content/*.js`를 수정했다면 반드시 다시 생성해 함께 커밋하세요.
+
+```powershell
+node tools/generate-content.js
+git add -A
+```
+
+- 새 카테고리를 추가하면 `tools/content/categories.js`에 같은 키로 `intro`, `tip`을 추가해야 합니다(없으면 스크립트가 오류를 냅니다).
+- 🔥 핵매운맛 질문은 정적 페이지에 싣지 않습니다(광고 정책 및 숨김 기능 유지).
+- 정식 주소(canonical)는 `https://icebreaker-de4.pages.dev`입니다. 앱 페이지의 canonical/og:url도 이 주소를 가리켜야 합니다.
+
 ## 4. 테스트 체크리스트
 
 빌드가 없으므로 `index.html`을 브라우저로 직접 열어서 확인합니다.
@@ -220,6 +239,8 @@ const mildQuestions = [
 - [ ] HTTPS/localhost에서 최초 캐시 후 오프라인으로 세 모드를 사용한다
 - [ ] 기존 버전에서 업데이트 후 `./`, `./index.html`, 쿼리 URL에서 최신 질문이 보인다
 - [ ] 캐시 정리 시 다른 앱 캐시를 삭제하지 않는다
+- [ ] `node tools/generate-content.js`가 오류 없이 끝나고, 질문 모음·가이드 페이지 링크가 깨지지 않는다
+- [ ] 앱 하단 안내 구간의 카테고리 링크가 뽑기 칩 선택 상태에 영향을 주지 않는다
 
 ## 5. 배포 (Cloudflare Pages)
 
@@ -232,7 +253,7 @@ const mildQuestions = [
 ### PWA 캐시 유지보수
 
 - 캐시 대상은 세 메뉴와 개인정보처리방침 HTML, 공통 CSS·JS, manifest, 아이콘입니다. 저장된 페이지를 바로 보여준 뒤 최신 버전을 확인하며, 온라인 첫 방문 또는 캐시 누락 시에는 네트워크에서 가져옵니다. Cloudflare의 확장자 없는 주소도 같은 페이지 캐시에 연결됩니다.
-- 캐시 파일을 수정하면 `sw.js` 캐시 이름도 반드시 증가시키세요(현재 `icebreaker-v22`).
+- 캐시 파일을 수정하면 `sw.js` 캐시 이름도 반드시 증가시키세요(현재 `icebreaker-v23`).
 - 업데이트 설치 시 HTTP 캐시를 새로 검증하며, 이전 Icebreaker 버전 캐시만 정리하고 글꼴 캐시는 유지합니다.
 - `file://`에서는 질문 뽑기만 동작합니다. 서비스 워커는 HTTPS 또는 localhost에서 확인합니다.
 - Pretendard는 jsDelivr CDN(`pretendard@v1.3.9` 다이내믹 서브셋)에서 불러오고 서비스 워커가 캐시 우선으로 저장합니다. 불러오지 못하면 시스템 한글 글꼴을 사용합니다.
@@ -278,6 +299,6 @@ git switch main; git merge --no-ff stage; git push origin main
 - ❌ **검토 요청 시 바로 푸시 금지**: 문서 변경 등에 대해 검토를 요청받았다면 `main`에 바로 푸시하지 말고 브랜치 + PR로 올려 확인을 받으세요.
 - ❌ 파일 인코딩을 UTF-8 이외로 바꾸지 마세요. (한글 깨짐)
 
-- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v22, 통계 요청은 캐시하지 않음.
+- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v23, 통계 요청은 캐시하지 않음.
 - 광고: Google AdSense 자동 광고(`ca-pub-9717375299017347`). AdSense는 쿠키를 사용하므로 수집 항목이 바뀌면 `privacy.html` 내용과 시행일을 함께 갱신하세요.
 - 배포 브랜치: 작업 브랜치 → `stage` 머지(확인) → `stage`를 `main`에 머지.
