@@ -1,4 +1,4 @@
-/* 홈 화면 설치: 지원 브라우저에서만 표시 */
+/* 앱 설치 버튼: 지원 브라우저에서만 표시하고, 설치된 앱(standalone) 안에서는 링크 공유 버튼으로 바뀝니다. */
 const installBtn = document.getElementById("installBtn");
 const installGuide = document.getElementById("installGuide");
 const standaloneMode = window.matchMedia("(display-mode: standalone)");
@@ -15,13 +15,68 @@ else if (isIOSOtherBrowser) installGuideText.textContent = "브라우저의 공�
 let installPrompt = null;
 let appInstalled = false;
 
+let shareResetTimer = null;
+
+function isStandaloneApp() {
+  return standaloneMode.matches || navigator.standalone === true;
+}
+
 function updateInstallButton() {
-  const installed = appInstalled || standaloneMode.matches || navigator.standalone === true;
+  if (isStandaloneApp()) {
+    installPrompt = null;
+    if (installGuide.open) installGuide.close();
+    installBtn.removeAttribute("aria-haspopup");
+    if (!shareResetTimer) installBtn.textContent = "링크 공유";
+    installBtn.hidden = false;
+    return;
+  }
+  installBtn.textContent = "앱 설치";
+  if (isIOSShareInstall) installBtn.setAttribute("aria-haspopup", "dialog");
+  const installed = appInstalled;
   installBtn.hidden = installed || (!isIOSShareInstall && !installPrompt);
   if (installed) {
     installPrompt = null;
     if (installGuide.open) installGuide.close();
   }
+}
+
+function shareUrl() {
+  const url = new URL(location.href);
+  url.search = "";
+  url.hash = "";
+  return url.href;
+}
+
+async function copyText(text) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch { /* 아래 방식으로 다시 시도합니다. */ }
+  const field = document.createElement("textarea");
+  field.value = text;
+  field.setAttribute("readonly", "");
+  field.style.position = "fixed";
+  field.style.opacity = "0";
+  document.body.appendChild(field);
+  field.select();
+  let ok = false;
+  try { ok = document.execCommand("copy"); } catch { ok = false; }
+  field.remove();
+  return ok;
+}
+
+async function copyShareLink() {
+  const ok = await copyText(shareUrl());
+  installBtn.textContent = ok ? "링크 복사됨 ✓" : "복사 실패 😢";
+  const live = document.getElementById("announcement");
+  if (live) live.textContent = ok ? "링크를 클립보드에 복사했어요." : "링크를 복사하지 못했어요.";
+  clearTimeout(shareResetTimer);
+  shareResetTimer = setTimeout(() => {
+    shareResetTimer = null;
+    installBtn.textContent = "링크 공유";
+  }, 2000);
 }
 
 window.addEventListener("beforeinstallprompt", (event) => {
@@ -31,6 +86,10 @@ window.addEventListener("beforeinstallprompt", (event) => {
 });
 installBtn.addEventListener("click", async () => {
   if (installBtn.hidden) return;
+  if (isStandaloneApp()) {
+    copyShareLink();
+    return;
+  }
   if (isIOSShareInstall) {
     installGuide.showModal();
     return;
@@ -71,7 +130,6 @@ window.addEventListener("appinstalled", () => {
 });
 if (standaloneMode.addEventListener) standaloneMode.addEventListener("change", updateInstallButton);
 else standaloneMode.addListener(updateInstallButton);
-if (isIOSShareInstall) installBtn.setAttribute("aria-haspopup", "dialog");
 updateInstallButton();
 
 /* ===== 💬 대화 주제 모드 데이터 ===== */
