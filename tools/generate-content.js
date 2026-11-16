@@ -49,12 +49,18 @@ function splitLabel(label) {
   return { emoji: label.slice(0, i), name: label.slice(i + 1) };
 }
 const catFile = (mode, key) => `${mode}-${key}.html`;
-const cleanUrl = (rel) => SITE + "/" + rel.replace(/(^|\/)index\.html$/, "$1").replace(/\.html$/, "");
+const pagePath = (file) => file.replace(/(^|\/)index\.html$/, "$1").replace(/\.html$/, "");
+const cleanUrl = (rel) => SITE + "/" + pagePath(rel);
+
+function useCanonicalLinks(html) {
+  return html.replace(/\bhref="((?!\/\/)[\w./-]+\.html)([?#][^"]*)?"/g,
+    (_, file, suffix = "") => `href="${pagePath(file) || "./"}${suffix}"`);
+}
 
 function write(rel, html) {
   const file = path.join(ROOT, rel);
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, html, "utf8");
+  fs.writeFileSync(file, rel.endsWith(".html") ? useCanonicalLinks(html) : html, "utf8");
 }
 
 /* ---------- 공통 레이아웃 ---------- */
@@ -373,7 +379,7 @@ function injectAppPage(data, file, mode) {
   const html = fs.readFileSync(p, "utf8");
   const re = /<!-- content:start[\s\S]*?<!-- content:end -->/;
   if (!re.test(html)) throw new Error(`${file}에 <!-- content:start --> ~ <!-- content:end --> 표시가 없습니다.`);
-  fs.writeFileSync(p, html.replace(re, appSection(data, mode)), "utf8");
+  fs.writeFileSync(p, useCanonicalLinks(html.replace(re, appSection(data, mode))), "utf8");
 }
 
 /* ---------- 사이트맵 ---------- */
