@@ -107,6 +107,15 @@ installBtn.addEventListener("click", async () => {
   }
   updateInstallButton();
 });
+const isLocalFile = location.protocol === "file:";
+if (isLocalFile) {
+  // 파일로 직접 열 때는 호스팅의 확장자 없는 주소 대신 실제 HTML 파일을 엽니다.
+  document.querySelectorAll('a[href^="./"]').forEach((link) => {
+    if (link.pathname.endsWith("/")) link.pathname += "index.html";
+    else if (!/\.[^/]+$/.test(link.pathname)) link.pathname += ".html";
+  });
+}
+
 /* ===== 사용법 · 질문 모음 팝업 ===== */
 const guideBtn = document.getElementById("guideBtn");
 const guideDialog = document.getElementById("guideDialog");
@@ -121,7 +130,7 @@ if (guideBtn && guideDialog && typeof guideDialog.showModal === "function") {
   });
 } else if (guideBtn) {
   // <dialog>를 지원하지 않는 오래된 브라우저에서는 질문 모음 페이지로 이동
-  guideBtn.addEventListener("click", () => { location.href = "./questions/index.html"; });
+  guideBtn.addEventListener("click", () => { location.href = isLocalFile ? "./questions/index.html" : "./questions/"; });
 }
 
 window.addEventListener("appinstalled", () => {
