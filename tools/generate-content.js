@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Icebreaker 정적 콘텐츠 페이지 생성 스크립트 (의존성 없음, Node 18+)
+// 아이스브레이커 정적 콘텐츠 페이지 생성 스크립트 (의존성 없음, Node 18+)
 //
 //   node tools/generate-content.js
 //
@@ -67,7 +67,7 @@ function write(rel, html) {
 // base: 루트까지의 상대 경로("" 또는 "../")
 function layout({ rel, base, title, description, body, ads = true, noindex = false, ogType = "website" }) {
   const url = cleanUrl(rel);
-  const fullTitle = title.includes("Icebreaker") ? title : `${title} | Icebreaker`;
+  const fullTitle = title.includes("아이스브레이커") ? title : `${title} | 아이스브레이커`;
   return `<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -81,7 +81,7 @@ function layout({ rel, base, title, description, body, ads = true, noindex = fal
 ${noindex ? `  <meta name="robots" content="noindex" />\n` : `  <link rel="canonical" href="${url}" />\n`}  <meta name="theme-color" content="#f4f5f9" />
   <link rel="apple-touch-icon" href="${base}icons/apple-touch-icon.png" />
   <meta property="og:type" content="${ogType}" />
-  <meta property="og:site_name" content="Icebreaker" />
+  <meta property="og:site_name" content="아이스브레이커" />
   <meta property="og:url" content="${url}" />
   <meta property="og:title" content="${esc(fullTitle)}" />
   <meta property="og:description" content="${esc(description)}" />
@@ -96,7 +96,7 @@ ${ads ? `  <script async src="https://pagead2.googlesyndication.com/pagead/js/ad
 <body>
   <div class="wrap">
     <header class="site-header">
-      <a class="brand" href="${base}index.html">🧊 Icebreaker</a>
+      <a class="brand" href="${base}index.html">🧊 아이스브레이커</a>
       <nav class="site-nav" aria-label="사이트 메뉴">
         <a href="${base}index.html">💬 대화 주제</a>
         <a href="${base}balance.html">⚖️ 밸런스게임</a>
@@ -116,7 +116,7 @@ ${body}
         <a href="${base}questions/index.html">질문 모음</a> ·
         <a href="${base}guide/index.html">가이드</a>
       </p>
-      <p>© 2026 Icebreaker. 모임의 첫마디를 여는 질문 모음.</p>
+      <p>© 2026 아이스브레이커. 모임의 첫마디를 여는 질문 모음.</p>
     </footer>
   </div>
 <script data-goatcounter="https://icebreaker.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -256,8 +256,8 @@ function guideHub() {
 /* ---------- 소개·문의·404 ---------- */
 function aboutPage(data, counts) {
   const body = `
-      <h1>Icebreaker 소개</h1>
-      <p class="lead">Icebreaker는 모임의 어색한 첫마디를 대신 열어 주는 무료 웹앱이에요. 소그룹, 동아리, 회사 팀, 친구 모임에서 "무슨 얘기부터 하지?"라는 고민을 줄이기 위해 만들었어요.</p>
+      <h1>아이스브레이커 소개</h1>
+      <p class="lead">아이스브레이커는 모임의 어색한 첫마디를 대신 열어 주는 무료 웹앱이에요. 소그룹, 동아리, 회사 팀, 친구 모임에서 "무슨 얘기부터 하지?"라는 고민을 줄이기 위해 만들었어요.</p>
 
       <section class="panel">
         <h2>무엇을 할 수 있나요?</h2>
@@ -286,9 +286,9 @@ function aboutPage(data, counts) {
 
       <section class="panel">
         <h2>만든 사람</h2>
-        <p>Icebreaker는 개인 개발자가 운영하는 프로젝트예요. 소스 코드는 <a href="https://github.com/Chehok/icebreaker" target="_blank" rel="noopener noreferrer">GitHub</a>에 공개되어 있어요. 질문 제안이나 오류 제보는 <a href="contact.html">문의 페이지</a>로 보내 주세요.</p>
+        <p>아이스브레이커는 개인 개발자가 운영하는 프로젝트예요. 소스 코드는 <a href="https://github.com/Chehok/icebreaker" target="_blank" rel="noopener noreferrer">GitHub</a>에 공개되어 있어요. 질문 제안이나 오류 제보는 <a href="contact.html">문의 페이지</a>로 보내 주세요.</p>
       </section>`;
-  return layout({ rel: "about.html", base: "", title: "Icebreaker 소개", description: "모임의 어색한 첫마디를 열어 주는 무료 웹앱 Icebreaker의 기능, 질문을 만드는 원칙, 운영자를 소개합니다.", body, ads: false });
+  return layout({ rel: "about.html", base: "", title: "아이스브레이커 소개", description: "모임의 어색한 첫마디를 열어 주는 무료 웹앱 아이스브레이커의 기능, 질문을 만드는 원칙, 운영자를 소개합니다.", body, ads: false });
 }
 
 function contactPage() {
@@ -315,7 +315,7 @@ function contactPage() {
           <li><strong>오류 제보:</strong> 사용한 기기와 브라우저(예: iPhone Safari, Android Chrome), 어떤 화면에서 무엇을 눌렀는지 알려 주세요.</li>
         </ul>
       </section>`;
-  return layout({ rel: "contact.html", base: "", title: "문의하기", description: "Icebreaker 질문 제안, 불편한 질문 신고, 오류 제보 및 문의 방법을 안내합니다.", body, ads: false });
+  return layout({ rel: "contact.html", base: "", title: "문의하기", description: "아이스브레이커 질문 제안, 불편한 질문 신고, 오류 제보 및 문의 방법을 안내합니다.", body, ads: false });
 }
 
 function notFoundPage() {
