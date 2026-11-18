@@ -67,8 +67,17 @@ async function copyText(text) {
   return ok;
 }
 
-async function copyShareLink() {
-  const ok = await copyText(shareUrl());
+async function shareLink() {
+  const url = shareUrl();
+  if (typeof navigator.share === "function") {
+    try {
+      await navigator.share({ title: document.title, url });
+      return;
+    } catch (error) {
+      if (error.name === "AbortError" || error.name === "InvalidStateError") return;
+    }
+  }
+  const ok = await copyText(url);
   installBtn.textContent = ok ? "링크 복사됨 ✓" : "복사 실패 😢";
   const live = document.getElementById("announcement");
   if (live) live.textContent = ok ? "링크를 클립보드에 복사했어요." : "링크를 복사하지 못했어요.";
@@ -87,7 +96,7 @@ window.addEventListener("beforeinstallprompt", (event) => {
 installBtn.addEventListener("click", async () => {
   if (installBtn.hidden) return;
   if (isStandaloneApp()) {
-    copyShareLink();
+    await shareLink();
     return;
   }
   if (isIOSShareInstall) {
