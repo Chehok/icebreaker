@@ -37,6 +37,8 @@
   <meta name="twitter:image" content="https://icebreaker-de4.pages.dev/icons/icon-512.png" />
   <meta name="twitter:image:alt" content="아이스브레이커 앱 아이콘" />
   <link rel="stylesheet" href="./app.css" />
+  <script src="./config.js" defer></script>
+  <script src="./data.js" defer></script>
   <script src="./app.js" defer></script>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9717375299017347"
           crossorigin="anonymous"></script>
@@ -49,6 +51,33 @@
 
     <p class="subtitle">답하기 곤란하면 언제든 건너뛰세요. 실명이나 타인의 비밀은 말하지 않아도 돼요.</p>
 
+    <button class="together-btn" id="togetherBtn" type="button" aria-haspopup="dialog" aria-controls="togetherSheet" hidden>
+      <span class="together-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14.5c2.4.2 4 1.8 4.5 4.5"/></svg></span>
+      <span class="together-text"><span class="together-title">함께하기 <span class="together-new">NEW</span></span><span class="together-sub">각자 폰으로 같은 질문 보기 · 투표 · 지목</span></span>
+      <span class="together-arrow" aria-hidden="true">›</span>
+    </button>
+    <dialog class="category-sheet together-sheet" id="togetherSheet" aria-labelledby="togetherSheetTitle">
+      <div class="category-sheet-handle" aria-hidden="true"></div>
+      <div class="category-sheet-head">
+        <h2 id="togetherSheetTitle">함께하기</h2>
+        <form method="dialog"><button class="guide-close" type="submit" aria-label="닫기">✕</button></form>
+      </div>
+      <div class="together-body">
+        <a class="together-create" id="togetherCreate" href="./room?new=1">
+          <span class="together-plus" aria-hidden="true">+</span>
+          <span><strong>방 만들기</strong><span>내가 리더가 되어 QR로 초대하고 질문을 넘겨요</span></span>
+        </a>
+        <div class="together-or"><span>또는</span></div>
+        <form class="together-code" id="togetherCodeForm" action="./room.html">
+          <label for="togetherCode">방 코드로 들어가기</label>
+          <div class="together-code-row">
+            <input id="togetherCode" name="c" type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="4자리 숫자" autocomplete="off" required />
+            <button type="submit">들어가기</button>
+          </div>
+          <p>리더 화면의 QR을 카메라로 찍으면 코드 없이 바로 들어가요.</p>
+        </form>
+      </div>
+    </dialog>
     <nav class="modes" aria-label="게임 모드">
       <a class="mode-btn" href="./" aria-current="page">💬 대화 주제</a>
       <a class="mode-btn" href="./balance">⚖️ 밸런스게임</a>

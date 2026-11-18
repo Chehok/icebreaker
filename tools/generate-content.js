@@ -3,13 +3,13 @@
 //
 //   node tools/generate-content.js
 //
-// app.js의 질문 데이터와 tools/content/*.js의 원고로 아래 파일을 다시 만듭니다.
+// data.js의 질문 데이터와 tools/content/*.js의 원고로 아래 파일을 다시 만듭니다.
 //   - questions/index.html, questions/<모드>-<카테고리>.html  (질문 모음, 순한맛·매운맛만)
 //   - guide/index.html, guide/<slug>.html                     (가이드 글)
 //   - about.html, contact.html, 404.html, sitemap.xml
 //   - index.html / balance.html / who.html 의 <!-- content:start --> ~ <!-- content:end --> 구간
 // 생성된 파일은 그대로 커밋합니다. 배포 시 빌드 단계는 없습니다.
-// 질문(app.js)이나 원고를 바꾸면 이 스크립트를 다시 실행해 주세요.
+// 질문(data.js)이나 원고를 바꾸면 이 스크립트를 다시 실행해 주세요.
 
 "use strict";
 const fs = require("fs");
@@ -26,11 +26,9 @@ const GUIDES = require("./content/guides.js");
 
 /* ---------- 질문 데이터 읽기 ---------- */
 function loadData() {
-  const src = fs.readFileSync(path.join(ROOT, "app.js"), "utf8");
-  const start = src.indexOf("const categories = {");
-  const end = src.indexOf("const spices = {");
-  if (start < 0 || end < 0) throw new Error("app.js에서 질문 데이터 구간을 찾지 못했습니다.");
-  const code = src.slice(start, end) +
+  const src = fs.readFileSync(path.join(ROOT, "data.js"), "utf8");
+  if (!src.includes("const categories = {")) throw new Error("data.js에서 질문 데이터를 찾지 못했습니다.");
+  const code = src +
     "\n;({ categories, questions, balanceCategories, balanceItems, whoCategories, whoItems })";
   const d = vm.runInNewContext(code, {});
   return {

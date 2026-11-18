@@ -1,4 +1,4 @@
-const CACHE = 'icebreaker-v34';
+const CACHE = 'icebreaker-v35';
 const FONT_CACHE = 'icebreaker-fonts-v1';
 const FONT_ORIGIN = 'https://cdn.jsdelivr.net';
 const APP_ROOT = new URL('./', self.location.href);
@@ -9,7 +9,7 @@ const PAGES = new Map([
   ['privacy', './privacy.html'], ['privacy.html', './privacy.html']
 ]);
 const ASSETS = new Set([
-  './app.css', './app.js', './manifest.webmanifest',
+  './app.css', './config.js', './data.js', './app.js', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png',
   './icons/icon-512-maskable.png', './icons/apple-touch-icon.png',
   './favicon.ico', './favicon-32.png', './favicon-16.png'

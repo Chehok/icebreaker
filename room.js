@@ -1,0 +1,570 @@
+/* 아이스브레이커 함께하기(실시간 방) 화면.
+   서버: rooms/ Worker. 질문 데이터: data.js. QR: qr.js. 화면 요소는 모두 DOM API로 만들어 사용자 입력을 그대로 HTML로 넣지 않습니다. */
+(function () {
+  "use strict";
+
+  const API = String(window.ICEBREAKER_ROOMS_URL || "").replace(/\/+$/, "");
+  const params = new URLSearchParams(location.search);
+  const $ = (id) => document.getElementById(id);
+
+  const MODE_INFO = {
+    topic: { label: "대화 주제", categories, items: questions },
+    balance: { label: "밸런스게임", categories: balanceCategories, items: balanceItems },
+    who: { label: "이 중 누가?", categories: whoCategories, items: whoItems }
+  };
+  const SPICE_INFO = { mild: "순한맛", medium: "매운맛", hot: "핵매운맛" };
+  const LEADER_NAME_KEY = "icebreaker:leaderName";
+  const NICK_KEY = "icebreaker:nick";
+  const credKey = (code) => `icebreaker:room:${code}`;
+
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch { /* 무시 */ } },
+    del(k) { try { localStorage.removeItem(k); } catch { /* 무시 */ } }
+  };
+
+  let code = /^\d{4}$/.test(params.get("c") || "") ? params.get("c") : "";
+  let creds = null;
+  let ws = null;
+  let pendingName = "";
+  let retry = 0;
+  let retryTimer = null;
+  let pingTimer = null;
+  let stopped = false;
+  let everOpened = false;
+  let last = null;
+  let bodyKey = "";
+  let whoSelection = null;
+  let editingNote = false;
+  let lastAnnouncedRound = 0;
+  let qrRenderedFor = "";
+  const bags = Object.create(null);
+
+  /* ---------- 작은 DOM 도우미 ---------- */
+  function el(tag, attrs, ...children) {
+    const node = document.createElement(tag);
+    if (attrs) for (const [k, v] of Object.entries(attrs)) {
+      if (v === undefined || v === null || v === false) continue;
+      if (k === "class") node.className = v;
+      else if (k === "text") node.textContent = v;
+      else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
+      else node.setAttribute(k, v === true ? "" : v);
+    }
+    for (const c of children.flat()) if (c !== null && c !== undefined && c !== false) node.append(c);
+    return node;
+  }
+  const initial = (name) => Array.from(String(name || "?"))[0] || "?";
+  function show(id) {
+    for (const s of document.querySelectorAll(".screen")) s.hidden = s.id !== id;
+  }
+  function announce(text) { $("announce").textContent = text; }
+
+  function gone(title, text) {
+    stopped = true;
+    if (ws) try { ws.close(); } catch { /* 무시 */ }
+    $("goneTitle").textContent = title;
+    $("goneText").textContent = text;
+    $("topBadge").hidden = true;
+    $("connBanner").hidden = true;
+    show("scrGone");
+  }
+
+  /* ---------- 공유 ---------- */
+  function roomLink() {
+    const url = new URL(location.href);
+    url.search = "";
+    url.hash = "";
+    url.searchParams.set("c", code);
+    return url.href;
+  }
+  async function shareLink(button) {
+    const url = roomLink();
+    try {
+      if (navigator.share) { await navigator.share({ title: "아이스브레이커 방에 들어와요", url }); return; }
+    } catch (e) { if (e && e.name === "AbortError") return; }
+    let ok = false;
+    try { await navigator.clipboard.writeText(url); ok = true; } catch { ok = false; }
+    const prev = button.textContent;
+    button.textContent = ok ? "링크 복사됨 ✓" : url;
+    announce(ok ? "방 링크를 복사했어요." : "링크를 복사하지 못했어요.");
+    setTimeout(() => { button.textContent = prev; }, 2000);
+  }
+  document.querySelectorAll("[data-share-link]").forEach((b) => b.addEventListener("click", () => shareLink(b)));
+
+  function renderQr() {
+    if (qrRenderedFor === code) return;
+    qrRenderedFor = code;
+    for (const [box, px] of [[$("qrBoxLobby"), 168], [$("qrBoxSheet"), 260]]) {
+      box.replaceChildren(window.IcebreakerQr.qrSvg(roomLink(), px));
+      box.firstChild.setAttribute("role", "img");
+      box.firstChild.setAttribute("aria-label", `방 ${code} 참여 QR 코드`);
+    }
+    $("lobbyCode").textContent = code;
+    $("sheetCode").textContent = code;
+  }
+
+  /* ---------- 서버 ---------- */
+  async function api(path, opts) {
+    const res = await fetch(API + path, opts);
+    let data = {};
+    try { data = await res.json(); } catch { /* 빈 응답 */ }
+    return { ok: res.ok, status: res.status, data };
+  }
+
+  function connect() {
+    if (stopped) return;
+    clearTimeout(retryTimer);
+    const wsUrl = API.replace(/^http/, "ws") + `/rooms/${code}/ws`;
+    let opened = false;
+    try { ws = new WebSocket(wsUrl); } catch { scheduleRetry(); return; }
+    ws.addEventListener("open", () => {
+      opened = true;
+      everOpened = true;
+      retry = 0;
+      $("connBanner").hidden = true;
+      const hello = { t: "hello" };
+      if (creds) { hello.clientId = creds.clientId; hello.key = creds.key; }
+      if (pendingName) hello.name = pendingName;
+      ws.send(JSON.stringify(hello));
+      clearInterval(pingTimer);
+      pingTimer = setInterval(() => { try { ws.send("ping"); } catch { /* 무시 */ } }, 25000);
+    });
+    ws.addEventListener("message", (e) => {
+      if (e.data === "pong") return;
+      let msg;
+      try { msg = JSON.parse(e.data); } catch { return; }
+      onMessage(msg);
+    });
+    ws.addEventListener("close", async (e) => {
+      clearInterval(pingTimer);
+      if (stopped) return;
+      if (e.code === 4000 || e.code === 4004) return gone("방이 끝났어요", "리더가 방을 닫았거나 오래 쉬어서 정리됐어요.");
+      if (e.code === 4001) return;
+      if (!opened) {
+        // 연결 자체가 거절되면 방이 있는지 확인합니다.
+        try {
+          const info = await api(`/rooms/${code}`);
+          if (info.status === 404) { store.del(credKey(code)); return gone("방을 찾을 수 없어요", "방 코드를 다시 확인하거나 리더에게 새 QR을 받아 주세요."); }
+        } catch { /* 오프라인: 아래에서 재시도 */ }
+      }
+      scheduleRetry();
+    });
+  }
+
+  function scheduleRetry() {
+    if (stopped) return;
+    if (everOpened) $("connBanner").hidden = false;
+    retry = Math.min(retry + 1, 6);
+    retryTimer = setTimeout(connect, Math.min(1000 * 2 ** (retry - 1), 15000));
+  }
+
+  function send(data) {
+    if (ws && ws.readyState === WebSocket.OPEN) { ws.send(JSON.stringify(data)); return true; }
+    announce("연결이 끊겨서 보내지 못했어요. 잠시 후 다시 시도해 주세요.");
+    return false;
+  }
+
+  function onMessage(msg) {
+    if (msg.t === "welcome") {
+      creds = { clientId: msg.clientId, key: msg.key };
+      store.set(credKey(code), JSON.stringify(creds));
+      if (pendingName && msg.role === "player") store.set(NICK_KEY, pendingName);
+      pendingName = "";
+      return;
+    }
+    if (msg.t === "need_name" || (msg.t === "error" && msg.code === "not_joined")) {
+      creds = null;
+      store.del(credKey(code));
+      return showJoin();
+    }
+    if (msg.t === "error") {
+      const text = { name_taken: "이미 방에 있는 이름이에요. 다른 이름을 골라 주세요.", room_full: "방이 꽉 찼어요." }[msg.code] || "문제가 생겼어요. 다시 시도해 주세요.";
+      pendingName = "";
+      $("joinError").textContent = text;
+      $("joinError").hidden = false;
+      $("joinBtn").disabled = false;
+      return;
+    }
+    if (msg.t === "ended") return gone("방이 끝났어요", "리더가 방을 닫았어요. 함께해 주셔서 고마워요!");
+    if (msg.t === "state") render(msg);
+  }
+
+  /* ---------- 리더: 질문 고르기 ---------- */
+  function drawQuestion(mode, spice) {
+    const key = `${mode}|${spice}`;
+    const pool = MODE_INFO[mode].items.filter((q) => q.spice === spice);
+    if (!pool.length) return null;
+    let bag = bags[key];
+    if (!bag || !bag.length) {
+      bag = pool.map((_, i) => i);
+      for (let i = bag.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [bag[i], bag[j]] = [bag[j], bag[i]];
+      }
+      bags[key] = bag;
+    }
+    const item = pool[bag.pop()];
+    const cat = MODE_INFO[mode].categories[item.category];
+    const label = cat ? cat.label.replace(/^\S+\s/, "") : "";
+    const question = mode === "balance" ? { a: item.a, b: item.b } : { text: item.text };
+    return { question, label };
+  }
+
+  /* ---------- 공통 선택 버튼 ---------- */
+  function fillToggleGroup(container, options, current, onPick) {
+    container.replaceChildren(...options.map(([value, label]) => el("button", {
+      type: "button", "aria-pressed": String(value === current), text: label,
+      onclick: () => onPick(value)
+    })));
+  }
+
+  /* ---------- 방 만들기 ---------- */
+  let createMode = MODE_INFO[params.get("mode")] ? params.get("mode") : "topic";
+  let createSpice = params.get("spice") === "medium" ? "medium" : "mild";
+  function renderCreatePickers() {
+    fillToggleGroup($("createMode"), Object.entries(MODE_INFO).map(([k, v]) => [k, v.label]), createMode, (v) => { createMode = v; renderCreatePickers(); });
+    fillToggleGroup($("createSpice"), [["mild", "순한맛"], ["medium", "매운맛"]], createSpice, (v) => { createSpice = v; renderCreatePickers(); });
+  }
+  function showCreate() {
+    $("leaderName").value = store.get(LEADER_NAME_KEY) || "";
+    renderCreatePickers();
+    show("scrCreate");
+    if (!$("leaderName").value) $("leaderName").focus();
+  }
+  $("createForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const name = $("leaderName").value.trim();
+    if (!name) return;
+    $("createBtn").disabled = true;
+    $("createError").hidden = true;
+    try {
+      const res = await api("/rooms", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ name, mode: createMode, spice: createSpice })
+      });
+      if (!res.ok) throw new Error(res.data.error || "create_failed");
+      store.set(LEADER_NAME_KEY, name);
+      code = res.data.code;
+      creds = { clientId: res.data.clientId, key: res.data.key };
+      store.set(credKey(code), JSON.stringify(creds));
+      history.replaceState(null, "", roomLink());
+      show("scrLoading");
+      connect();
+    } catch {
+      $("createError").textContent = "방을 만들지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.";
+      $("createError").hidden = false;
+    } finally {
+      $("createBtn").disabled = false;
+    }
+  });
+
+  /* ---------- 참여하기 ---------- */
+  const ADJ = ["웃는", "졸린", "배고픈", "수줍은", "용감한", "느긋한", "신난", "조용한", "엉뚱한", "다정한"];
+  const ANIMAL = ["펭귄", "수달", "곰", "여우", "고양이", "다람쥐", "판다", "코알라", "햄스터", "고래"];
+  function suggestNames() {
+    const set = new Set();
+    while (set.size < 3) set.add(`${ADJ[Math.floor(Math.random() * ADJ.length)]} ${ANIMAL[Math.floor(Math.random() * ANIMAL.length)]}`);
+    $("nickSuggest").replaceChildren(
+      ...[...set].map((n) => el("button", { type: "button", class: "chip", text: n, onclick: () => { $("nickName").value = n; updateNickCount(); } })),
+      el("button", { type: "button", class: "chip", "aria-label": "다른 이름 추천", text: "↻", onclick: suggestNames })
+    );
+  }
+  function updateNickCount() { $("nickCount").textContent = `${$("nickName").value.length}/10`; }
+  $("nickName").addEventListener("input", updateNickCount);
+
+  async function showJoin() {
+    show("scrJoin");
+    $("joinRoomLabel").textContent = `방 ${code}`;
+    $("nickName").value = $("nickName").value || store.get(NICK_KEY) || "";
+    updateNickCount();
+    suggestNames();
+    try {
+      const info = await api(`/rooms/${code}`);
+      if (info.status === 404) return gone("방을 찾을 수 없어요", "방 코드를 다시 확인하거나 리더에게 새 QR을 받아 주세요.");
+      if (info.ok) $("joinRoomLabel").textContent = `방 ${code} · 리더 ${info.data.leaderName}`;
+    } catch { /* 미리보기 실패는 무시 */ }
+  }
+  $("joinForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = $("nickName").value.trim();
+    if (!name) return;
+    $("joinError").hidden = true;
+    $("joinBtn").disabled = true;
+    pendingName = name;
+    stopped = false;
+    if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ t: "hello", name }));
+    else connect();
+    setTimeout(() => { $("joinBtn").disabled = false; }, 1500);
+  });
+
+  $("codeForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const v = $("codeInput").value.trim();
+    if (!/^\d{4}$/.test(v)) return;
+    location.href = `${location.pathname}?c=${v}`;
+  });
+
+  /* ---------- 방 화면 그리기 ---------- */
+  function memberCard(m, meId, extra) {
+    const isMe = m.id === meId;
+    return el(extra && extra.button ? "button" : "div", {
+      type: extra && extra.button ? "button" : undefined,
+      class: `member${isMe && !(extra && extra.button) ? " is-me" : ""}${m.online ? "" : " off"}`,
+      "aria-pressed": extra && extra.button ? String(extra.pressed) : undefined,
+      onclick: extra && extra.onclick
+    },
+    el("span", { class: "av", "aria-hidden": "true", text: initial(m.name) }),
+    el("span", null, `${m.name}${isMe && extra && extra.button ? " (나)" : ""}`,
+      !(extra && extra.button) && (m.role === "leader" || isMe) ? el("small", { text: m.role === "leader" ? "리더" : "나" }) : null));
+  }
+
+  function progressHead(title, r) {
+    return el("div", { class: "section-head" }, el("strong", { text: title }), el("span", { class: "progress", text: `${r.answered} / ${r.total}명` }));
+  }
+
+  function render(s) {
+    last = s;
+    const isLeader = s.me.role === "leader";
+    const r = s.round;
+    show("scrRoom");
+    $("topBadge").hidden = !isLeader;
+    $("topBadge").textContent = "리더";
+    $("roomMeta").textContent = `방 ${s.code} · ${s.members.filter((m) => m.online).length}명 접속`;
+    $("roomTitle").textContent = r ? `${MODE_INFO[r.mode].label} · ${SPICE_INFO[r.spice]}` : `${s.leaderName} 님의 방`;
+    $("meChip").textContent = s.me.name;
+    $("meChip").hidden = isLeader;
+    $("qrBtn").hidden = !(isLeader && r);
+    $("leaderBar").hidden = !isLeader;
+    $("leaveBtn").hidden = isLeader;
+    $("nextBtn").textContent = r ? "다음 질문" : "시작하기";
+
+    $("lobbyLeader").hidden = !(isLeader && !r);
+    $("lobbyPlayer").hidden = !(!isLeader && !r);
+    $("roundBox").hidden = !r;
+
+    if (isLeader) renderQr();
+    if (!r) {
+      if (isLeader) {
+        $("lobbyCount").textContent = `들어온 사람 ${s.members.length}명`;
+        $("lobbyMembers").replaceChildren(...s.members.map((m) => el("span", {
+          class: `chip${m.id === s.me.id ? " me" : ""}${m.online ? "" : " off"}`,
+          text: m.id === s.me.id ? `${m.name} (나)` : m.name
+        })));
+      } else {
+        $("lobbyGrid").replaceChildren(...s.members.map((m) => memberCard(m, s.me.id)));
+      }
+      bodyKey = "";
+      syncSettings(s);
+      return;
+    }
+
+    // 질문 카드
+    $("qLabel").textContent = `${r.label ? r.label + " · " : ""}${r.n}번째 질문`;
+    const isBalance = r.mode === "balance";
+    $("qText").textContent = isBalance ? "둘 중 하나만 고른다면?" : r.question.text;
+    $("qAb").hidden = !isBalance;
+    if (isBalance) { $("qA").textContent = r.question.a; $("qB").textContent = r.question.b; }
+    if (r.n !== lastAnnouncedRound) {
+      lastAnnouncedRound = r.n;
+      whoSelection = null;
+      editingNote = false;
+      announce(isBalance ? `새 질문. A: ${r.question.a}. B: ${r.question.b}` : `새 질문. ${r.question.text}`);
+    }
+
+    const body = $("roundBody");
+    if (isLeader) {
+      body.replaceChildren(...leaderBody(s, r).filter(Boolean));
+    } else {
+      const key = `${r.n}|${r.mode}|${r.mine ? r.mine.type + (r.mine.choice || r.mine.target || "") : "none"}|${editingNote}|${whoSelection}`;
+      if (r.mode === "topic" && key === bodyKey) {
+        const p = body.querySelector(".progress");
+        if (p) p.textContent = `${r.answered} / ${r.total}명`;
+      } else {
+        bodyKey = key;
+        body.replaceChildren(...playerBody(s, r).filter(Boolean));
+      }
+    }
+    syncSettings(s);
+  }
+
+  function leaderBody(s, r) {
+    if (r.mode === "topic") {
+      const notes = r.notes || [];
+      const list = notes.length
+        ? notes.map((n) => el("div", { class: "note" }, el("b", { text: n.name }), el("span", { text: n.text })))
+        : [el("div", { class: "empty", text: "아직 도착한 쪽지가 없어요." })];
+      return [progressHead("도착한 쪽지", r), ...list, r.passes ? el("p", { class: "muted small", text: `${r.passes}명은 이번 질문을 패스했어요.` }) : null];
+    }
+    if (r.mode === "balance") {
+      const a = (r.result && r.result.a) || [];
+      const b = (r.result && r.result.b) || [];
+      const total = a.length + b.length;
+      return [progressHead("결과", r), balanceBar(a.length, b.length, total), el("div", { class: "lists" },
+        el("div", { class: "list-card a" }, el("strong", { text: `A를 고른 ${a.length}명` }), el("div", { class: "chip-row" }, a.map((n) => el("span", { class: "name-pill", text: n })))),
+        el("div", { class: "list-card b" }, el("strong", { text: `B를 고른 ${b.length}명` }), el("div", { class: "chip-row" }, b.map((n) => el("span", { class: "name-pill", text: n }))))
+      )];
+    }
+    return [progressHead("지목 결과", r), ...whoResult(r.result || [], s, true)];
+  }
+
+  function balanceBar(a, b, total) {
+    if (!total) return el("div", { class: "empty", text: "아직 아무도 고르지 않았어요." });
+    const pa = Math.round((a / total) * 100);
+    const pb = 100 - pa;
+    return el("div", { class: "bar", role: "img", "aria-label": `A ${pa}퍼센트, B ${pb}퍼센트` },
+      a ? el("div", { class: "ba", style: `width:${pa}%`, text: pa >= 18 ? `A ${pa}%` : "A" }) : null,
+      b ? el("div", { class: "bb", style: `width:${pb}%`, text: pb >= 18 ? `${pb}% B` : "B" }) : null);
+  }
+
+  function whoResult(rows, s, isLeader) {
+    if (!rows.length) return [el("div", { class: "empty", text: "아직 아무도 지목하지 않았어요." })];
+    const max = rows[0].count;
+    const top = rows.filter((x) => x.count === max);
+    const rest = rows.filter((x) => x.count !== max);
+    const out = [el("div", { class: "top1" },
+      el("span", { class: "av", "aria-hidden": "true", text: initial(top[0].name) }),
+      el("span", { class: "tn" }, el("small", { text: top.length > 1 ? "공동 1위" : "1위" }), el("b", { text: top.map((x) => x.name).join(", ") })),
+      el("span", { class: "tc", text: `${max}표` }))];
+    if (isLeader && top.some((x) => x.voters)) {
+      out.push(el("p", { class: "muted small", text: top.map((x) => `${x.name} ← ${x.voters.join(", ")}`).join(" / ") }));
+    }
+    if (rest.length) {
+      out.push(el("div", { class: "rank" }, rest.map((x) => el("div", { class: "rank-row" },
+        el("div", { class: "rl" }, el("span", { text: x.name }), el("span", { text: `${x.count}표` })),
+        el("div", { class: "track" }, el("div", { class: "fill", style: `width:${Math.round((x.count / max) * 100)}%` })),
+        x.voters ? el("span", { class: "voters", text: `← ${x.voters.join(", ")}` }) : null))));
+    }
+    const zero = s.members.filter((m) => !rows.some((x) => x.id === m.id)).map((m) => m.name);
+    if (zero.length && isLeader) out.push(el("p", { class: "muted small", text: `0표: ${zero.join(" · ")}` }));
+    return out;
+  }
+
+  function playerBody(s, r) {
+    const mine = r.mine;
+    const statusCard = (title, text) => el("div", { class: "status-card" }, el("strong", { text: title }), text ? el("span", { class: "muted small", text }) : null);
+
+    if (r.mode === "topic") {
+      if (mine && !editingNote) {
+        return [
+          mine.type === "note"
+            ? el("div", { class: "note" }, el("b", { text: mine.anon ? "익명으로 보낸 쪽지" : "내가 보낸 쪽지" }), el("span", { text: mine.text }))
+            : statusCard("이번 질문은 패스했어요", null),
+          statusCard(`${r.answered} / ${r.total}명이 참여했어요`, "리더가 다음으로 넘기기 전까지 다시 쓸 수 있어요."),
+          el("button", { type: "button", class: "ghost", text: "다시 쓰기", onclick: () => { editingNote = true; render(last); } })
+        ];
+      }
+      const ta = el("textarea", { class: "text-input", id: "noteText", maxlength: "200", rows: "4", placeholder: "떠오르는 대로 짧게 써 보세요" });
+      if (mine && mine.type === "note") ta.value = mine.text;
+      const anon = el("input", { type: "checkbox", id: "noteAnon" });
+      if (mine && mine.anon) anon.checked = true;
+      const count = el("span", { class: "muted small", text: `${ta.value.length}/200` });
+      ta.addEventListener("input", () => { count.textContent = `${ta.value.length}/200`; });
+      const submit = () => {
+        const text = ta.value.trim();
+        if (!text) { ta.focus(); return; }
+        if (send({ t: "note", text, anon: anon.checked, round: r.n })) { editingNote = false; announce("쪽지를 보냈어요."); }
+      };
+      return [
+        el("label", { class: "field-label", for: "noteText", text: "내 쪽지" }), ta,
+        el("div", { class: "hint-row" }, el("label", { class: "check-row", for: "noteAnon" }, anon, "익명으로 보내기"), count),
+        el("p", { class: "muted small", text: "쪽지는 리더 화면에 모여요. 리더가 읽어 주거나 큰 화면에 띄울 수 있어요." }),
+        el("div", { class: "two-btn" },
+          el("button", { type: "button", class: "secondary-btn", text: "패스", onclick: () => { if (send({ t: "pass", round: r.n })) editingNote = false; } }),
+          el("button", { type: "button", class: "primary", text: "쪽지 보내기", onclick: submit })),
+        el("p", { class: "progress", text: `${r.answered} / ${r.total}명` })
+      ];
+    }
+
+    if (r.mode === "balance") {
+      const choice = mine && mine.type === "vote" ? mine.choice : null;
+      const btn = (k, text) => el("button", {
+        type: "button", class: `choice ${k}`, "aria-pressed": String(choice === k),
+        onclick: () => send({ t: "vote", choice: k, round: r.n })
+      }, el("span", { style: "display:flex;width:100%;justify-content:space-between;align-items:center" }, el("b", { text: k.toUpperCase() }), choice === k ? el("span", { class: "mine", text: "내 선택" }) : null), el("span", { class: "ct", text }));
+      const out = [btn("a", r.question.a), btn("b", r.question.b)];
+      if (r.result) {
+        out.push(balanceBar(r.result.a, r.result.b, r.result.a + r.result.b));
+      }
+      out.push(statusCard(`${r.answered} / ${r.total}명이 골랐어요`, "리더가 다음으로 넘기기 전까지는 다시 바꿀 수 있어요."));
+      out.push(el("button", { type: "button", class: "text-btn", text: "이번 질문은 패스", onclick: () => send({ t: "pass", round: r.n }) }));
+      return out;
+    }
+
+    // 이 중 누가?
+    const picked = whoSelection || (mine && mine.type === "pick" ? mine.target : null);
+    const sent = mine && mine.type === "pick" && mine.target === picked;
+    const pickedName = (s.members.find((m) => m.id === picked) || {}).name;
+    const grid = el("div", { class: "member-grid" }, s.members.map((m) => memberCard(m, s.me.id, {
+      button: true, pressed: m.id === picked,
+      onclick: () => { whoSelection = m.id; render(last); }
+    })));
+    const out = [
+      el("div", { class: "section-head" }, el("strong", { text: "한 명을 골라 주세요" }), el("span", { class: "muted small", text: "나도 고를 수 있어요" })),
+      grid,
+      el("div", { class: "two-btn" },
+        el("button", { type: "button", class: "secondary-btn", text: "패스", onclick: () => { whoSelection = null; send({ t: "pass", round: r.n }); } }),
+        el("button", {
+          type: "button", class: "primary", disabled: !picked || sent,
+          text: sent ? `${pickedName} 지목 완료` : picked ? `${pickedName} 지목하기` : "지목하기",
+          onclick: () => { if (picked) send({ t: "pick", target: picked, round: r.n }); }
+        }))
+    ];
+    if (mine && mine.type === "pass") out.push(statusCard("이번 질문은 패스했어요", "마음이 바뀌면 지금이라도 골라 주세요."));
+    out.push(el("p", { class: "progress", text: `${r.answered} / ${r.total}명` }));
+    if (r.result) out.push(...whoResult(r.result, s, false));
+    return out;
+  }
+
+  /* ---------- 리더 조작 ---------- */
+  function syncSettings(s) {
+    if (s.me.role !== "leader") return;
+    fillToggleGroup($("setMode"), Object.entries(MODE_INFO).map(([k, v]) => [k, v.label]), s.mode, (v) => send({ t: "settings", mode: v }));
+    fillToggleGroup($("setSpice"), [["mild", "순한맛"], ["medium", "매운맛"]], s.spice, (v) => send({ t: "settings", spice: v }));
+    $("setShowResults").checked = !!s.settings.showResults;
+    $("setShowVoters").checked = !!s.settings.showVoters;
+  }
+  $("setShowResults").addEventListener("change", (e) => send({ t: "settings", showResults: e.target.checked }));
+  $("setShowVoters").addEventListener("change", (e) => send({ t: "settings", showVoters: e.target.checked }));
+  $("settingsBtn").addEventListener("click", () => $("settingsSheet").showModal());
+  $("qrBtn").addEventListener("click", () => $("qrSheet").showModal());
+  for (const d of [$("settingsSheet"), $("qrSheet")]) {
+    d.addEventListener("click", (e) => { if (e.target === d) d.close(); });
+  }
+  $("nextBtn").addEventListener("click", () => {
+    if (!last) return;
+    const spice = last.spice === "medium" ? "medium" : last.spice === "hot" ? "hot" : "mild";
+    const picked = drawQuestion(last.mode, spice);
+    if (!picked) return announce("이 모드와 맛에는 질문이 없어요.");
+    send({ t: "round", mode: last.mode, spice, ...picked });
+  });
+  let endArmed = false;
+  $("endBtn").addEventListener("click", () => {
+    if (!endArmed) {
+      endArmed = true;
+      $("endBtn").textContent = "한 번 더 누르면 방이 끝나요";
+      setTimeout(() => { endArmed = false; $("endBtn").textContent = "방 끝내기"; }, 3000);
+      return;
+    }
+    send({ t: "end" });
+    store.del(credKey(code));
+    $("settingsSheet").close();
+  });
+  $("leaveBtn").addEventListener("click", () => {
+    send({ t: "leave" });
+    store.del(credKey(code));
+    stopped = true;
+    location.href = "./";
+  });
+
+  /* ---------- 시작 ---------- */
+  function start() {
+    if (!API) return gone("함께하기를 준비하고 있어요", "곧 열릴 예정이에요. 지금은 혼자 질문 뽑기를 이용해 주세요.");
+    if (params.get("new") === "1") return showCreate();
+    if (!code) return gone("방 코드를 입력해 주세요", "리더 화면의 QR을 찍거나 4자리 방 코드를 입력하면 들어갈 수 있어요.");
+    try { creds = JSON.parse(store.get(credKey(code)) || "null"); } catch { creds = null; }
+    if (creds) { show("scrLoading"); connect(); }
+    else showJoin();
+  }
+  start();
+})();
