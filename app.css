@@ -767,3 +767,46 @@ body.spicy-mode .who-hint { background: #fff0f0; color: #b71c1c; }
   .category-sheet .categories { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .category-sheet-body { padding: 4px 20px 24px; }
 }
+
+/* ---------- 함께하기 입구 ---------- */
+.together-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto 18px;
+  padding: 12px 14px;
+  border: 2px solid var(--accent);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 10px 24px -12px var(--accent-glow);
+}
+.together-btn[hidden] { display: none; }
+.together-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.together-icon { flex: none; width: 40px; height: 40px; border-radius: 12px; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; }
+.together-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.together-title { font-weight: 800; font-size: 1rem; display: flex; align-items: center; gap: 6px; }
+.together-new { font-size: 0.68rem; font-weight: 800; color: var(--accent-ink); background: var(--accent-soft); border-radius: 999px; padding: 2px 7px; }
+.together-sub { font-size: 0.8rem; color: var(--muted); }
+.together-arrow { flex: none; font-size: 1.4rem; color: var(--muted); }
+.together-body { display: flex; flex-direction: column; gap: 16px; padding: 4px 16px 24px; }
+.together-create { display: flex; align-items: center; gap: 14px; padding: 16px; border: 2px solid var(--accent); border-radius: 18px; background: var(--accent-soft); color: var(--text); text-decoration: none; }
+.together-create:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.together-create > span:last-child { display: flex; flex-direction: column; gap: 2px; }
+.together-create strong { font-size: 1.05rem; }
+.together-create > span:last-child > span { font-size: 0.82rem; color: var(--text-2); }
+.together-plus { flex: none; width: 44px; height: 44px; border-radius: 14px; background: var(--accent); color: #fff; font-size: 1.6rem; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.together-or { display: flex; align-items: center; gap: 10px; font-size: 0.8rem; color: var(--muted); }
+.together-or::before, .together-or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.together-code { display: flex; flex-direction: column; gap: 8px; }
+.together-code label { font-weight: 700; font-size: 0.95rem; }
+.together-code p { margin: 0; font-size: 0.78rem; color: var(--muted); }
+.together-code-row { display: flex; gap: 8px; }
+.together-code-row input { flex: 1; min-width: 0; min-height: 52px; border: 2px solid var(--line-strong); border-radius: 14px; padding: 0 16px; font: inherit; font-size: 1.2rem; font-weight: 800; letter-spacing: 0.2em; background: var(--surface); color: var(--text); }
+.together-code-row input:focus { outline: none; border-color: var(--accent); }
+.together-code-row button { min-height: 52px; padding: 0 18px; border: 0; border-radius: 14px; background: var(--text); color: #fff; font: inherit; font-weight: 800; cursor: pointer; }

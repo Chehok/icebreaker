@@ -27,8 +27,12 @@
 | `index.html` | 첫 화면 및 대화 주제 페이지 |
 | `balance.html`, `who.html` | 밸런스게임 및 이 중 누가? 페이지 |
 | `privacy.html` | 개인정보처리방침(브라우저 저장소·GoatCounter·AdSense 안내). 자체 인라인 스타일, 광고·통계 스크립트 없음 |
-| `app.css`, `app.js` | 공통 스타일, 뽑기 로직, 질문 데이터. 빌드 없음 |
-| `sw.js` | 앱 셸 오프라인 캐시, 버전 `icebreaker-v34`, 글꼴 캐시 `icebreaker-fonts-v1` |
+| `app.css`, `app.js` | 공통 스타일, 혼자 뽑기 로직. 빌드 없음 |
+| `data.js` | 질문·카테고리 데이터(`categories`, `questions`, `balanceCategories`, `balanceItems`, `whoCategories`, `whoItems`). 세 앱 페이지와 `room.html`이 `app.js`/`room.js`보다 먼저 불러옵니다 |
+| `config.js` | 함께하기 서버 주소 `window.ICEBREAKER_ROOMS_URL`. 비어 있으면 함께하기 버튼이 숨겨지고 방 화면은 준비 중 안내를 보여줍니다. 로컬 테스트는 주소에 `?rooms=http://localhost:8787` |
+| `room.html`, `room.js`, `room.css`, `qr.js` | 함께하기(실시간 방) 화면. 리더·참여자 공용 한 페이지(`room.html?new=1` 방 만들기, `room.html?c=1234` 참여). `qr.js`는 의존성 없는 QR 생성기. 온라인 전용이라 서비스 워커가 미리 저장하지 않습니다 |
+| `rooms/` | 함께하기 서버(Cloudflare Worker + Durable Object). Pages와 별도로 배포. 자세한 내용은 `rooms/README.md` |
+| `sw.js` | 앱 셸 오프라인 캐시, 버전 `icebreaker-v35`, 글꼴 캐시 `icebreaker-fonts-v1` |
 | `manifest.webmanifest` | 상대 경로 시작 URL·범위·설치 아이콘 |
 | `icons/` | PWA 및 Apple 터치 아이콘 |
 | `favicon.ico`, `favicon-32.png`, `favicon-16.png` | 파비콘. `icons/icon-512.png`를 줄여 만든 파일이며, 링크 미리보기(스레드 등) 크롤러가 내려받을 수 있도록 모든 페이지가 루트 절대 경로(`/favicon…`)로 참조합니다 |
@@ -36,7 +40,7 @@
 | `about.html`, `contact.html`, `404.html`, `sitemap.xml` | 소개·문의·404 페이지와 사이트맵. 역시 생성물 |
 | `content.css` | 질문 모음·가이드·소개 등 읽는 페이지 공통 스타일 |
 | `robots.txt`, `ads.txt` | 크롤러 안내(사이트맵 위치), AdSense 판매자 인증 |
-| `tools/generate-content.js` | 의존성 없는 Node 스크립트. `app.js` 질문과 `tools/content/*.js` 원고로 위 생성물과 세 앱 페이지의 `<!-- content:start -->`~`<!-- content:end -->` 구간(사용법·질문 모음 버튼과 팝업)을 만듭니다. 배포 시 실행하지 않습니다(결과물을 커밋) |
+| `tools/generate-content.js` | 의존성 없는 Node 스크립트. `data.js` 질문과 `tools/content/*.js` 원고로 위 생성물과 세 앱 페이지의 `<!-- content:start -->`~`<!-- content:end -->` 구간(사용법·질문 모음 버튼과 팝업)을 만듭니다. 배포 시 실행하지 않습니다(결과물을 커밋) |
 | `tools/content/categories.js`, `tools/content/guides.js` | 모드·카테고리 소개 문구, 가이드 원고 |
 | `README.md` | 사람용 간단 소개 |
 | `AGENTS.md` | 이 문서 (상세 인수인계) |
@@ -49,9 +53,9 @@
 - 파비콘: 루트의 `favicon.ico`·`favicon-32.png`·`favicon-16.png`. data URI 이모지 파비콘은 링크 미리보기에서 깨지므로 쓰지 않습니다
 - 현재 모드는 페이지 주소와 HTML의 `data-mode`로 결정됩니다. 첫 화면은 항상 대화 주제를 엽니다.
 
-### 데이터 구조 (`app.js`)
+### 데이터 구조 (`data.js`)
 
-모든 질문 데이터는 `app.js`에 JS 상수로 들어 있습니다.
+모든 질문 데이터는 `data.js`에 JS 상수로 들어 있습니다. 맛·모드 설정(`spices`, `modes`)과 뽑기 로직은 `app.js`에 있습니다.
 
 #### 💬 대화 주제 모드
 
@@ -143,13 +147,15 @@ const SPICE_KEY = "icebreaker:spice"; // 예전 값 "spicy"는 "medium"으로 �
 ```
 
 - 상단 `#installBtn`은 설치 가능한 브라우저에서 "앱 설치"로 보이고(iOS는 `#installGuide` 안내 팝업), 설치된 앱(`display-mode: standalone` 또는 `navigator.standalone`)에서는 "링크 공유"로 바뀝니다. 누르면 페이지 제목과 주소(쿼리·해시 제외)를 기기의 시스템 공유 창에 전달합니다. 공유 기능이 없거나 실행에 실패하면 클립보드에 복사하고, 복사 결과를 2초간 버튼에 표시하며 `#announcement`로 알립니다. 공유를 취소하면 복사하지 않습니다.
+- 함께하기 입구: 세 앱 페이지의 `#togetherBtn`(서버 주소가 있을 때만 보임)이 `#togetherSheet` 바텀시트를 열고, "방 만들기"는 현재 모드·맛을 담아 `room.html?new=1&mode=…&spice=…`로, 방 코드 입력은 `room.html?c=1234`로 이동합니다.
+- 함께하기 방(`room.html`): 리더가 이름·첫 모드를 정해 방을 열면 4자리 코드와 QR(주소 `room.html?c=코드`)이 나옵니다. 참여자는 닉네임(10자, 방 안에서 중복 불가)을 정해 입장합니다. 리더가 "다음 질문"을 누르면 리더 기기가 `data.js`에서 질문을 골라(모드·맛별 셔플, 카테고리는 전체) 서버로 보내고, 모두의 화면이 바뀝니다. 대화 주제는 쪽지(200자, 익명 선택)·패스, 밸런스게임은 A/B 선택, 이 중 누가?는 방 사람 중 한 명 지목(자기 자신 가능)입니다. 리더는 쪽지 전체, 밸런스 선택 명단, 지목 순위를 보고, 참여자는 응답 후 집계만 봅니다(리더가 끌 수 있음). 지목한 사람 명단은 리더가 켤 때만 리더 화면에 보입니다. 핵매운맛은 방에서 쓰지 않습니다. 접속 정보는 `icebreaker:room:<코드>`에 저장되어 새로고침해도 같은 사람으로 돌아옵니다.
 - 세 모드 모두 핵매운맛 버튼은 기본 `hidden`이며, 제목을 매번 1.5초 이내 간격으로 5번 클릭/탭하면 잠금이 전환됩니다(제목 흔들림 피드백). 잠금 해제는 메모리에만 유지합니다. 다시 잠글 때 핵매운맛 선택 중이면 `selectSpice("medium")`으로 저장·질문 초기화하고, 로드 시 저장된 `hot`/`핵매운맛`도 `medium`으로 이전합니다. iPhone Safari를 위해 제목의 터치·선택 방지 CSS와 단일 `click` 리스너를 유지하세요.
 - 화면의 카테고리 칩은 `categories` / `balanceCategories` / `whoCategories` 객체에서 자동 생성됩니다. (`✨ 전체` 칩은 코드에서 따로 추가)
 - 칩 목록(`#categories`)은 화면 폭과 관계없이 `#categorySheet` 바텀시트(`<dialog>`)에 들어가고, 원래 자리에는 현재 카테고리를 보여주는 `#categoryTrigger` 버튼을 표시합니다. 시트는 휴대폰에서 전체 폭·2열, 560px 이상에서는 가운데 최대 640px·3열입니다. 칩을 고르거나 바깥·✕·Esc를 누르면 닫힙니다. `<dialog>` 미지원 브라우저에서만 칩을 원래 자리에 펼쳐 둡니다.
 - 뽑기 풀 = 현재 모드의 `items` 중 `spice`가 선택한 맛과 같고, 카테고리가 `전체`이거나 선택한 카테고리와 같은 것. 직전과 같은 질문은 연속으로 나오지 않습니다.
 - 풀(모드·맛·카테고리, 전체는 독립)마다 Fisher-Yates 셔플 백으로 한 바퀴 동안 중복 없이 뽑고 회차 경계의 연속 중복도 피하며(2개 이상), `icebreaker:bags`에 남은 풀 내부 인덱스·마지막 인덱스·크기를 저장·검증하고 상태 줄에 회차 진행도를 표시합니다.
 
-### 현재 수량 (2026-11-04 기준, `app.js`에서 직접 집계)
+### 현재 수량 (2026-11-04 기준, `data.js`에서 직접 집계)
 
 | 모드 | 카테고리 | 질문 수 | 내역 |
 |---|---|---|---|
@@ -165,7 +171,7 @@ const SPICE_KEY = "icebreaker:spice"; // 예전 값 "spicy"는 "medium"으로 �
 
 ### 대화 주제 질문 추가
 
-1. `app.js`를 UTF-8로 엽니다. (VS Code 권장. 메모장 등으로 인코딩이 바뀌지 않게 주의)
+1. `data.js`를 UTF-8로 엽니다. (VS Code 권장. 메모장 등으로 인코딩이 바뀌지 않게 주의)
 2. 순한맛이면 `mildQuestions`, 매운맛이면 `mediumQuestions`, 핵매운맛이면 `hotQuestions` 배열을 찾습니다.
 3. 같은 카테고리 질문들이 모여 있는 위치에 한 줄을 추가합니다.
 4. `category` 값은 반드시 `categories`에 **이미 있는 키**여야 합니다. 없는 키를 쓰면 뽑을 때 오류가 납니다.
@@ -209,7 +215,7 @@ const mildQuestions = [
 
 ### 질문·원고를 바꾼 뒤 (중요)
 
-AdSense 심사와 검색 노출을 위해 질문을 정적 HTML 페이지(`questions/`)로도 공개합니다. `app.js`의 질문, 카테고리, 또는 `tools/content/*.js`를 수정했다면 반드시 다시 생성해 함께 커밋하세요.
+AdSense 심사와 검색 노출을 위해 질문을 정적 HTML 페이지(`questions/`)로도 공개합니다. `data.js`의 질문, 카테고리, 또는 `tools/content/*.js`를 수정했다면 반드시 다시 생성해 함께 커밋하세요.
 
 ```powershell
 node tools/generate-content.js
@@ -245,6 +251,7 @@ git add -A
 - [ ] 기존 버전에서 업데이트 후 `./`, `./index.html`, 쿼리 URL에서 최신 질문이 보인다
 - [ ] 캐시 정리 시 다른 앱 캐시를 삭제하지 않는다
 - [ ] `node tools/generate-content.js`가 오류 없이 끝나고, 질문 모음·가이드 페이지 링크가 깨지지 않는다
+- [ ] 함께하기: `cd rooms; npx wrangler dev` 후 `index.html?rooms=http://localhost:8787`에서 방 만들기 → 다른 브라우저로 `room.html?c=코드&rooms=http://localhost:8787` 입장 → 세 모드 응답·집계, 새로고침 재접속, 방 끝내기가 된다. 서버 주소가 없으면 함께하기 버튼이 보이지 않는다
 - [ ] 앱 하단 `📖 사용법 · 질문 모음` 버튼이 팝업(`#guideDialog`)을 열고, ✕·Esc·바깥 클릭으로 닫히며, 팝업 안 카테고리 링크가 뽑기 칩 선택 상태에 영향을 주지 않는다
 
 ## 5. 배포 (Cloudflare Pages)
@@ -258,7 +265,7 @@ git add -A
 ### PWA 캐시 유지보수
 
 - 캐시 대상은 세 메뉴와 개인정보처리방침 HTML, 공통 CSS·JS, manifest, 아이콘입니다. 저장된 페이지를 바로 보여준 뒤 최신 버전을 확인하며, 온라인 첫 방문 또는 캐시 누락 시에는 네트워크에서 가져옵니다. Cloudflare의 확장자 없는 주소도 같은 페이지 캐시에 연결됩니다.
-- 캐시 파일을 수정하면 `sw.js` 캐시 이름도 반드시 증가시키세요(현재 `icebreaker-v34`).
+- 캐시 파일을 수정하면 `sw.js` 캐시 이름도 반드시 증가시키세요(현재 `icebreaker-v35`).
 - 업데이트 설치 시 HTTP 캐시를 새로 검증하며, 이전 Icebreaker 버전 캐시만 정리하고 글꼴 캐시는 유지합니다.
 - `file://`에서는 질문 뽑기만 동작합니다. 서비스 워커는 HTTPS 또는 localhost에서 확인합니다.
 - Pretendard는 jsDelivr CDN(`pretendard@v1.3.9` 다이내믹 서브셋)에서 불러오고 서비스 워커가 캐시 우선으로 저장합니다. 불러오지 못하면 시스템 한글 글꼴을 사용합니다.
@@ -270,7 +277,7 @@ cd C:\git\icebreaker
 git switch main; git pull
 git switch -c fix/질문-수정
 # 질문 수정 후 로컬에서 테스트
-git add app.js sw.js
+git add data.js sw.js
 git commit -m "질문 추가: ..."
 git switch stage; git pull; git merge --no-ff fix/질문-수정; git push origin stage
 # https://stage.icebreaker-de4.pages.dev/ 에서 확인한 뒤
@@ -298,12 +305,13 @@ git switch main; git merge --no-ff stage; git push origin main
 ## 7. 하지 말아야 할 것 (Don'ts)
 
 - ❌ **비밀정보 금지**: API 키, 토큰, 비밀번호 등은 이 저장소에 절대 넣지 마세요. 현재 비밀정보는 전혀 없으며, 필요하지도 않습니다.
-- ❌ **정적·무빌드 구조 유지**: 프레임워크, 번들러, npm 패키지, 외부 CDN 등을 추가하지 마세요. 저장소의 `index.html`을 브라우저로 직접 열어도 동작해야 합니다. 예외로 허용된 외부 리소스는 Pretendard(jsDelivr), GoatCounter, Google AdSense뿐이며, 모두 없어도 질문 뽑기는 동작해야 합니다.
+- ❌ **정적·무빌드 구조 유지**: 사이트(루트)에는 프레임워크, 번들러, npm 패키지, 외부 CDN 등을 추가하지 마세요. 예외는 `rooms/` 서버뿐이며, 이곳도 런타임 의존성 없이 배포 도구(wrangler)만 씁니다. 저장소의 `index.html`을 브라우저로 직접 열어도 동작해야 합니다. 예외로 허용된 외부 리소스는 Pretendard(jsDelivr), GoatCounter, Google AdSense뿐이며, 모두 없어도 질문 뽑기는 동작해야 합니다.
 - ❌ **저장소 비공개 전환 금지**: 예전 주소의 GitHub Pages 안내 페이지는 무료 플랜에서 공개 저장소가 필요합니다. 비공개로 바꾸면 예전 주소가 내려갑니다.
 - ❌ **회사 git 설정/계정 변경 금지**: `git config --global` 수정, `Chehok-developer` 계정 사용 금지.
 - ❌ **검토 요청 시 바로 푸시 금지**: 문서 변경 등에 대해 검토를 요청받았다면 `main`에 바로 푸시하지 말고 브랜치 + PR로 올려 확인을 받으세요.
 - ❌ 파일 인코딩을 UTF-8 이외로 바꾸지 마세요. (한글 깨짐)
 
-- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v34, 통계 요청은 캐시하지 않음.
+- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v35, 통계 요청은 캐시하지 않음.
 - 광고: Google AdSense 자동 광고(`ca-pub-9717375299017347`). AdSense는 쿠키를 사용하므로 수집 항목이 바뀌면 `privacy.html` 내용과 시행일을 함께 갱신하세요.
 - 배포 브랜치: 작업 브랜치 → `stage` 머지(확인) → `stage`를 `main`에 머지.
+- 함께하기 서버: Cloudflare Worker `icebreaker-rooms`(저장소 `rooms/` 폴더, Workers Builds로 자동 배포). 주소를 `config.js`에 넣어야 함께하기가 켜집니다. 방 데이터는 방 종료 즉시 또는 마지막 활동 6시간 뒤 삭제되며, 수집 항목이 바뀌면 `privacy.html`도 갱신하세요.

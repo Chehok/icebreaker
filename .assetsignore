@@ -2,6 +2,7 @@
 !/*.html
 !/app.css
 !/app.js
+!/data.js
 !/content.css
 !/sw.js
 !/manifest.webmanifest
@@ -14,3 +15,7 @@
 !/favicon.ico
 !/favicon-16.png
 !/favicon-32.png
+!/config.js
+!/qr.js
+!/room.js
+!/room.css

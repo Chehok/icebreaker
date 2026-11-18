@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+  <title>함께하기 - 아이스브레이커</title>
+  <meta name="robots" content="noindex" />
+  <meta name="description" content="리더가 넘기는 질문을 각자 폰으로 함께 보고, 쪽지·투표·지목으로 참여하는 아이스브레이커 방." />
+  <meta property="og:site_name" content="아이스브레이커" />
+  <meta property="og:title" content="아이스브레이커 방에 초대받았어요" />
+  <meta property="og:description" content="링크를 열고 닉네임만 정하면 바로 참여할 수 있어요." />
+  <meta property="og:image" content="https://icebreaker-de4.pages.dev/icons/icon-512.png" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#f4f5f9" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="stylesheet" href="room.css" />
+  <script src="./config.js" defer></script>
+  <script src="./data.js" defer></script>
+  <script src="./qr.js" defer></script>
+  <script src="./room.js" defer></script>
+</head>
+<body>
+  <main class="room" id="app">
+    <header class="room-top">
+      <a class="brand" href="./">아이스브레이커 <span>함께하기</span></a>
+      <span class="badge" id="topBadge" hidden></span>
+    </header>
+
+    <p class="conn" id="connBanner" role="status" hidden>연결이 끊겼어요. 다시 연결하는 중…</p>
+
+    <!-- 리더: 이름 정하고 방 열기 -->
+    <section class="screen" id="scrCreate" hidden>
+      <div class="intro">
+        <span class="eyebrow">방 만들기</span>
+        <h1>참여자들에게 보일<br>리더 이름은?</h1>
+        <p class="muted">이 기기에 기억해 두고, 다음에 방을 만들 때 그대로 써요.</p>
+      </div>
+      <form id="createForm" class="stack">
+        <label class="field-label" for="leaderName">리더 이름</label>
+        <input class="text-input" id="leaderName" type="text" maxlength="10" autocomplete="nickname" required />
+        <span class="field-label">처음 열 모드</span>
+        <div class="seg" id="createMode" role="group" aria-label="처음 열 모드"></div>
+        <div class="pills" id="createSpice" role="group" aria-label="맛"></div>
+        <p class="form-error" id="createError" role="alert" hidden></p>
+        <div class="grow"></div>
+        <button class="primary" type="submit" id="createBtn">방 열기</button>
+      </form>
+    </section>
+
+    <!-- 참여자: 닉네임 -->
+    <section class="screen" id="scrJoin" hidden>
+      <div class="intro">
+        <span class="eyebrow" id="joinRoomLabel">방</span>
+        <h1>어떤 이름으로<br>참여할까요?</h1>
+        <p class="muted">이 방 안에서만 보여요. 실명이 아니어도 괜찮아요.</p>
+      </div>
+      <form id="joinForm" class="stack">
+        <label class="field-label" for="nickName">닉네임</label>
+        <input class="text-input" id="nickName" type="text" maxlength="10" autocomplete="nickname" required />
+        <div class="hint-row"><span>최대 10자 · 방 안에서 겹치지 않게</span><span id="nickCount">0/10</span></div>
+        <span class="muted small">고민되면 하나 골라요</span>
+        <div class="chip-row" id="nickSuggest"></div>
+        <p class="form-error" id="joinError" role="alert" hidden></p>
+        <div class="grow"></div>
+        <button class="primary" type="submit" id="joinBtn">입장하기</button>
+      </form>
+    </section>
+
+    <!-- 방 없음 / 종료 -->
+    <section class="screen" id="scrGone" hidden>
+      <div class="card center">
+        <h1 id="goneTitle">방을 찾을 수 없어요</h1>
+        <p class="muted" id="goneText">방 코드를 다시 확인하거나 리더에게 새 QR을 받아 주세요.</p>
+      </div>
+      <form class="stack" id="codeForm">
+        <label class="field-label" for="codeInput">방 코드로 들어가기</label>
+        <div class="code-row">
+          <input class="text-input code-input" id="codeInput" type="text" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="4자리 숫자" />
+          <button class="dark" type="submit">들어가기</button>
+        </div>
+      </form>
+      <a class="secondary" href="./">혼자 질문 뽑기로 돌아가기</a>
+    </section>
+
+    <section class="screen" id="scrLoading">
+      <p class="muted center-text">불러오는 중…</p>
+    </section>
+
+    <!-- 방 안 -->
+    <section class="screen" id="scrRoom" hidden>
+      <div class="room-head">
+        <div>
+          <span class="room-meta" id="roomMeta">방 0000 · 0명</span>
+          <h2 class="room-title" id="roomTitle">대기실</h2>
+        </div>
+        <div class="head-actions">
+          <span class="me-chip" id="meChip"></span>
+          <button class="icon-btn" type="button" id="qrBtn" aria-label="QR 다시 보기" hidden>
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 대기실 -->
+      <div id="lobbyLeader" class="stack" hidden>
+        <div class="card qr-card">
+          <strong>QR을 찍으면 바로 들어와요</strong>
+          <div class="qr-box" id="qrBoxLobby"></div>
+          <div class="code-line"><span class="muted small">방 코드</span><span class="room-code" id="lobbyCode">0000</span></div>
+          <button class="ghost" type="button" data-share-link>링크 공유</button>
+        </div>
+        <div class="section-head"><strong id="lobbyCount">들어온 사람</strong><span class="muted small">실시간으로 늘어나요</span></div>
+        <div class="chip-row" id="lobbyMembers"></div>
+      </div>
+
+      <div id="lobbyPlayer" class="stack" hidden>
+        <div class="card center waiting">
+          <div class="dots" aria-hidden="true"><span></span><span></span><span></span></div>
+          <strong class="big">곧 시작해요</strong>
+          <p class="muted">리더가 질문을 넘기면<br>이 화면이 자동으로 바뀌어요.</p>
+        </div>
+        <strong>함께하는 사람</strong>
+        <div class="member-grid" id="lobbyGrid"></div>
+      </div>
+
+      <!-- 질문 -->
+      <div id="roundBox" class="stack" hidden>
+        <div class="card q-card" id="qCard">
+          <span class="tag" id="qLabel"></span>
+          <p class="q-text" id="qText"></p>
+          <div class="ab" id="qAb" hidden>
+            <div class="ab-a"><b>A</b><span id="qA"></span></div>
+            <div class="ab-b"><b>B</b><span id="qB"></span></div>
+          </div>
+        </div>
+        <div id="roundBody" class="stack"></div>
+      </div>
+
+      <div class="grow"></div>
+
+      <!-- 리더 하단 -->
+      <div class="leader-bar" id="leaderBar" hidden>
+        <button class="secondary-btn" type="button" id="settingsBtn">모드·맛</button>
+        <button class="primary" type="button" id="nextBtn">시작하기</button>
+      </div>
+      <button class="text-btn" type="button" id="leaveBtn" hidden>방 나가기</button>
+    </section>
+  </main>
+
+  <dialog class="sheet" id="settingsSheet" aria-labelledby="settingsTitle">
+    <div class="sheet-handle" aria-hidden="true"></div>
+    <div class="sheet-head">
+      <h2 id="settingsTitle">모드·맛 바꾸기</h2>
+      <form method="dialog"><button class="icon-btn plain" type="submit" aria-label="닫기">✕</button></form>
+    </div>
+    <div class="stack">
+      <div class="seg" id="setMode" role="group" aria-label="모드"></div>
+      <div class="pills" id="setSpice" role="group" aria-label="맛"></div>
+      <label class="switch-row"><span>참여자 화면에도 결과 보여주기</span><input type="checkbox" id="setShowResults" /></label>
+      <label class="switch-row"><span>이 중 누가?: 누가 누구를 골랐는지 공개</span><input type="checkbox" id="setShowVoters" /></label>
+      <p class="muted small">바꾼 모드·맛은 다음 질문부터 적용돼요.</p>
+      <button class="danger" type="button" id="endBtn">방 끝내기</button>
+    </div>
+  </dialog>
+
+  <dialog class="sheet" id="qrSheet" aria-labelledby="qrTitle">
+    <div class="sheet-handle" aria-hidden="true"></div>
+    <div class="sheet-head">
+      <h2 id="qrTitle">초대하기</h2>
+      <form method="dialog"><button class="icon-btn plain" type="submit" aria-label="닫기">✕</button></form>
+    </div>
+    <div class="stack center-items">
+      <div class="qr-box big" id="qrBoxSheet"></div>
+      <div class="code-line"><span class="muted small">방 코드</span><span class="room-code" id="sheetCode">0000</span></div>
+      <button class="ghost" type="button" data-share-link>링크 공유</button>
+    </div>
+  </dialog>
+
+  <p class="sr-only" id="announce" role="status" aria-live="polite" aria-atomic="true"></p>
+<script data-goatcounter="https://icebreaker.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
