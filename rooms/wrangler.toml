@@ -1,0 +1,17 @@
+# 아이스브레이커 "함께하기" 실시간 방 서버 (Cloudflare Worker + Durable Object)
+# 정적 사이트(Cloudflare Pages)와 별개로 배포합니다. 배포 방법은 rooms/README.md 참고.
+name = "icebreaker-rooms"
+main = "src/index.js"
+compatibility_date = "2026-11-01"
+
+[vars]
+# 웹소켓·방 만들기를 허용할 사이트 주소(쉼표로 구분). *.icebreaker-de4.pages.dev 와 localhost 는 코드에서 항상 허용합니다.
+ALLOWED_ORIGINS = "https://icebreaker-de4.pages.dev"
+
+[[durable_objects.bindings]]
+name = "ROOMS"
+class_name = "Room"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Room"]
