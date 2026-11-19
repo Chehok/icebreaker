@@ -196,9 +196,24 @@
   }
 
   /* ---------- 리더: 질문 고르기 ---------- */
-  function drawQuestion(mode, spice) {
-    const key = `${mode}|${spice}`;
-    const pool = MODE_INFO[mode].items.filter((q) => q.spice === spice);
+  /* 리더가 고른 카테고리(이 기기·이 방에서만 기억). "all"이면 전체에서 뽑습니다. */
+  const CATEGORY_KEY = () => `icebreaker:roomCategory:${code}`;
+  let leaderCategory = { mode: "", key: "all" };
+  try { leaderCategory = JSON.parse(sessionStorage.getItem(CATEGORY_KEY()) || "null") || leaderCategory; } catch { /* 무시 */ }
+  function setLeaderCategory(mode, key) {
+    leaderCategory = { mode, key };
+    try { sessionStorage.setItem(CATEGORY_KEY(), JSON.stringify(leaderCategory)); } catch { /* 무시 */ }
+  }
+  function currentCategory(mode) {
+    const key = leaderCategory.mode === mode ? leaderCategory.key : "all";
+    return key === "all" || MODE_INFO[mode].categories[key] ? key : "all";
+  }
+  const categoryLabel = (mode, key) => key === "all" ? "✨ 전체" : MODE_INFO[mode].categories[key].label;
+
+  function drawQuestion(mode, spice, category) {
+    const cat = category || "all";
+    const key = `${mode}|${spice}|${cat}`;
+    const pool = MODE_INFO[mode].items.filter((q) => q.spice === spice && (cat === "all" || q.category === cat));
     if (!pool.length) return null;
     let bag = bags[key];
     if (!bag || !bag.length) {
@@ -210,8 +225,8 @@
       bags[key] = bag;
     }
     const item = pool[bag.pop()];
-    const cat = MODE_INFO[mode].categories[item.category];
-    const label = cat ? cat.label.replace(/^\S+\s/, "") : "";
+    const info = MODE_INFO[mode].categories[item.category];
+    const label = info ? info.label.replace(/^\S+\s/, "") : "";
     const question = mode === "balance" ? { a: item.a, b: item.b } : { text: item.text };
     return { question, label };
   }
@@ -362,6 +377,7 @@
     $("meChip").textContent = isLeader ? `리더 · ${s.me.name}` : s.me.name;
     $("qrBtn").hidden = !(isLeader && r);
     $("leaderBar").hidden = !isLeader;
+    $("nextInfo").hidden = !isLeader;
     $("leaveBtn").hidden = isLeader;
     const needsReveal = !!(r && r.mode !== "topic" && !r.revealed);
     $("nextBtn").textContent = !r ? "시작하기" : needsReveal ? "결과 공개" : "다음 질문";
@@ -618,6 +634,11 @@
     renderKickList(s);
     fillToggleGroup($("setMode"), Object.entries(MODE_INFO).map(([k, v]) => [k, v.label]), s.mode, (v) => send({ t: "settings", mode: v }));
     fillToggleGroup($("setSpice"), [["mild", "순한맛"], ["medium", "매운맛"]], s.spice, (v) => send({ t: "settings", spice: v }));
+    const cat = currentCategory(s.mode);
+    fillToggleGroup($("setCategory"),
+      [["all", "✨ 전체"], ...Object.entries(MODE_INFO[s.mode].categories).map(([k, v]) => [k, v.label])],
+      cat, (v) => { setLeaderCategory(s.mode, v); syncSettings(last); });
+    $("nextInfo").textContent = `다음 질문: ${MODE_EMOJI[s.mode]} ${MODE_INFO[s.mode].label} · ${SPICE_INFO[s.spice] || "순한맛"} · ${categoryLabel(s.mode, cat)}`;
     $("setShowResults").checked = !!s.settings.showResults;
     $("setShowVoters").checked = !!s.settings.showVoters;
   }
@@ -635,7 +656,7 @@
       return;
     }
     const spice = last.spice === "medium" ? "medium" : last.spice === "hot" ? "hot" : "mild";
-    const picked = drawQuestion(last.mode, spice);
+    const picked = drawQuestion(last.mode, spice, currentCategory(last.mode));
     if (!picked) return announce("이 모드와 맛에는 질문이 없어요.");
     send({ t: "round", mode: last.mode, spice, ...picked });
   });
