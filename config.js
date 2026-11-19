@@ -1,7 +1,7 @@
 /* 함께하기(실시간 방) 서버 주소. 비어 있으면 함께하기 버튼을 숨깁니다.
    rooms/ Worker를 배포한 뒤 그 주소를 넣으세요. 예: "https://icebreaker-rooms.example.workers.dev"
    로컬에서는 페이지 주소에 ?rooms=http://localhost:8787 을 붙이면 이 값 대신 씁니다. */
-window.ICEBREAKER_ROOMS_URL = "";
+window.ICEBREAKER_ROOMS_URL = "https://icebreaker-rooms.dev-chehok.workers.dev";
 
 (function () {
   try {

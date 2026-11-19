@@ -243,7 +243,7 @@ export class Room {
       return this.broadcast();
     }
 
-    if (!state.round || isLeader) return;
+    if (!state.round) return;
     const round = state.round;
     let response = null;
     if (msg.t === "pass") response = { type: "pass" };
@@ -320,7 +320,8 @@ export class Room {
     const members = Object.entries(state.members)
       .sort((a, b) => (a[1].role === "leader" ? -1 : 0) - (b[1].role === "leader" ? -1 : 0) || a[1].joinedAt - b[1].joinedAt)
       .map(([id, m]) => ({ id, name: m.name, role: m.role, online: online.has(id) }));
-    const players = members.filter((m) => m.role !== "leader");
+    // 리더도 답할 수 있으므로 응답 인원은 방의 모든 사람 기준입니다.
+    const players = members;
     const out = {
       t: "state",
       code: state.code,
@@ -340,6 +341,7 @@ export class Room {
     const r = {
       n: round.n, mode: round.mode, spice: round.spice, label: round.label, question: round.question,
       answered, total: players.length,
+      answeredIds: players.filter((p) => responses[p.id]).map((p) => p.id),
       mine: responses[forId] || null
     };
     const nameOf = (id) => state.members[id]?.name || "(나간 사람)";

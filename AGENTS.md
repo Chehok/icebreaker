@@ -32,7 +32,7 @@
 | `config.js` | 함께하기 서버 주소 `window.ICEBREAKER_ROOMS_URL`. 비어 있으면 함께하기 버튼이 숨겨지고 방 화면은 준비 중 안내를 보여줍니다. 로컬 테스트는 주소에 `?rooms=http://localhost:8787` |
 | `room.html`, `room.js`, `room.css`, `qr.js` | 함께하기(실시간 방) 화면. 리더·참여자 공용 한 페이지(`room.html?new=1` 방 만들기, `room.html?c=1234` 참여). `qr.js`는 의존성 없는 QR 생성기. 온라인 전용이라 서비스 워커가 미리 저장하지 않습니다 |
 | `rooms/` | 함께하기 서버(Cloudflare Worker + Durable Object). Pages와 별도로 배포. 자세한 내용은 `rooms/README.md` |
-| `sw.js` | 앱 셸 오프라인 캐시, 버전 `icebreaker-v35`, 글꼴 캐시 `icebreaker-fonts-v1` |
+| `sw.js` | 앱 셸 오프라인 캐시, 버전 `icebreaker-v37`, 글꼴 캐시 `icebreaker-fonts-v1` |
 | `manifest.webmanifest` | 상대 경로 시작 URL·범위·설치 아이콘 |
 | `icons/` | PWA 및 Apple 터치 아이콘 |
 | `favicon.ico`, `favicon-32.png`, `favicon-16.png` | 파비콘. `icons/icon-512.png`를 줄여 만든 파일이며, 링크 미리보기(스레드 등) 크롤러가 내려받을 수 있도록 모든 페이지가 루트 절대 경로(`/favicon…`)로 참조합니다 |
@@ -148,7 +148,7 @@ const SPICE_KEY = "icebreaker:spice"; // 예전 값 "spicy"는 "medium"으로 �
 
 - 상단 `#installBtn`은 설치 가능한 브라우저에서 "앱 설치"로 보이고(iOS는 `#installGuide` 안내 팝업), 설치된 앱(`display-mode: standalone` 또는 `navigator.standalone`)에서는 "링크 공유"로 바뀝니다. 누르면 페이지 제목과 주소(쿼리·해시 제외)를 기기의 시스템 공유 창에 전달합니다. 공유 기능이 없거나 실행에 실패하면 클립보드에 복사하고, 복사 결과를 2초간 버튼에 표시하며 `#announcement`로 알립니다. 공유를 취소하면 복사하지 않습니다.
 - 함께하기 입구: 세 앱 페이지의 `#togetherBtn`(서버 주소가 있을 때만 보임)이 `#togetherSheet` 바텀시트를 열고, "방 만들기"는 현재 모드·맛을 담아 `room.html?new=1&mode=…&spice=…`로, 방 코드 입력은 `room.html?c=1234`로 이동합니다.
-- 함께하기 방(`room.html`): 리더가 이름·첫 모드를 정해 방을 열면 4자리 코드와 QR(주소 `room.html?c=코드`)이 나옵니다. 참여자는 닉네임(10자, 방 안에서 중복 불가)을 정해 입장합니다. 리더가 "다음 질문"을 누르면 리더 기기가 `data.js`에서 질문을 골라(모드·맛별 셔플, 카테고리는 전체) 서버로 보내고, 모두의 화면이 바뀝니다. 대화 주제는 쪽지(200자, 익명 선택)·패스, 밸런스게임은 A/B 선택, 이 중 누가?는 방 사람 중 한 명 지목(자기 자신 가능)입니다. 리더는 쪽지 전체, 밸런스 선택 명단, 지목 순위를 보고, 참여자는 응답 후 집계만 봅니다(리더가 끌 수 있음). 지목한 사람 명단은 리더가 켤 때만 리더 화면에 보입니다. 핵매운맛은 방에서 쓰지 않습니다. 접속 정보는 `icebreaker:room:<코드>`에 저장되어 새로고침해도 같은 사람으로 돌아옵니다.
+- 함께하기 방(`room.html`): 리더가 이름·첫 모드를 정해 방을 열면 4자리 코드와 QR(주소 `room.html?c=코드`)이 나옵니다. 참여자는 닉네임(10자, 방 안에서 중복 불가)을 정해 입장합니다. 리더가 "다음 질문"을 누르면 리더 기기가 `data.js`에서 질문을 골라(모드·맛별 셔플, 카테고리는 전체) 서버로 보내고, 모두의 화면이 바뀝니다. 대화 주제는 쪽지(200자, 익명 선택)·패스, 밸런스게임은 A/B 선택, 이 중 누가?는 방 사람 중 한 명 지목(자기 자신 가능)입니다. 리더도 "나도 답하기"로 같은 방식으로 답할 수 있고(선택), 응답 인원은 리더를 포함해 셉니다. 리더는 쪽지 전체, 밸런스 선택 명단, 지목 순위와 누가 응답했는지를 보고, 참여자는 응답 진행도와 응답 후 집계(밸런스는 선택 버튼 안 비율, 지목은 득표 배지·순위)만 봅니다(리더가 끌 수 있음). 지목한 사람 명단은 리더가 켤 때만 리더 화면에 보입니다. 핵매운맛은 방에서 쓰지 않습니다. 접속 정보는 `icebreaker:room:<코드>`에 저장되어 새로고침해도 같은 사람으로 돌아옵니다.
 - 세 모드 모두 핵매운맛 버튼은 기본 `hidden`이며, 제목을 매번 1.5초 이내 간격으로 5번 클릭/탭하면 잠금이 전환됩니다(제목 흔들림 피드백). 잠금 해제는 메모리에만 유지합니다. 다시 잠글 때 핵매운맛 선택 중이면 `selectSpice("medium")`으로 저장·질문 초기화하고, 로드 시 저장된 `hot`/`핵매운맛`도 `medium`으로 이전합니다. iPhone Safari를 위해 제목의 터치·선택 방지 CSS와 단일 `click` 리스너를 유지하세요.
 - 화면의 카테고리 칩은 `categories` / `balanceCategories` / `whoCategories` 객체에서 자동 생성됩니다. (`✨ 전체` 칩은 코드에서 따로 추가)
 - 칩 목록(`#categories`)은 화면 폭과 관계없이 `#categorySheet` 바텀시트(`<dialog>`)에 들어가고, 원래 자리에는 현재 카테고리를 보여주는 `#categoryTrigger` 버튼을 표시합니다. 시트는 휴대폰에서 전체 폭·2열, 560px 이상에서는 가운데 최대 640px·3열입니다. 칩을 고르거나 바깥·✕·Esc를 누르면 닫힙니다. `<dialog>` 미지원 브라우저에서만 칩을 원래 자리에 펼쳐 둡니다.
@@ -265,7 +265,7 @@ git add -A
 ### PWA 캐시 유지보수
 
 - 캐시 대상은 세 메뉴와 개인정보처리방침 HTML, 공통 CSS·JS, manifest, 아이콘입니다. 저장된 페이지를 바로 보여준 뒤 최신 버전을 확인하며, 온라인 첫 방문 또는 캐시 누락 시에는 네트워크에서 가져옵니다. Cloudflare의 확장자 없는 주소도 같은 페이지 캐시에 연결됩니다.
-- 캐시 파일을 수정하면 `sw.js` 캐시 이름도 반드시 증가시키세요(현재 `icebreaker-v35`).
+- 캐시 파일을 수정하면 `sw.js` 캐시 이름도 반드시 증가시키세요(현재 `icebreaker-v37`).
 - 업데이트 설치 시 HTTP 캐시를 새로 검증하며, 이전 Icebreaker 버전 캐시만 정리하고 글꼴 캐시는 유지합니다.
 - `file://`에서는 질문 뽑기만 동작합니다. 서비스 워커는 HTTPS 또는 localhost에서 확인합니다.
 - Pretendard는 jsDelivr CDN(`pretendard@v1.3.9` 다이내믹 서브셋)에서 불러오고 서비스 워커가 캐시 우선으로 저장합니다. 불러오지 못하면 시스템 한글 글꼴을 사용합니다.
@@ -311,7 +311,7 @@ git switch main; git merge --no-ff stage; git push origin main
 - ❌ **검토 요청 시 바로 푸시 금지**: 문서 변경 등에 대해 검토를 요청받았다면 `main`에 바로 푸시하지 말고 브랜치 + PR로 올려 확인을 받으세요.
 - ❌ 파일 인코딩을 UTF-8 이외로 바꾸지 마세요. (한글 깨짐)
 
-- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v35, 통계 요청은 캐시하지 않음.
+- 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v37, 통계 요청은 캐시하지 않음.
 - 광고: Google AdSense 자동 광고(`ca-pub-9717375299017347`). AdSense는 쿠키를 사용하므로 수집 항목이 바뀌면 `privacy.html` 내용과 시행일을 함께 갱신하세요.
 - 배포 브랜치: 작업 브랜치 → `stage` 머지(확인) → `stage`를 `main`에 머지.
-- 함께하기 서버: Cloudflare Worker `icebreaker-rooms`(저장소 `rooms/` 폴더, Workers Builds로 자동 배포). 주소를 `config.js`에 넣어야 함께하기가 켜집니다. 방 데이터는 방 종료 즉시 또는 마지막 활동 6시간 뒤 삭제되며, 수집 항목이 바뀌면 `privacy.html`도 갱신하세요.
+- 함께하기 서버: Cloudflare Worker `icebreaker-rooms`(https://icebreaker-rooms.dev-chehok.workers.dev, 저장소 `rooms/` 폴더, `main` 푸시 시 Workers Builds로 자동 배포). 주소를 `config.js`에 넣어야 함께하기가 켜집니다. 방 데이터는 방 종료 즉시 또는 마지막 활동 6시간 뒤 삭제되며, 수집 항목이 바뀌면 `privacy.html`도 갱신하세요.
