@@ -268,3 +268,14 @@ body { background: radial-gradient(120% 60% at 50% 0%, #eceefe 0%, var(--bg) 60%
 .list-title { font-size: 0.95rem; }
 .edit-btn { position: relative; }
 .edit-btn::after { content: ""; position: absolute; inset: -6px; }
+
+/* 결과 공개 대기 · 내보내기 */
+.reveal-wait { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border: 1px dashed var(--line-strong); border-radius: 16px; background: var(--surface); font-size: 0.88rem; color: var(--text-2); }
+.reveal-wait .lock { font-size: 1.1rem; }
+.choice:disabled, .member:disabled { cursor: default; opacity: 1; }
+.kick-list { display: flex; flex-direction: column; gap: 6px; }
+.kick-row { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 4px 0 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.kick-name { flex: 1; min-width: 0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kick-btn { min-height: 40px; padding: 0 12px; border: 1px solid #f3c7c3; border-radius: 999px; background: #fff; color: #b42318; font-size: 0.8rem; font-weight: 700; }
+.kick-btn.armed { background: #b42318; border-color: #b42318; color: #fff; }
+.sheet { overflow-y: auto; }
