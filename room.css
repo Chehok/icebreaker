@@ -257,3 +257,14 @@ body { background: radial-gradient(120% 60% at 50% 0%, #eceefe 0%, var(--bg) 60%
 .leader-bar { z-index: 3; padding: 8px; margin: 0 -8px; border-radius: 22px; background: rgba(244, 245, 249, 0.86); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
 #myBody:not(:empty) + #resultBody:not(:empty) { border-top: 1px dashed var(--line-strong); padding-top: 14px; }
 @media (prefers-reduced-motion: reduce) { .q-card.enter { animation: none; } .pfill, .choice.has-result::before { transition: none; } }
+
+/* 쪽지 목록 · 작은 고치기 버튼 */
+.note-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.edit-btn { flex: none; display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 0 10px; border: 1px solid var(--line-strong); border-radius: 999px; background: var(--surface); color: var(--text-2); font-size: 0.78rem; font-weight: 700; }
+.edit-btn:hover { border-color: var(--accent); color: var(--accent-ink); }
+.status-card.row { flex-direction: row; align-items: center; justify-content: space-between; }
+.note.is-mine { border-color: var(--accent); }
+.me-tag { margin-left: 6px; font-size: 0.68rem; font-weight: 800; color: #fff; background: var(--accent); border-radius: 999px; padding: 1px 6px; }
+.list-title { font-size: 0.95rem; }
+.edit-btn { position: relative; }
+.edit-btn::after { content: ""; position: absolute; inset: -6px; }
