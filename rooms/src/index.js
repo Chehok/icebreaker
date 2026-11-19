@@ -213,6 +213,31 @@ export class Room {
 
     if (isLeader) {
       if (msg.t === "round") return this.onRound(msg);
+      if (msg.t === "reveal") {
+        // 밸런스게임·이 중 누가?: 리더가 공개하기 전까지 결과는 아무에게도 보이지 않습니다.
+        if (state.round && state.round.mode !== "topic" && !state.round.revealed && msg.round === state.round.n) {
+          state.round.revealed = true;
+          await this.save();
+          this.broadcast();
+        }
+        return;
+      }
+      if (msg.t === "kick") {
+        const target = typeof msg.target === "string" ? msg.target : "";
+        if (!target || target === state.leaderId || !state.members[target]) return;
+        delete state.members[target];
+        if (state.round) delete state.round.responses[target];
+        await this.save();
+        for (const s of this.ctx.getWebSockets()) {
+          const a = s.deserializeAttachment();
+          if (a && a.clientId === target) {
+            s.serializeAttachment({ clientId: null });
+            this.send(s, { t: "kicked" });
+            try { s.close(4002, "kicked"); } catch { /* 무시 */ }
+          }
+        }
+        return this.broadcast();
+      }
       if (msg.t === "settings") {
         if (typeof msg.showResults === "boolean") state.settings.showResults = msg.showResults;
         if (typeof msg.showVoters === "boolean") state.settings.showVoters = msg.showVoters;
@@ -257,6 +282,7 @@ export class Room {
       response = { type: "pick", target: msg.target };
     }
     if (!response || msg.round !== round.n) return;
+    if (round.revealed) return; // 공개된 뒤에는 답을 바꿀 수 없습니다.
     // 답을 고쳐도 처음 낸 순서는 유지합니다.
     const prev = round.responses[att.clientId];
     response.at = prev ? prev.at : Date.now();
@@ -309,7 +335,8 @@ export class Room {
       spice: msg.spice,
       label: cleanText(msg.label, 40),
       question,
-      responses: {}
+      responses: {},
+      revealed: false
     };
     await this.save();
     this.broadcast();
@@ -344,7 +371,8 @@ export class Room {
       n: round.n, mode: round.mode, spice: round.spice, label: round.label, question: round.question,
       answered, total: players.length,
       answeredIds: players.filter((p) => responses[p.id]).map((p) => p.id),
-      mine: responses[forId] || null
+      mine: responses[forId] || null,
+      revealed: !!round.revealed
     };
     const nameOf = (id) => state.members[id]?.name || "(나간 사람)";
 
@@ -363,8 +391,7 @@ export class Room {
         if (v.type !== "vote") continue;
         (v.choice === "a" ? a : b).push(nameOf(id));
       }
-      if (isLeader) r.result = { a, b };
-      else if (state.settings.showResults && r.mine) r.result = { a: a.length, b: b.length };
+      if (round.revealed) r.result = { a, b };
     } else if (round.mode === "who") {
       const tally = new Map();
       for (const [id, v] of Object.entries(responses)) {
@@ -375,10 +402,9 @@ export class Room {
         tally.set(v.target, t);
       }
       const list = [...tally.values()].sort((x, y) => y.count - x.count);
-      const showVoters = isLeader && state.settings.showVoters;
+      const showVoters = state.settings.showVoters;
       const rows = list.map((t) => ({ id: t.id, name: t.name, count: t.count, voters: showVoters ? t.voters : undefined }));
-      if (isLeader) r.result = rows;
-      else if (state.settings.showResults && r.mine) r.result = rows;
+      if (round.revealed) r.result = rows;
     }
     out.round = r;
     return out;
