@@ -20,7 +20,7 @@
 
 - 서버 → 클라이언트: `welcome {clientId, key, role}`, `need_name`, `error {code: name_taken | room_full | not_joined}`, `state {...}`(받는 사람 역할에 맞게 거른 방 상태), `ended`
 - 리더 → 서버: `round {mode, spice, label, question}`, `settings {mode?, spice?, showResults?, showVoters?}`, `end`
-- 참여자 → 서버: `note {text, anon, round}`, `vote {choice: "a"|"b", round}`, `pick {target, round}`, `pass {round}`, `leave`
+- 참여자·리더 → 서버(리더도 답할 수 있음): `note {text, anon, round}`, `vote {choice: "a"|"b", round}`, `pick {target, round}`, `pass {round}`, `leave`
 
 `state`에서 리더는 쪽지 전체·밸런스 선택 명단·지목 순위(설정 시 지목한 사람)를 받고, 참여자는 자기 응답과, 응답한 뒤 `showResults`가 켜져 있으면 집계(비율·득표수)만 받습니다.
 
