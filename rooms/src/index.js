@@ -257,7 +257,9 @@ export class Room {
       response = { type: "pick", target: msg.target };
     }
     if (!response || msg.round !== round.n) return;
-    response.at = Date.now();
+    // 답을 고쳐도 처음 낸 순서는 유지합니다.
+    const prev = round.responses[att.clientId];
+    response.at = prev ? prev.at : Date.now();
     round.responses[att.clientId] = response;
     await this.save();
     this.broadcast();
@@ -347,11 +349,12 @@ export class Room {
     const nameOf = (id) => state.members[id]?.name || "(나간 사람)";
 
     if (round.mode === "topic") {
-      if (isLeader) {
+      // 리더는 항상, 참여자는 자기 답(쪽지나 패스)을 낸 뒤 결과 공개가 켜져 있으면 전체 쪽지를 봅니다.
+      if (isLeader || (state.settings.showResults && r.mine)) {
         r.notes = Object.entries(responses)
           .filter(([, v]) => v.type === "note")
           .sort((a, b) => a[1].at - b[1].at)
-          .map(([id, v]) => ({ name: v.anon ? "익명" : nameOf(id), text: v.text }));
+          .map(([id, v]) => ({ name: v.anon ? "익명" : nameOf(id), text: v.text, mine: id === forId }));
         r.passes = Object.values(responses).filter((v) => v.type === "pass").length;
       }
     } else if (round.mode === "balance") {

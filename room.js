@@ -417,11 +417,14 @@
 
     if (r.mode === "topic") {
       if (mine && !editingNote) {
-        return [heading, el("div", { class: "my-answer" },
-          mine.type === "note"
-            ? el("div", { class: "note mine-note" }, el("b", { text: mine.anon ? "익명으로 보낸 쪽지" : "내가 보낸 쪽지" }), el("span", { text: mine.text }))
-            : el("div", { class: "status-card" }, el("strong", { text: "이번 질문은 패스했어요" })),
-          el("button", { type: "button", class: "link-btn", text: mine.type === "note" ? "쪽지 고치기" : "지금이라도 쓰기", onclick: () => { editingNote = true; bodyKey = ""; render(last); } }))];
+        const edit = () => { editingNote = true; bodyKey = ""; render(last); };
+        const editBtn = el("button", { type: "button", class: "edit-btn", "aria-label": mine.type === "note" ? "쪽지 고치기" : "쪽지 쓰기", title: mine.type === "note" ? "고치기" : "쓰기", onclick: edit },
+          el("span", { "aria-hidden": "true", text: "✎" }), el("span", { text: mine.type === "note" ? "고치기" : "쓰기" }));
+        return [heading, mine.type === "note"
+          ? el("div", { class: "note mine-note" },
+              el("div", { class: "note-head" }, el("b", { text: mine.anon ? "익명으로 보낸 쪽지" : "내가 보낸 쪽지" }), editBtn),
+              el("span", { text: mine.text }))
+          : el("div", { class: "status-card row" }, el("strong", { text: "이번 질문은 패스했어요" }), editBtn)];
       }
       const ta = el("textarea", { class: "text-input", id: "noteText", maxlength: "200", rows: isLeader ? "2" : "4", placeholder: "떠오르는 대로 짧게 써 보세요" });
       if (mine && mine.type === "note") ta.value = mine.text;
@@ -492,14 +495,7 @@
   /* ---------- 결과 ---------- */
   function leaderResults(s, r) {
     if (r.mode === "topic") {
-      const notes = r.notes || [];
-      return [
-        progressBox(s, r, "도착한 쪽지", true),
-        ...(notes.length
-          ? notes.map((n) => el("div", { class: "note" }, el("b", { text: n.name }), el("span", { text: n.text })))
-          : [el("div", { class: "empty", text: "아직 도착한 쪽지가 없어요." })]),
-        r.passes ? el("p", { class: "muted small", text: `${r.passes}명은 이번 질문을 패스했어요.` }) : null
-      ];
+      return [progressBox(s, r, "도착한 쪽지", true), ...noteList(r)];
     }
     if (r.mode === "balance") {
       const a = (r.result && r.result.a) || [];
@@ -514,12 +510,28 @@
 
   function playerResults(s, r) {
     const out = [progressBox(s, r, r.mode === "topic" ? "참여 현황" : "응답 현황", false)];
-    if (r.mode === "topic") out.push(el("p", { class: "muted small", text: "쪽지는 리더 화면에 모여요. 리더가 읽어 주거나 큰 화면에 띄울 수 있어요." }));
+    if (r.mode === "topic") {
+      if (r.notes) out.push(el("strong", { class: "list-title", text: "모두의 쪽지" }), ...noteList(r));
+      else if (!r.mine) out.push(el("p", { class: "muted small", text: "쪽지를 보내거나 패스하면 다른 사람들의 쪽지를 볼 수 있어요." }));
+      else out.push(el("p", { class: "muted small", text: "리더가 쪽지를 리더 화면에만 보이게 해 두었어요." }));
+    }
     else if (r.mode === "who" && r.result) out.push(...whoResult(r.result, s, false));
     else if (!r.mine) out.push(el("p", { class: "muted small", text: "고르고 나면 다른 사람들의 선택 비율을 볼 수 있어요." }));
     else if (!r.result) out.push(el("p", { class: "muted small", text: "리더가 결과를 비공개로 해 두었어요." }));
     if (r.mode !== "topic" && r.mine) out.push(el("p", { class: "muted small", text: "리더가 다음으로 넘기기 전까지는 다시 바꿀 수 있어요." }));
     return out;
+  }
+
+  function noteList(r) {
+    const notes = r.notes || [];
+    return [
+      ...(notes.length
+        ? notes.map((n) => el("div", { class: `note${n.mine ? " is-mine" : ""}` },
+            el("b", null, n.name, n.mine ? el("span", { class: "me-tag", text: "나" }) : null),
+            el("span", { text: n.text })))
+        : [el("div", { class: "empty", text: "아직 도착한 쪽지가 없어요." })]),
+      r.passes ? el("p", { class: "muted small", text: `${r.passes}명은 이번 질문을 패스했어요.` }) : null
+    ];
   }
 
   function balanceBar(a, b) {
