@@ -64,7 +64,7 @@
     if (ws) try { ws.close(); } catch { /* 무시 */ }
     $("goneTitle").textContent = title;
     $("goneText").textContent = text;
-    $("topBadge").hidden = true;
+    $("roomPill").hidden = true;
     $("connBanner").hidden = true;
     show("scrGone");
   }
@@ -306,21 +306,40 @@
   });
 
   /* ---------- 방 화면 그리기 ---------- */
-  function memberCard(m, meId, extra) {
+  const MODE_EMOJI = { topic: "💬", balance: "⚖️", who: "🎯" };
+
+  function memberCard(m, meId, opts) {
+    const o = opts || {};
     const isMe = m.id === meId;
-    return el(extra && extra.button ? "button" : "div", {
-      type: extra && extra.button ? "button" : undefined,
-      class: `member${isMe && !(extra && extra.button) ? " is-me" : ""}${m.online ? "" : " off"}`,
-      "aria-pressed": extra && extra.button ? String(extra.pressed) : undefined,
-      onclick: extra && extra.onclick
+    const tagName = o.button ? "button" : "div";
+    return el(tagName, {
+      type: o.button ? "button" : undefined,
+      class: `member${isMe && !o.button ? " is-me" : ""}${m.online ? "" : " off"}${o.answered ? " answered" : ""}`,
+      "aria-pressed": o.button ? String(!!o.pressed) : undefined,
+      onclick: o.onclick
     },
     el("span", { class: "av", "aria-hidden": "true", text: initial(m.name) }),
-    el("span", null, `${m.name}${isMe && extra && extra.button ? " (나)" : ""}`,
-      !(extra && extra.button) && (m.role === "leader" || isMe) ? el("small", { text: m.role === "leader" ? "리더" : "나" }) : null));
+    el("span", { class: "member-name" }, `${m.name}${isMe && o.button ? " (나)" : ""}`,
+      !o.button && (m.role === "leader" || isMe) ? el("small", { text: [m.role === "leader" ? "리더" : "", isMe ? "나" : ""].filter(Boolean).join(" · ") }) : null),
+    o.count ? el("span", { class: "vote-badge", text: `${o.count}표` }) : null,
+    !o.button ? el("span", { class: `online-dot${m.online ? " on" : ""}`, "aria-label": m.online ? "접속 중" : "연결 끊김" }) : null);
   }
 
-  function progressHead(title, r) {
-    return el("div", { class: "section-head" }, el("strong", { text: title }), el("span", { class: "progress", text: `${r.answered} / ${r.total}명` }));
+  /* 응답 진행도: 막대 + (리더에게는) 누가 답했는지 */
+  function progressBox(s, r, title, showPeople) {
+    const pct = r.total ? Math.round((r.answered / r.total) * 100) : 0;
+    const answered = new Set(r.answeredIds || []);
+    return el("div", { class: "progress-box" },
+      el("div", { class: "section-head" },
+        el("strong", { text: title }),
+        el("span", { class: "progress", text: `${r.answered} / ${r.total}명 응답` })),
+      el("div", { class: "pbar", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": String(r.total), "aria-valuenow": String(r.answered), "aria-label": "응답한 사람" },
+        el("div", { class: "pfill", style: `width:${pct}%` })),
+      showPeople ? el("div", { class: "who-answered" }, s.members.map((m) => el("span", {
+        class: `mini${answered.has(m.id) ? " done" : ""}`,
+        title: m.name,
+        text: m.name
+      }))) : null);
   }
 
   function render(s) {
@@ -328,12 +347,12 @@
     const isLeader = s.me.role === "leader";
     const r = s.round;
     show("scrRoom");
-    $("topBadge").hidden = !isLeader;
-    $("topBadge").textContent = "리더";
-    $("roomMeta").textContent = `방 ${s.code} · ${s.members.filter((m) => m.online).length}명 접속`;
-    $("roomTitle").textContent = r ? `${MODE_INFO[r.mode].label} · ${SPICE_INFO[r.spice]}` : `${s.leaderName} 님의 방`;
-    $("meChip").textContent = s.me.name;
-    $("meChip").hidden = isLeader;
+    const online = s.members.filter((m) => m.online).length;
+    $("roomPill").hidden = false;
+    $("roomPillText").textContent = `방 ${s.code} · ${online}명`;
+    $("roomMeta").textContent = r ? `${MODE_EMOJI[r.mode]} ${MODE_INFO[r.mode].label} · ${SPICE_INFO[r.spice]}` : isLeader ? "대기실 · 리더" : "대기실";
+    $("roomTitle").textContent = r ? `${r.n}번째 질문` : `${s.leaderName} 님의 방`;
+    $("meChip").textContent = isLeader ? `리더 · ${s.me.name}` : s.me.name;
     $("qrBtn").hidden = !(isLeader && r);
     $("leaderBar").hidden = !isLeader;
     $("leaveBtn").hidden = isLeader;
@@ -347,10 +366,10 @@
     if (!r) {
       if (isLeader) {
         $("lobbyCount").textContent = `들어온 사람 ${s.members.length}명`;
-        $("lobbyMembers").replaceChildren(...s.members.map((m) => el("span", {
-          class: `chip${m.id === s.me.id ? " me" : ""}${m.online ? "" : " off"}`,
-          text: m.id === s.me.id ? `${m.name} (나)` : m.name
-        })));
+        $("lobbyMembers").replaceChildren(
+          ...s.members.map((m) => memberCard(m, s.me.id)),
+          ...(s.members.length < 2 ? [el("p", { class: "muted small hint-wide", text: "아직 아무도 없어요. QR을 보여 주거나 링크를 공유해 보세요." })] : [])
+        );
       } else {
         $("lobbyGrid").replaceChildren(...s.members.map((m) => memberCard(m, s.me.id)));
       }
@@ -360,55 +379,151 @@
     }
 
     // 질문 카드
-    $("qLabel").textContent = `${r.label ? r.label + " · " : ""}${r.n}번째 질문`;
+    const card = $("qCard");
+    card.className = `card q-card mode-${r.mode}`;
+    $("qLabel").textContent = r.label || MODE_INFO[r.mode].label;
+    $("qNum").textContent = `${r.n}번째`;
     const isBalance = r.mode === "balance";
     $("qText").textContent = isBalance ? "둘 중 하나만 고른다면?" : r.question.text;
-    $("qAb").hidden = !isBalance;
-    if (isBalance) { $("qA").textContent = r.question.a; $("qB").textContent = r.question.b; }
+    // A/B 문구는 아래 선택 버튼에 크게 보이므로 카드에서는 숨깁니다.
+    $("qAb").hidden = true;
     if (r.n !== lastAnnouncedRound) {
       lastAnnouncedRound = r.n;
       whoSelection = null;
       editingNote = false;
+      bodyKey = "";
+      card.classList.remove("enter");
+      void card.offsetWidth;
+      card.classList.add("enter");
       announce(isBalance ? `새 질문. A: ${r.question.a}. B: ${r.question.b}` : `새 질문. ${r.question.text}`);
     }
 
-    const body = $("roundBody");
-    if (isLeader) {
-      body.replaceChildren(...leaderBody(s, r).filter(Boolean));
-    } else {
-      const key = `${r.n}|${r.mode}|${r.mine ? r.mine.type + (r.mine.choice || r.mine.target || "") : "none"}|${editingNote}|${whoSelection}`;
-      if (r.mode === "topic" && key === bodyKey) {
-        const p = body.querySelector(".progress");
-        if (p) p.textContent = `${r.answered} / ${r.total}명`;
-      } else {
-        bodyKey = key;
-        body.replaceChildren(...playerBody(s, r).filter(Boolean));
-      }
+    // 내 답: 입력 중인 쪽지가 지워지지 않도록 바뀐 게 있을 때만 다시 그립니다.
+    const mineKey = r.mine ? `${r.mine.type}:${r.mine.choice || r.mine.target || ""}:${r.mine.text || ""}` : "none";
+    const resultKey = r.mode === "topic" ? "" : JSON.stringify(r.result || null);
+    const key = `${r.n}|${r.mode}|${isLeader}|${mineKey}|${editingNote}|${whoSelection}|${resultKey}`;
+    if (key !== bodyKey) {
+      bodyKey = key;
+      $("myBody").replaceChildren(...myBody(s, r, isLeader).filter(Boolean));
     }
+    $("resultBody").replaceChildren(...(isLeader ? leaderResults(s, r) : playerResults(s, r)).filter(Boolean));
     syncSettings(s);
   }
 
-  function leaderBody(s, r) {
+  /* ---------- 내 답 (리더·참여자 공통) ---------- */
+  function myBody(s, r, isLeader) {
+    const mine = r.mine;
+    const heading = isLeader ? el("div", { class: "section-head" }, el("strong", { text: "나도 답하기" }), el("span", { class: "muted small", text: "리더도 참여할 수 있어요 · 선택" })) : null;
+
+    if (r.mode === "topic") {
+      if (mine && !editingNote) {
+        return [heading, el("div", { class: "my-answer" },
+          mine.type === "note"
+            ? el("div", { class: "note mine-note" }, el("b", { text: mine.anon ? "익명으로 보낸 쪽지" : "내가 보낸 쪽지" }), el("span", { text: mine.text }))
+            : el("div", { class: "status-card" }, el("strong", { text: "이번 질문은 패스했어요" })),
+          el("button", { type: "button", class: "link-btn", text: mine.type === "note" ? "쪽지 고치기" : "지금이라도 쓰기", onclick: () => { editingNote = true; bodyKey = ""; render(last); } }))];
+      }
+      const ta = el("textarea", { class: "text-input", id: "noteText", maxlength: "200", rows: isLeader ? "2" : "4", placeholder: "떠오르는 대로 짧게 써 보세요" });
+      if (mine && mine.type === "note") ta.value = mine.text;
+      const anon = el("input", { type: "checkbox", id: "noteAnon" });
+      if (mine && mine.anon) anon.checked = true;
+      const count = el("span", { class: "muted small", text: `${ta.value.length}/200` });
+      ta.addEventListener("input", () => { count.textContent = `${ta.value.length}/200`; });
+      const submit = () => {
+        const text = ta.value.trim();
+        if (!text) { ta.focus(); return; }
+        if (send({ t: "note", text, anon: anon.checked, round: r.n })) { editingNote = false; announce("쪽지를 보냈어요."); }
+      };
+      return [
+        heading,
+        isLeader ? null : el("label", { class: "field-label", for: "noteText", text: "내 쪽지" }),
+        isLeader ? el("label", { class: "sr-only", for: "noteText", text: "내 쪽지" }) : null,
+        ta,
+        el("div", { class: "hint-row" }, el("label", { class: "check-row", for: "noteAnon" }, anon, "익명으로 보내기"), count),
+        el("div", { class: `two-btn${isLeader ? "" : " action-bar"}` },
+          el("button", { type: "button", class: "secondary-btn", text: "패스", onclick: () => { if (send({ t: "pass", round: r.n })) editingNote = false; } }),
+          el("button", { type: "button", class: isLeader ? "primary small-primary" : "primary", text: "쪽지 보내기", onclick: submit }))
+      ];
+    }
+
+    if (r.mode === "balance") {
+      const choice = mine && mine.type === "vote" ? mine.choice : null;
+      // 집계가 보이면 버튼 안에 비율을 채워 보여줍니다.
+      let counts = null;
+      if (r.result) counts = isLeader ? { a: r.result.a.length, b: r.result.b.length } : r.result;
+      const total = counts ? counts.a + counts.b : 0;
+      const btn = (k, text) => {
+        const pct = counts && total ? Math.round((counts[k] / total) * 100) : null;
+        return el("button", {
+          type: "button", class: `choice ${k}${pct !== null ? " has-result" : ""}`, "aria-pressed": String(choice === k),
+          style: pct !== null ? `--pct:${pct}%` : undefined,
+          onclick: () => send({ t: "vote", choice: k, round: r.n })
+        },
+        el("span", { class: "choice-top" }, el("b", { text: k.toUpperCase() }), choice === k ? el("span", { class: "mine", text: "내 선택" }) : null),
+        el("span", { class: "ct", text }),
+        pct !== null ? el("span", { class: "pct", text: `${pct}% · ${counts[k]}명` }) : null);
+      };
+      return [heading, el("div", { class: isLeader ? "choices compact" : "choices" }, btn("a", r.question.a), btn("b", r.question.b)),
+        el("button", { type: "button", class: "link-btn", text: mine && mine.type === "pass" ? "패스했어요 · 다시 고르려면 위를 눌러요" : "이번 질문은 패스", onclick: () => send({ t: "pass", round: r.n }) })];
+    }
+
+    // 이 중 누가?
+    const counts = new Map();
+    if (Array.isArray(r.result)) for (const row of r.result) counts.set(row.id, row.count);
+    const picked = whoSelection || (mine && mine.type === "pick" ? mine.target : null);
+    const sent = mine && mine.type === "pick" && mine.target === picked;
+    const pickedName = (s.members.find((m) => m.id === picked) || {}).name;
+    return [
+      heading || el("div", { class: "section-head" }, el("strong", { text: "한 명을 골라 주세요" }), el("span", { class: "muted small", text: "나도 고를 수 있어요" })),
+      el("div", { class: "member-grid" }, s.members.map((m) => memberCard(m, s.me.id, {
+        button: true, pressed: m.id === picked, count: counts.get(m.id),
+        onclick: () => { whoSelection = m.id; render(last); }
+      }))),
+      el("div", { class: `two-btn${isLeader ? "" : " action-bar"}` },
+        el("button", { type: "button", class: "secondary-btn", text: mine && mine.type === "pass" ? "패스함" : "패스", onclick: () => { whoSelection = null; send({ t: "pass", round: r.n }); } }),
+        el("button", {
+          type: "button", class: isLeader ? "primary small-primary" : "primary", disabled: !picked || sent,
+          text: sent ? `${pickedName} 지목 완료 ✓` : picked ? `${pickedName} 지목하기` : "지목하기",
+          onclick: () => { if (picked) send({ t: "pick", target: picked, round: r.n }); }
+        }))
+    ];
+  }
+
+  /* ---------- 결과 ---------- */
+  function leaderResults(s, r) {
     if (r.mode === "topic") {
       const notes = r.notes || [];
-      const list = notes.length
-        ? notes.map((n) => el("div", { class: "note" }, el("b", { text: n.name }), el("span", { text: n.text })))
-        : [el("div", { class: "empty", text: "아직 도착한 쪽지가 없어요." })];
-      return [progressHead("도착한 쪽지", r), ...list, r.passes ? el("p", { class: "muted small", text: `${r.passes}명은 이번 질문을 패스했어요.` }) : null];
+      return [
+        progressBox(s, r, "도착한 쪽지", true),
+        ...(notes.length
+          ? notes.map((n) => el("div", { class: "note" }, el("b", { text: n.name }), el("span", { text: n.text })))
+          : [el("div", { class: "empty", text: "아직 도착한 쪽지가 없어요." })]),
+        r.passes ? el("p", { class: "muted small", text: `${r.passes}명은 이번 질문을 패스했어요.` }) : null
+      ];
     }
     if (r.mode === "balance") {
       const a = (r.result && r.result.a) || [];
       const b = (r.result && r.result.b) || [];
-      const total = a.length + b.length;
-      return [progressHead("결과", r), balanceBar(a.length, b.length, total), el("div", { class: "lists" },
-        el("div", { class: "list-card a" }, el("strong", { text: `A를 고른 ${a.length}명` }), el("div", { class: "chip-row" }, a.map((n) => el("span", { class: "name-pill", text: n })))),
-        el("div", { class: "list-card b" }, el("strong", { text: `B를 고른 ${b.length}명` }), el("div", { class: "chip-row" }, b.map((n) => el("span", { class: "name-pill", text: n }))))
+      return [progressBox(s, r, "결과", true), balanceBar(a.length, b.length), el("div", { class: "lists" },
+        el("div", { class: "list-card a" }, el("strong", { text: `A를 고른 ${a.length}명` }), el("div", { class: "chip-row" }, a.length ? a.map((n) => el("span", { class: "name-pill", text: n })) : el("span", { class: "muted small", text: "아직 없어요" }))),
+        el("div", { class: "list-card b" }, el("strong", { text: `B를 고른 ${b.length}명` }), el("div", { class: "chip-row" }, b.length ? b.map((n) => el("span", { class: "name-pill", text: n })) : el("span", { class: "muted small", text: "아직 없어요" })))
       )];
     }
-    return [progressHead("지목 결과", r), ...whoResult(r.result || [], s, true)];
+    return [progressBox(s, r, "지목 결과", true), ...whoResult(r.result || [], s, true)];
   }
 
-  function balanceBar(a, b, total) {
+  function playerResults(s, r) {
+    const out = [progressBox(s, r, r.mode === "topic" ? "참여 현황" : "응답 현황", false)];
+    if (r.mode === "topic") out.push(el("p", { class: "muted small", text: "쪽지는 리더 화면에 모여요. 리더가 읽어 주거나 큰 화면에 띄울 수 있어요." }));
+    else if (r.mode === "who" && r.result) out.push(...whoResult(r.result, s, false));
+    else if (!r.mine) out.push(el("p", { class: "muted small", text: "고르고 나면 다른 사람들의 선택 비율을 볼 수 있어요." }));
+    else if (!r.result) out.push(el("p", { class: "muted small", text: "리더가 결과를 비공개로 해 두었어요." }));
+    if (r.mode !== "topic" && r.mine) out.push(el("p", { class: "muted small", text: "리더가 다음으로 넘기기 전까지는 다시 바꿀 수 있어요." }));
+    return out;
+  }
+
+  function balanceBar(a, b) {
+    const total = a + b;
     if (!total) return el("div", { class: "empty", text: "아직 아무도 고르지 않았어요." });
     const pa = Math.round((a / total) * 100);
     const pb = 100 - pa;
@@ -437,82 +552,6 @@
     }
     const zero = s.members.filter((m) => !rows.some((x) => x.id === m.id)).map((m) => m.name);
     if (zero.length && isLeader) out.push(el("p", { class: "muted small", text: `0표: ${zero.join(" · ")}` }));
-    return out;
-  }
-
-  function playerBody(s, r) {
-    const mine = r.mine;
-    const statusCard = (title, text) => el("div", { class: "status-card" }, el("strong", { text: title }), text ? el("span", { class: "muted small", text }) : null);
-
-    if (r.mode === "topic") {
-      if (mine && !editingNote) {
-        return [
-          mine.type === "note"
-            ? el("div", { class: "note" }, el("b", { text: mine.anon ? "익명으로 보낸 쪽지" : "내가 보낸 쪽지" }), el("span", { text: mine.text }))
-            : statusCard("이번 질문은 패스했어요", null),
-          statusCard(`${r.answered} / ${r.total}명이 참여했어요`, "리더가 다음으로 넘기기 전까지 다시 쓸 수 있어요."),
-          el("button", { type: "button", class: "ghost", text: "다시 쓰기", onclick: () => { editingNote = true; render(last); } })
-        ];
-      }
-      const ta = el("textarea", { class: "text-input", id: "noteText", maxlength: "200", rows: "4", placeholder: "떠오르는 대로 짧게 써 보세요" });
-      if (mine && mine.type === "note") ta.value = mine.text;
-      const anon = el("input", { type: "checkbox", id: "noteAnon" });
-      if (mine && mine.anon) anon.checked = true;
-      const count = el("span", { class: "muted small", text: `${ta.value.length}/200` });
-      ta.addEventListener("input", () => { count.textContent = `${ta.value.length}/200`; });
-      const submit = () => {
-        const text = ta.value.trim();
-        if (!text) { ta.focus(); return; }
-        if (send({ t: "note", text, anon: anon.checked, round: r.n })) { editingNote = false; announce("쪽지를 보냈어요."); }
-      };
-      return [
-        el("label", { class: "field-label", for: "noteText", text: "내 쪽지" }), ta,
-        el("div", { class: "hint-row" }, el("label", { class: "check-row", for: "noteAnon" }, anon, "익명으로 보내기"), count),
-        el("p", { class: "muted small", text: "쪽지는 리더 화면에 모여요. 리더가 읽어 주거나 큰 화면에 띄울 수 있어요." }),
-        el("div", { class: "two-btn" },
-          el("button", { type: "button", class: "secondary-btn", text: "패스", onclick: () => { if (send({ t: "pass", round: r.n })) editingNote = false; } }),
-          el("button", { type: "button", class: "primary", text: "쪽지 보내기", onclick: submit })),
-        el("p", { class: "progress", text: `${r.answered} / ${r.total}명` })
-      ];
-    }
-
-    if (r.mode === "balance") {
-      const choice = mine && mine.type === "vote" ? mine.choice : null;
-      const btn = (k, text) => el("button", {
-        type: "button", class: `choice ${k}`, "aria-pressed": String(choice === k),
-        onclick: () => send({ t: "vote", choice: k, round: r.n })
-      }, el("span", { style: "display:flex;width:100%;justify-content:space-between;align-items:center" }, el("b", { text: k.toUpperCase() }), choice === k ? el("span", { class: "mine", text: "내 선택" }) : null), el("span", { class: "ct", text }));
-      const out = [btn("a", r.question.a), btn("b", r.question.b)];
-      if (r.result) {
-        out.push(balanceBar(r.result.a, r.result.b, r.result.a + r.result.b));
-      }
-      out.push(statusCard(`${r.answered} / ${r.total}명이 골랐어요`, "리더가 다음으로 넘기기 전까지는 다시 바꿀 수 있어요."));
-      out.push(el("button", { type: "button", class: "text-btn", text: "이번 질문은 패스", onclick: () => send({ t: "pass", round: r.n }) }));
-      return out;
-    }
-
-    // 이 중 누가?
-    const picked = whoSelection || (mine && mine.type === "pick" ? mine.target : null);
-    const sent = mine && mine.type === "pick" && mine.target === picked;
-    const pickedName = (s.members.find((m) => m.id === picked) || {}).name;
-    const grid = el("div", { class: "member-grid" }, s.members.map((m) => memberCard(m, s.me.id, {
-      button: true, pressed: m.id === picked,
-      onclick: () => { whoSelection = m.id; render(last); }
-    })));
-    const out = [
-      el("div", { class: "section-head" }, el("strong", { text: "한 명을 골라 주세요" }), el("span", { class: "muted small", text: "나도 고를 수 있어요" })),
-      grid,
-      el("div", { class: "two-btn" },
-        el("button", { type: "button", class: "secondary-btn", text: "패스", onclick: () => { whoSelection = null; send({ t: "pass", round: r.n }); } }),
-        el("button", {
-          type: "button", class: "primary", disabled: !picked || sent,
-          text: sent ? `${pickedName} 지목 완료` : picked ? `${pickedName} 지목하기` : "지목하기",
-          onclick: () => { if (picked) send({ t: "pick", target: picked, round: r.n }); }
-        }))
-    ];
-    if (mine && mine.type === "pass") out.push(statusCard("이번 질문은 패스했어요", "마음이 바뀌면 지금이라도 골라 주세요."));
-    out.push(el("p", { class: "progress", text: `${r.answered} / ${r.total}명` }));
-    if (r.result) out.push(...whoResult(r.result, s, false));
     return out;
   }
 
