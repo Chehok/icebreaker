@@ -19,10 +19,10 @@
 웹소켓 메시지 (JSON)
 
 - 서버 → 클라이언트: `welcome {clientId, key, role}`, `need_name`, `kicked`, `error {code: name_taken | room_full | not_joined}`, `state {...}`(받는 사람 역할에 맞게 거른 방 상태), `ended`
-- 리더 → 서버: `round {mode, spice, label, question}`, `reveal {round}`(밸런스·지목 결과 공개), `kick {target}`(참여자 내보내기), `settings {mode?, spice?, showResults?, showVoters?}`, `end`
+- 리더 → 서버: `round {mode, spice, label, question}`, `reveal {round}`(세 모드 결과 공개), `kick {target}`(참여자 내보내기), `settings {mode?, spice?}`, `end`
 - 참여자·리더 → 서버(리더도 답할 수 있음): `note {text, anon, round}`, `vote {choice: "a"|"b", round}`, `pick {target, round}`, `pass {round}`, `leave`
 
-`state`에서 대화 주제 쪽지는 리더에게 항상, 참여자에게는 답한 뒤 `showResults`가 켜져 있으면 보냅니다. 밸런스·지목 결과는 `round.revealed`가 된 뒤에만 모두에게 같은 내용으로 보내고, 공개 뒤에는 답 변경을 받지 않습니다.
+`state`에서 쪽지·밸런스 선택·지목 결과(고른 사람 명단 포함)는 `round.revealed`가 된 뒤에만 모두에게 같은 내용으로 보내고, 공개 뒤에는 답 변경을 받지 않습니다. 공개 전에는 응답 인원과 응답한 사람(`answeredIds`)만 보냅니다.
 
 허용 출처: `https://icebreaker-de4.pages.dev`와 그 하위 도메인(stage 등), `localhost`. 다른 주소는 `wrangler.toml`의 `ALLOWED_ORIGINS`에 쉼표로 추가합니다.
 

@@ -153,7 +153,7 @@ export class Room {
         roundCount: 0,
         mode: body.mode,
         spice: body.spice,
-        settings: { showResults: true, showVoters: false },
+        settings: {},
         ended: false
       };
       await this.save();
@@ -214,8 +214,8 @@ export class Room {
     if (isLeader) {
       if (msg.t === "round") return this.onRound(msg);
       if (msg.t === "reveal") {
-        // 밸런스게임·이 중 누가?: 리더가 공개하기 전까지 결과는 아무에게도 보이지 않습니다.
-        if (state.round && state.round.mode !== "topic" && !state.round.revealed && msg.round === state.round.n) {
+        // 세 모드 모두 리더가 공개하기 전까지 결과(쪽지·선택·지목)는 아무에게도 보이지 않습니다.
+        if (state.round && !state.round.revealed && msg.round === state.round.n) {
           state.round.revealed = true;
           await this.save();
           this.broadcast();
@@ -239,8 +239,6 @@ export class Room {
         return this.broadcast();
       }
       if (msg.t === "settings") {
-        if (typeof msg.showResults === "boolean") state.settings.showResults = msg.showResults;
-        if (typeof msg.showVoters === "boolean") state.settings.showVoters = msg.showVoters;
         if (MODES.includes(msg.mode)) state.mode = msg.mode;
         if (SPICES.includes(msg.spice)) state.spice = msg.spice;
         await this.save();
@@ -377,8 +375,8 @@ export class Room {
     const nameOf = (id) => state.members[id]?.name || "(나간 사람)";
 
     if (round.mode === "topic") {
-      // 리더는 항상, 참여자는 자기 답(쪽지나 패스)을 낸 뒤 결과 공개가 켜져 있으면 전체 쪽지를 봅니다.
-      if (isLeader || (state.settings.showResults && r.mine)) {
+      // 리더가 결과를 공개하면 답했든 안 했든 모두에게 전체 쪽지가 보입니다.
+      if (round.revealed) {
         r.notes = Object.entries(responses)
           .filter(([, v]) => v.type === "note")
           .sort((a, b) => a[1].at - b[1].at)
@@ -402,8 +400,7 @@ export class Room {
         tally.set(v.target, t);
       }
       const list = [...tally.values()].sort((x, y) => y.count - x.count);
-      const showVoters = state.settings.showVoters;
-      const rows = list.map((t) => ({ id: t.id, name: t.name, count: t.count, voters: showVoters ? t.voters : undefined }));
+      const rows = list.map((t) => ({ id: t.id, name: t.name, count: t.count, voters: t.voters }));
       if (round.revealed) r.result = rows;
     }
     out.round = r;
