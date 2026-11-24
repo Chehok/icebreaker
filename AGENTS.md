@@ -314,4 +314,4 @@ git switch main; git merge --no-ff stage; git push origin main
 - 방문 통계: GoatCounter(쿠키 없음, 대시보드 https://icebreaker.goatcounter.com). 서비스 워커 캐시 icebreaker-v38, 통계 요청은 캐시하지 않음.
 - 광고: Google AdSense 자동 광고(`ca-pub-9717375299017347`). AdSense는 쿠키를 사용하므로 수집 항목이 바뀌면 `privacy.html` 내용과 시행일을 함께 갱신하세요.
 - 배포 브랜치: 작업 브랜치 → `stage` 머지(확인) → `stage`를 `main`에 머지.
-- 함께하기 서버: Cloudflare Worker `icebreaker-rooms`(https://icebreaker-rooms.dev-chehok.workers.dev, 저장소 `rooms/` 폴더, `main` 푸시 시 Workers Builds로 자동 배포). 주소를 `config.js`에 넣어야 함께하기가 켜집니다. 방 데이터는 방 종료 즉시 또는 마지막 활동 6시간 뒤 삭제되며, 수집 항목이 바뀌면 `privacy.html`도 갱신하세요.
+- 함께하기 서버: Cloudflare Worker `icebreaker-rooms`(https://icebreaker-rooms.dev-chehok.workers.dev, 저장소 `rooms/` 폴더, `main` 푸시 시 Workers Builds로 자동 배포). 주소를 `config.js`에 넣어야 함께하기가 켜집니다. 미리보기 사이트는 `stage` 푸시 시 배포되는 별도 Worker `icebreaker-rooms-stage`(https://icebreaker-rooms-stage.dev-chehok.workers.dev, `wrangler.toml`의 `[env.stage]`)를 쓰므로, 서버 변경도 `stage`에서 먼저 확인할 수 있습니다. 방 데이터는 방 종료 즉시 또는 마지막 활동 6시간 뒤 삭제되며, 수집 항목이 바뀌면 `privacy.html`도 갱신하세요.

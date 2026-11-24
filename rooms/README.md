@@ -31,6 +31,7 @@
 1. Cloudflare 대시보드 → Workers & Pages → Create → Import a repository → `Chehok/icebreaker`
 2. Project name `icebreaker-rooms`, Root directory `rooms`, Build command 비움, Deploy command `npx wrangler deploy`
 3. 배포된 주소(현재 `https://icebreaker-rooms.dev-chehok.workers.dev`)를 저장소 루트 `config.js`의 `window.ICEBREAKER_ROOMS_URL`에 넣고 사이트를 배포하면 함께하기 버튼이 켜집니다.
+4. 미리보기용 서버: 같은 방법으로 하나 더 만들되 Project name `icebreaker-rooms-stage`, Root directory `rooms`, Deploy command `npx wrangler deploy --env stage`, 설정의 Branch control에서 프로덕션 브랜치를 `stage`로 바꿉니다. `config.js`는 `stage.icebreaker-de4.pages.dev`에서 자동으로 `https://icebreaker-rooms-stage.dev-chehok.workers.dev`를 씁니다. 운영과 미리보기 방은 서로 섞이지 않습니다.
 
 무료 플랜으로 시작할 수 있습니다(하루 요청 10만 건, 실행 시간 13,000 GB-s). 한도를 넘으면 그날은 방 만들기·접속이 실패하므로, 이용이 늘면 Workers Paid(월 $5)로 바꿉니다.
 

@@ -15,3 +15,19 @@ class_name = "Room"
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["Room"]
+
+# 미리보기(stage) 서버: stage 브랜치 → Worker "icebreaker-rooms-stage"
+# 배포 명령: npx wrangler deploy --env stage  (바인딩·변수는 환경마다 따로 적어야 합니다)
+[env.stage]
+name = "icebreaker-rooms-stage"
+
+[env.stage.vars]
+ALLOWED_ORIGINS = "https://stage.icebreaker-de4.pages.dev"
+
+[[env.stage.durable_objects.bindings]]
+name = "ROOMS"
+class_name = "Room"
+
+[[env.stage.migrations]]
+tag = "v1"
+new_sqlite_classes = ["Room"]
