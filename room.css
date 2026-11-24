@@ -177,7 +177,9 @@ textarea.text-input { min-height: 120px; padding: 14px 16px; line-height: 1.55; 
 .rank-row .rl { display: flex; justify-content: space-between; font-weight: 700; font-size: 0.92rem; }
 .rank-row .track { height: 10px; border-radius: 999px; background: var(--accent-soft); overflow: hidden; }
 .rank-row .fill { height: 100%; border-radius: 999px; background: var(--accent); }
-.rank-row .voters { font-size: 0.75rem; color: var(--muted); }
+.voter-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 6px; }
+.voter-label { font-size: 0.72rem; font-weight: 700; color: var(--muted); margin-right: 2px; }
+.voter-pill { font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-ink); }
 .top1 { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 2px solid var(--accent); border-radius: 18px; padding: 14px 16px; }
 .top1 .av { width: 44px; height: 44px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 800; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; flex: none; }
 .top1 .tn { flex: 1; display: flex; flex-direction: column; }
