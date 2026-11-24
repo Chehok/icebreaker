@@ -145,8 +145,9 @@
       <div class="grow"></div>
 
       <!-- 리더 하단 -->
+      <p class="next-info" id="nextInfo" hidden></p>
       <div class="leader-bar" id="leaderBar" hidden>
-        <button class="secondary-btn" type="button" id="settingsBtn">모드·맛</button>
+        <button class="secondary-btn" type="button" id="settingsBtn">설정</button>
         <button class="primary" type="button" id="nextBtn">시작하기</button>
       </div>
       <button class="text-btn" type="button" id="leaveBtn" hidden>방 나가기</button>
@@ -156,15 +157,19 @@
   <dialog class="sheet" id="settingsSheet" aria-labelledby="settingsTitle">
     <div class="sheet-handle" aria-hidden="true"></div>
     <div class="sheet-head">
-      <h2 id="settingsTitle">모드·맛 바꾸기</h2>
+      <h2 id="settingsTitle">방 설정</h2>
       <form method="dialog"><button class="icon-btn plain" type="submit" aria-label="닫기">✕</button></form>
     </div>
     <div class="stack">
       <div class="seg" id="setMode" role="group" aria-label="모드"></div>
       <div class="pills" id="setSpice" role="group" aria-label="맛"></div>
-      <label class="switch-row"><span>참여자 화면에도 결과 보여주기</span><input type="checkbox" id="setShowResults" /></label>
-      <label class="switch-row"><span>이 중 누가?: 누가 누구를 골랐는지 공개</span><input type="checkbox" id="setShowVoters" /></label>
-      <p class="muted small">바꾼 모드·맛은 다음 질문부터 적용돼요.</p>
+      <strong class="list-title">카테고리</strong>
+      <div class="cat-grid" id="setCategory" role="group" aria-label="카테고리"></div>
+      <label class="switch-row"><span>대화 주제: 답한 사람에게 모두의 쪽지 보여주기</span><input type="checkbox" id="setShowResults" /></label>
+      <label class="switch-row"><span>이 중 누가?: 결과 공개 때 누가 누구를 골랐는지도 공개</span><input type="checkbox" id="setShowVoters" /></label>
+      <strong class="list-title">참여자 관리</strong>
+      <div class="kick-list" id="kickList"></div>
+      <p class="muted small">바꾼 모드·맛·카테고리는 다음 질문부터 적용돼요.</p>
       <button class="danger" type="button" id="endBtn">방 끝내기</button>
     </div>
   </dialog>
